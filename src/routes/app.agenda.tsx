@@ -115,7 +115,7 @@ function AgendaPage() {
               <SelectItem value="all">Todos status</SelectItem>
               <SelectItem value="agendado">Agendado</SelectItem>
               <SelectItem value="confirmado">Confirmado</SelectItem>
-              <SelectItem value="em_atendimento">Em atendimento</SelectItem>
+              <SelectItem value="em_andamento">Em atendimento</SelectItem>
               <SelectItem value="concluido">Concluído</SelectItem>
               <SelectItem value="cancelado">Cancelado</SelectItem>
             </SelectContent>

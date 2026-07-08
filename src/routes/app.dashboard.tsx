@@ -29,9 +29,9 @@ const PIE_COLORS = ["#1B3A4B", "#2C5870", "#3F7A95", "#6BA3BD", "#A3CCDE"];
 const STATUS_COLORS: Record<string, string> = {
   agendado: "bg-blue-100 text-blue-700 border-blue-200",
   confirmado: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  em_atendimento: "bg-yellow-100 text-yellow-700 border-yellow-200",
+  em_andamento: "bg-yellow-100 text-yellow-700 border-yellow-200",
   concluido: "bg-gray-100 text-gray-700 border-gray-200",
-  faltou: "bg-orange-100 text-orange-700 border-orange-200",
+  nao_compareceu: "bg-orange-100 text-orange-700 border-orange-200",
   cancelado: "bg-red-100 text-red-700 border-red-200",
 };
 
