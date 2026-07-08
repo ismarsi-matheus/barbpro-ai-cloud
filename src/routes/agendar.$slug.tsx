@@ -256,8 +256,8 @@ function AgendarPage() {
         service_name: service.name,
         price: service.price,
         scheduled_at: scheduledAt.toISOString(),
-        source: "online",
-        status: "agendado",
+        source: "online" as const,
+        status: "agendado" as const,
       };
 
       const missingRequired = ([
