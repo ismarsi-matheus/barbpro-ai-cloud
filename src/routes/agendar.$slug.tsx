@@ -166,7 +166,39 @@ function AgendarPage() {
   const companyMissing = companyQuery.isFetched && !company;
 
   const submit = async () => {
-    if (!company || !service || !pro || !time) return;
+    if (!company) {
+      toast.error("Barbearia inválida para agendamento.");
+      return;
+    }
+    if (!service) {
+      toast.error("Escolha um serviço antes de confirmar.");
+      return;
+    }
+    if (!pro) {
+      toast.error("Escolha um profissional antes de confirmar.");
+      return;
+    }
+    if (!time || !slots.includes(time)) {
+      toast.error("Escolha um horário válido antes de confirmar.");
+      return;
+    }
+    if (unavailable.has(time)) {
+      toast.error("Esse horário acabou de ser reservado, escolha outro");
+      busyQuery.refetch();
+      return;
+    }
+
+    const customerName = nome.trim();
+    const customerPhone = phone.trim();
+    if (!customerName) {
+      toast.error("Informe seu nome para confirmar o agendamento.");
+      return;
+    }
+    if (customerPhone.length < 6) {
+      toast.error("Informe um telefone válido para confirmar o agendamento.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const [hh, mm] = time.split(":").map(Number);
@@ -202,34 +234,54 @@ function AgendarPage() {
       // Upsert de cliente via RPC (anon só tem INSERT direto na tabela)
       const { data: customerId, error: cErr } = await supabase.rpc("upsert_customer_public", {
         _company_id: company.id,
-        _name: nome,
-        _phone: phone,
+        _name: customerName,
+        _phone: customerPhone,
       });
+      console.log("[agendar] upsert_customer_public result", { customerId, error: cErr });
       if (cErr || !customerId) {
         setSubmitting(false);
         toast.error("Erro ao registrar cliente: " + (cErr?.message ?? "desconhecido"));
         return;
       }
 
+      const appointmentPayload = {
+        id: crypto.randomUUID(),
+        company_id: company.id,
+        customer_id: customerId,
+        professional_id: pro.id,
+        service_id: service.id,
+        customer_name: customerName,
+        customer_phone: customerPhone,
+        professional_name: pro.name,
+        service_name: service.name,
+        price: service.price,
+        scheduled_at: scheduledAt.toISOString(),
+        source: "online",
+        status: "agendado",
+      };
 
-      const { data: appt, error: aErr } = await supabase
+      const missingRequired = ([
+        "company_id",
+        "customer_id",
+        "professional_id",
+        "service_id",
+        "scheduled_at",
+        "source",
+        "status",
+      ] as const).filter((field) => !appointmentPayload[field]);
+
+      console.log("[agendar] appointment insert payload", appointmentPayload);
+
+      if (missingRequired.length) {
+        setSubmitting(false);
+        console.error("[agendar] missing required appointment fields", missingRequired, appointmentPayload);
+        toast.error("Dados do agendamento incompletos. Revise serviço, profissional, data e horário.");
+        return;
+      }
+
+      const { error: aErr } = await supabase
         .from("appointment")
-        .insert({
-          company_id: company.id,
-          customer_id: customerId,
-          professional_id: pro.id,
-          service_id: service.id,
-          customer_name: nome,
-          customer_phone: phone,
-          professional_name: pro.name,
-          service_name: service.name,
-          price: service.price,
-          scheduled_at: scheduledAt.toISOString(),
-          source: "online",
-          status: "agendado",
-        })
-        .select("id")
-        .single();
+        .insert(appointmentPayload);
 
       if (aErr) {
         setSubmitting(false);
@@ -243,7 +295,7 @@ function AgendarPage() {
       }
 
       setSubmitting(false);
-      setConfirmed(appt.id);
+      setConfirmed(appointmentPayload.id);
       toast.success("Agendamento confirmado!");
 
     } catch (e: any) {
