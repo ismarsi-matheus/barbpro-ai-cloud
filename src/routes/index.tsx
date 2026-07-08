@@ -15,8 +15,8 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "BarbeiroPro AI — Sistema completo para barbearias" },
       { name: "description", content: "Agenda online, comissões automáticas, financeiro e IA pra recuperar clientes. 14 dias grátis." },
-      { property: "og:title", content: "BarbeiroPro AI — Sistema para barbearias" },
-      { property: "og:description", content: "Agenda online, comissões, financeiro e AI Growth para barbearias modernas." },
+      { property: "og:title", content: "BarbeiroPro AI — Sistema completo para barbearias" },
+      { property: "og:description", content: "Agenda online, comissões automáticas, financeiro e IA pra recuperar clientes. 14 dias grátis." },
     ],
   }),
   component: LandingPage,
