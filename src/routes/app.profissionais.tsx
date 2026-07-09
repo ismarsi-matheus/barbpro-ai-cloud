@@ -28,6 +28,7 @@ function ProfPage() {
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ name: "", specialty: "", comissao_percentual: 50, active: true });
   const [commProf, setCommProf] = useState<any>(null);
+  const [schedProf, setSchedProf] = useState<any>(null);
 
   const { data = [] } = useQuery({
     queryKey: ["professionals", cid],
