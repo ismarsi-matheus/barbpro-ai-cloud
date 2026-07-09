@@ -103,6 +103,12 @@ function ProfPage() {
           {commProf && cid && <CommissionsPanel cid={cid} professional={commProf} />}
         </SheetContent>
       </Sheet>
+
+      <Sheet open={!!schedProf} onOpenChange={(o) => !o && setSchedProf(null)}>
+        <SheetContent className="sm:max-w-2xl overflow-y-auto">
+          {schedProf && cid && <ProfessionalSchedulePanel cid={cid} professional={schedProf} />}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
