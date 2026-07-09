@@ -752,6 +752,120 @@ export type Database = {
           },
         ]
       }
+      professional_block: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          end_date: string
+          id: string
+          note: string | null
+          professional_id: string
+          reason: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          end_date: string
+          id?: string
+          note?: string | null
+          professional_id: string
+          reason?: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string
+          id?: string
+          note?: string | null
+          professional_id?: string
+          reason?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professional_block_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professional_block_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professional"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      professional_schedule: {
+        Row: {
+          company_id: string
+          created_at: string
+          end_time: string | null
+          id: string
+          is_working: boolean
+          lunch_end: string | null
+          lunch_start: string | null
+          professional_id: string
+          slot_minutes: number
+          start_time: string | null
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          end_time?: string | null
+          id?: string
+          is_working?: boolean
+          lunch_end?: string | null
+          lunch_start?: string | null
+          professional_id: string
+          slot_minutes?: number
+          start_time?: string | null
+          updated_at?: string
+          weekday: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          end_time?: string | null
+          id?: string
+          is_working?: boolean
+          lunch_end?: string | null
+          lunch_start?: string | null
+          professional_id?: string
+          slot_minutes?: number
+          start_time?: string | null
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professional_schedule_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professional_schedule_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professional"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       professional_service: {
         Row: {
           comissao_percentual: number | null
