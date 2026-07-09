@@ -542,19 +542,28 @@ function AgendarPage() {
               <div className="grid grid-cols-4 gap-2">
                 {days.map((d) => {
                   const same = d.toDateString() === date.toDateString();
+                  const off = dayUnavailable(d);
                   return (
                     <button
                       key={d.toISOString()}
+                      disabled={off}
                       onClick={() => {
                         setDate(d);
                         setStep(4);
                       }}
-                      className={`p-3 rounded-md border text-center ${same ? "border-[var(--brand)] bg-[var(--brand)]/5" : "border-border"}`}
+                      className={`p-3 rounded-md border text-center ${
+                        off
+                          ? "bg-muted text-muted-foreground border-border cursor-not-allowed opacity-60"
+                          : same
+                            ? "border-[var(--brand)] bg-[var(--brand)]/5"
+                            : "border-border"
+                      }`}
                     >
                       <div className="text-xs text-muted-foreground">
                         {format(d, "EEE", { locale: ptBR })}
                       </div>
                       <div className="font-semibold">{format(d, "dd/MM")}</div>
+                      {off && <div className="text-[10px] text-muted-foreground mt-1">indisponível</div>}
                     </button>
                   );
                 })}
