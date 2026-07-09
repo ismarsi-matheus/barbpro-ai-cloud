@@ -73,6 +73,9 @@ function ProfPage() {
             key: "actions", header: "", className: "text-right",
             render: (r) => (
               <div className="flex gap-1 justify-end">
+                <Button size="sm" variant="outline" onClick={() => setSchedProf(r)}>
+                  <CalendarClock className="w-3.5 h-3.5 mr-1" /> Agenda
+                </Button>
                 <Button size="sm" variant="outline" onClick={() => setCommProf(r)}>
                   <Percent className="w-3.5 h-3.5 mr-1" /> Por serviço
                 </Button>
