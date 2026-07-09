@@ -107,20 +107,65 @@ function AgendarPage() {
     [proQuery.data, proId]
   );
 
-  // Simple slot generator 9-19h em intervalos de 30min
+  // Schedule + blocks
+  const schedQuery = useQuery({
+    queryKey: ["public-sched", proId],
+    enabled: !!proId,
+    queryFn: async () => {
+      const { data } = await supabase.from("professional_schedule").select("*").eq("professional_id", proId);
+      return data ?? [];
+    },
+  });
+  const blocksQuery = useQuery({
+    queryKey: ["public-blocks", proId],
+    enabled: !!proId,
+    queryFn: async () => {
+      const { data } = await supabase.from("professional_block").select("start_date,end_date").eq("professional_id", proId);
+      return data ?? [];
+    },
+  });
+
+  const isBlocked = (d: Date) => {
+    const iso = format(d, "yyyy-MM-dd");
+    return (blocksQuery.data ?? []).some((b: any) => iso >= b.start_date && iso <= b.end_date);
+  };
+  const daySched = (d: Date) => {
+    const wd = d.getDay();
+    const list = (schedQuery.data ?? []) as any[];
+    if (list.length === 0) return null;
+    return list.find((s) => s.weekday === wd) ?? null;
+  };
+
   const slots = useMemo(() => {
     const list: string[] = [];
-    for (let h = 9; h < 19; h++) {
-      list.push(`${String(h).padStart(2, "0")}:00`);
-      list.push(`${String(h).padStart(2, "0")}:30`);
+    const s = daySched(date);
+    const step = s?.slot_minutes ?? 30;
+    const [sh, sm] = (s?.start_time ?? "09:00").slice(0, 5).split(":").map(Number);
+    const [eh, em] = (s?.end_time ?? "19:00").slice(0, 5).split(":").map(Number);
+    const [lsH, lsM] = s?.lunch_start ? s.lunch_start.slice(0, 5).split(":").map(Number) : [NaN, NaN];
+    const [leH, leM] = s?.lunch_end ? s.lunch_end.slice(0, 5).split(":").map(Number) : [NaN, NaN];
+    const startMin = sh * 60 + sm;
+    const endMin = eh * 60 + em;
+    const lStart = Number.isFinite(lsH) ? lsH * 60 + lsM : null;
+    const lEnd = Number.isFinite(leH) ? leH * 60 + leM : null;
+    for (let m = startMin; m < endMin; m += step) {
+      if (lStart != null && lEnd != null && m >= lStart && m < lEnd) continue;
+      list.push(`${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`);
     }
     return list;
-  }, []);
+  }, [schedQuery.data, date]);
 
   const days = useMemo(
     () => Array.from({ length: 14 }, (_, i) => addDays(startOfDay(new Date()), i)),
     []
   );
+
+  const dayUnavailable = (d: Date) => {
+    if (isBlocked(d)) return true;
+    const s = daySched(d);
+    if (s && !s.is_working) return true;
+    return false;
+  };
 
   // Agendamentos existentes para profissional + dia => slots indisponíveis
 
