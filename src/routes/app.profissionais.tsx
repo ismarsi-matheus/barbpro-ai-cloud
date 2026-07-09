@@ -14,7 +14,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Percent } from "lucide-react";
+import { Plus, Pencil, Trash2, Percent, CalendarClock } from "lucide-react";
+import { ProfessionalSchedulePanel } from "@/components/professional-schedule-panel";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/profissionais")({ component: ProfPage });
