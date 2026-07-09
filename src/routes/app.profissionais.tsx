@@ -14,7 +14,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Percent } from "lucide-react";
+import { Plus, Pencil, Trash2, Percent, CalendarClock } from "lucide-react";
+import { ProfessionalSchedulePanel } from "@/components/professional-schedule-panel";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/profissionais")({ component: ProfPage });
@@ -27,6 +28,7 @@ function ProfPage() {
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ name: "", specialty: "", comissao_percentual: 50, active: true });
   const [commProf, setCommProf] = useState<any>(null);
+  const [schedProf, setSchedProf] = useState<any>(null);
 
   const { data = [] } = useQuery({
     queryKey: ["professionals", cid],
@@ -71,6 +73,9 @@ function ProfPage() {
             key: "actions", header: "", className: "text-right",
             render: (r) => (
               <div className="flex gap-1 justify-end">
+                <Button size="sm" variant="outline" onClick={() => setSchedProf(r)}>
+                  <CalendarClock className="w-3.5 h-3.5 mr-1" /> Agenda
+                </Button>
                 <Button size="sm" variant="outline" onClick={() => setCommProf(r)}>
                   <Percent className="w-3.5 h-3.5 mr-1" /> Por serviço
                 </Button>
@@ -96,6 +101,12 @@ function ProfPage() {
       <Sheet open={!!commProf} onOpenChange={(o) => !o && setCommProf(null)}>
         <SheetContent className="sm:max-w-xl overflow-y-auto">
           {commProf && cid && <CommissionsPanel cid={cid} professional={commProf} />}
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={!!schedProf} onOpenChange={(o) => !o && setSchedProf(null)}>
+        <SheetContent className="sm:max-w-2xl overflow-y-auto">
+          {schedProf && cid && <ProfessionalSchedulePanel cid={cid} professional={schedProf} />}
         </SheetContent>
       </Sheet>
     </div>
