@@ -171,6 +171,7 @@ function AgendarPage() {
     if (availabilityLoading) return true;
     if (isBlocked(d)) return true;
     const s = daySched(d);
+    if (!s) return true;
     if (s && !s.is_working) return true;
     return false;
   };
