@@ -112,18 +112,23 @@ function AgendarPage() {
     queryKey: ["public-sched", proId],
     enabled: !!proId,
     queryFn: async () => {
-      const { data } = await supabase.from("professional_schedule").select("*").eq("professional_id", proId);
+      const { data, error } = await supabase.from("professional_schedule").select("*").eq("professional_id", proId);
+      if (error) { console.error("[agendar] schedule error", error); return []; }
       return data ?? [];
     },
+    retry: false,
   });
   const blocksQuery = useQuery({
     queryKey: ["public-blocks", proId],
     enabled: !!proId,
     queryFn: async () => {
-      const { data } = await supabase.from("professional_block").select("start_date,end_date").eq("professional_id", proId);
+      const { data, error } = await supabase.from("professional_block").select("start_date,end_date").eq("professional_id", proId);
+      if (error) { console.error("[agendar] blocks error", error); return []; }
       return data ?? [];
     },
+    retry: false,
   });
+  const availabilityLoading = !!proId && (schedQuery.isLoading || blocksQuery.isLoading);
 
   const isBlocked = (d: Date) => {
     const iso = format(d, "yyyy-MM-dd");
@@ -138,7 +143,9 @@ function AgendarPage() {
 
   const slots = useMemo(() => {
     const list: string[] = [];
+    if (availabilityLoading || isBlocked(date)) return list;
     const s = daySched(date);
+    if (s && !s.is_working) return list;
     const step = s?.slot_minutes ?? 30;
     const [sh, sm] = (s?.start_time ?? "09:00").slice(0, 5).split(":").map(Number);
     const [eh, em] = (s?.end_time ?? "19:00").slice(0, 5).split(":").map(Number);
@@ -153,7 +160,7 @@ function AgendarPage() {
       list.push(`${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`);
     }
     return list;
-  }, [schedQuery.data, date]);
+  }, [schedQuery.data, blocksQuery.data, availabilityLoading, date]);
 
   const days = useMemo(
     () => Array.from({ length: 14 }, (_, i) => addDays(startOfDay(new Date()), i)),
@@ -161,6 +168,7 @@ function AgendarPage() {
   );
 
   const dayUnavailable = (d: Date) => {
+    if (availabilityLoading) return true;
     if (isBlocked(d)) return true;
     const s = daySched(d);
     if (s && !s.is_working) return true;
