@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -97,6 +98,31 @@ function AgendarPage() {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState<string | null>(null);
+  const [clientSession, setClientSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setClientSession(data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setClientSession(s));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!clientSession) return;
+    supabase.from("client_profile").select("full_name,phone,email").eq("user_id", clientSession.user.id).maybeSingle().then(({ data }) => {
+      if (data) {
+        setNome((v) => v || data.full_name || "");
+        setPhone((v) => v || data.phone || "");
+        setEmail((v) => v || data.email || clientSession.user.email || "");
+      } else {
+        setEmail((v) => v || clientSession.user.email || "");
+        const meta: any = clientSession.user.user_metadata || {};
+        setNome((v) => v || meta.full_name || "");
+        setPhone((v) => v || meta.phone || "");
+      }
+    });
+  }, [clientSession]);
+
+
 
   const service = useMemo(
     () => servicesQuery.data?.find((s) => s.id === serviceId),
@@ -285,13 +311,14 @@ function AgendarPage() {
         console.error("[agendar] conflict check exception", e);
       }
 
-      // Upsert de cliente via RPC (anon só tem INSERT direto na tabela)
-      const { data: customerId, error: cErr } = await supabase.rpc("upsert_customer_public", {
-        _company_id: company.id,
-        _name: customerName,
-        _phone: customerPhone,
-      });
-      console.log("[agendar] upsert_customer_public result", { customerId, error: cErr });
+      // Upsert de cliente: usa versão autenticada quando há sessão (vincula user_id)
+      const customerEmail = email.trim() || null;
+      const rpcName = clientSession ? "upsert_customer_for_user" : "upsert_customer_public";
+      const rpcArgs: any = clientSession
+        ? { _company_id: company.id, _name: customerName, _phone: customerPhone, _email: customerEmail }
+        : { _company_id: company.id, _name: customerName, _phone: customerPhone };
+      const { data: customerId, error: cErr } = await supabase.rpc(rpcName as any, rpcArgs);
+      console.log("[agendar] upsert result", { rpcName, customerId, error: cErr });
       if (cErr || !customerId) {
         setSubmitting(false);
         toast.error("Erro ao registrar cliente: " + (cErr?.message ?? "desconhecido"));

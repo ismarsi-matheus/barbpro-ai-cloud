@@ -17,6 +17,7 @@ import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClienteIndexRouteImport } from './routes/cliente.index'
 import { Route as MasterPlanosRouteImport } from './routes/master.planos'
 import { Route as MasterPainelRouteImport } from './routes/master.painel'
 import { Route as MasterNovaBarbeariaRouteImport } from './routes/master.novaBarbearia'
@@ -34,6 +35,9 @@ import { Route as DemoClientesRouteImport } from './routes/demo.clientes'
 import { Route as DemoAigrowthRouteImport } from './routes/demo.aigrowth'
 import { Route as DemoAgendaRouteImport } from './routes/demo.agenda'
 import { Route as ConfirmarTokenRouteImport } from './routes/confirmar.$token'
+import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
+import { Route as ClienteEntrarRouteImport } from './routes/cliente.entrar'
+import { Route as ClienteAgendamentosRouteImport } from './routes/cliente.agendamentos'
 import { Route as AppServicosRouteImport } from './routes/app.servicos'
 import { Route as AppRelatoriosRouteImport } from './routes/app.relatorios'
 import { Route as AppProfissionaisRouteImport } from './routes/app.profissionais'
@@ -91,6 +95,11 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClienteIndexRoute = ClienteIndexRouteImport.update({
+  id: '/cliente/',
+  path: '/cliente/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MasterPlanosRoute = MasterPlanosRouteImport.update({
@@ -176,6 +185,21 @@ const DemoAgendaRoute = DemoAgendaRouteImport.update({
 const ConfirmarTokenRoute = ConfirmarTokenRouteImport.update({
   id: '/confirmar/$token',
   path: '/confirmar/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientePerfilRoute = ClientePerfilRouteImport.update({
+  id: '/cliente/perfil',
+  path: '/cliente/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClienteEntrarRoute = ClienteEntrarRouteImport.update({
+  id: '/cliente/entrar',
+  path: '/cliente/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClienteAgendamentosRoute = ClienteAgendamentosRouteImport.update({
+  id: '/cliente/agendamentos',
+  path: '/cliente/agendamentos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppServicosRoute = AppServicosRouteImport.update({
@@ -295,6 +319,9 @@ export interface FileRoutesByFullPath {
   '/app/profissionais': typeof AppProfissionaisRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/servicos': typeof AppServicosRoute
+  '/cliente/agendamentos': typeof ClienteAgendamentosRoute
+  '/cliente/entrar': typeof ClienteEntrarRoute
+  '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
   '/demo/agenda': typeof DemoAgendaRoute
   '/demo/aigrowth': typeof DemoAigrowthRoute
@@ -312,6 +339,7 @@ export interface FileRoutesByFullPath {
   '/master/novaBarbearia': typeof MasterNovaBarbeariaRoute
   '/master/painel': typeof MasterPainelRoute
   '/master/planos': typeof MasterPlanosRoute
+  '/cliente/': typeof ClienteIndexRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -340,6 +368,9 @@ export interface FileRoutesByTo {
   '/app/profissionais': typeof AppProfissionaisRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/servicos': typeof AppServicosRoute
+  '/cliente/agendamentos': typeof ClienteAgendamentosRoute
+  '/cliente/entrar': typeof ClienteEntrarRoute
+  '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
   '/demo/agenda': typeof DemoAgendaRoute
   '/demo/aigrowth': typeof DemoAigrowthRoute
@@ -357,6 +388,7 @@ export interface FileRoutesByTo {
   '/master/novaBarbearia': typeof MasterNovaBarbeariaRoute
   '/master/painel': typeof MasterPainelRoute
   '/master/planos': typeof MasterPlanosRoute
+  '/cliente': typeof ClienteIndexRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
 }
 export interface FileRoutesById {
@@ -386,6 +418,9 @@ export interface FileRoutesById {
   '/app/profissionais': typeof AppProfissionaisRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/servicos': typeof AppServicosRoute
+  '/cliente/agendamentos': typeof ClienteAgendamentosRoute
+  '/cliente/entrar': typeof ClienteEntrarRoute
+  '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
   '/demo/agenda': typeof DemoAgendaRoute
   '/demo/aigrowth': typeof DemoAigrowthRoute
@@ -403,6 +438,7 @@ export interface FileRoutesById {
   '/master/novaBarbearia': typeof MasterNovaBarbeariaRoute
   '/master/painel': typeof MasterPainelRoute
   '/master/planos': typeof MasterPlanosRoute
+  '/cliente/': typeof ClienteIndexRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
 }
 export interface FileRouteTypes {
@@ -433,6 +469,9 @@ export interface FileRouteTypes {
     | '/app/profissionais'
     | '/app/relatorios'
     | '/app/servicos'
+    | '/cliente/agendamentos'
+    | '/cliente/entrar'
+    | '/cliente/perfil'
     | '/confirmar/$token'
     | '/demo/agenda'
     | '/demo/aigrowth'
@@ -450,6 +489,7 @@ export interface FileRouteTypes {
     | '/master/novaBarbearia'
     | '/master/painel'
     | '/master/planos'
+    | '/cliente/'
     | '/api/public/billing/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -478,6 +518,9 @@ export interface FileRouteTypes {
     | '/app/profissionais'
     | '/app/relatorios'
     | '/app/servicos'
+    | '/cliente/agendamentos'
+    | '/cliente/entrar'
+    | '/cliente/perfil'
     | '/confirmar/$token'
     | '/demo/agenda'
     | '/demo/aigrowth'
@@ -495,6 +538,7 @@ export interface FileRouteTypes {
     | '/master/novaBarbearia'
     | '/master/painel'
     | '/master/planos'
+    | '/cliente'
     | '/api/public/billing/webhook'
   id:
     | '__root__'
@@ -523,6 +567,9 @@ export interface FileRouteTypes {
     | '/app/profissionais'
     | '/app/relatorios'
     | '/app/servicos'
+    | '/cliente/agendamentos'
+    | '/cliente/entrar'
+    | '/cliente/perfil'
     | '/confirmar/$token'
     | '/demo/agenda'
     | '/demo/aigrowth'
@@ -540,6 +587,7 @@ export interface FileRouteTypes {
     | '/master/novaBarbearia'
     | '/master/painel'
     | '/master/planos'
+    | '/cliente/'
     | '/api/public/billing/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -553,7 +601,11 @@ export interface RootRouteChildren {
   ResetSenhaRoute: typeof ResetSenhaRoute
   TrocarSenhaRoute: typeof TrocarSenhaRoute
   AgendarSlugRoute: typeof AgendarSlugRoute
+  ClienteAgendamentosRoute: typeof ClienteAgendamentosRoute
+  ClienteEntrarRoute: typeof ClienteEntrarRoute
+  ClientePerfilRoute: typeof ClientePerfilRoute
   ConfirmarTokenRoute: typeof ConfirmarTokenRoute
+  ClienteIndexRoute: typeof ClienteIndexRoute
   ApiPublicBillingWebhookRoute: typeof ApiPublicBillingWebhookRoute
 }
 
@@ -613,6 +665,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cliente/': {
+      id: '/cliente/'
+      path: '/cliente'
+      fullPath: '/cliente/'
+      preLoaderRoute: typeof ClienteIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/master/planos': {
@@ -732,6 +791,27 @@ declare module '@tanstack/react-router' {
       path: '/confirmar/$token'
       fullPath: '/confirmar/$token'
       preLoaderRoute: typeof ConfirmarTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cliente/perfil': {
+      id: '/cliente/perfil'
+      path: '/cliente/perfil'
+      fullPath: '/cliente/perfil'
+      preLoaderRoute: typeof ClientePerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cliente/entrar': {
+      id: '/cliente/entrar'
+      path: '/cliente/entrar'
+      fullPath: '/cliente/entrar'
+      preLoaderRoute: typeof ClienteEntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cliente/agendamentos': {
+      id: '/cliente/agendamentos'
+      path: '/cliente/agendamentos'
+      fullPath: '/cliente/agendamentos'
+      preLoaderRoute: typeof ClienteAgendamentosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/servicos': {
@@ -962,19 +1042,13 @@ const rootRouteChildren: RootRouteChildren = {
   ResetSenhaRoute: ResetSenhaRoute,
   TrocarSenhaRoute: TrocarSenhaRoute,
   AgendarSlugRoute: AgendarSlugRoute,
+  ClienteAgendamentosRoute: ClienteAgendamentosRoute,
+  ClienteEntrarRoute: ClienteEntrarRoute,
+  ClientePerfilRoute: ClientePerfilRoute,
   ConfirmarTokenRoute: ConfirmarTokenRoute,
+  ClienteIndexRoute: ClienteIndexRoute,
   ApiPublicBillingWebhookRoute: ApiPublicBillingWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
