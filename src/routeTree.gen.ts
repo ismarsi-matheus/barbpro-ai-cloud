@@ -15,6 +15,7 @@ import { Route as MasterRouteImport } from './routes/master'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as DemoRouteImport } from './routes/demo'
+import { Route as ClienteRouteImport } from './routes/cliente'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MasterPlanosRouteImport } from './routes/master.planos'
@@ -34,6 +35,9 @@ import { Route as DemoClientesRouteImport } from './routes/demo.clientes'
 import { Route as DemoAigrowthRouteImport } from './routes/demo.aigrowth'
 import { Route as DemoAgendaRouteImport } from './routes/demo.agenda'
 import { Route as ConfirmarTokenRouteImport } from './routes/confirmar.$token'
+import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
+import { Route as ClienteEntrarRouteImport } from './routes/cliente.entrar'
+import { Route as ClienteAgendamentosRouteImport } from './routes/cliente.agendamentos'
 import { Route as AppServicosRouteImport } from './routes/app.servicos'
 import { Route as AppRelatoriosRouteImport } from './routes/app.relatorios'
 import { Route as AppProfissionaisRouteImport } from './routes/app.profissionais'
@@ -81,6 +85,11 @@ const EntrarRoute = EntrarRouteImport.update({
 const DemoRoute = DemoRouteImport.update({
   id: '/demo',
   path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClienteRoute = ClienteRouteImport.update({
+  id: '/cliente',
+  path: '/cliente',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -178,6 +187,21 @@ const ConfirmarTokenRoute = ConfirmarTokenRouteImport.update({
   path: '/confirmar/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientePerfilRoute = ClientePerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteEntrarRoute = ClienteEntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteAgendamentosRoute = ClienteAgendamentosRouteImport.update({
+  id: '/agendamentos',
+  path: '/agendamentos',
+  getParentRoute: () => ClienteRoute,
+} as any)
 const AppServicosRoute = AppServicosRouteImport.update({
   id: '/servicos',
   path: '/servicos',
@@ -272,6 +296,7 @@ const ApiPublicBillingWebhookRoute = ApiPublicBillingWebhookRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/cliente': typeof ClienteRouteWithChildren
   '/demo': typeof DemoRouteWithChildren
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
@@ -295,6 +320,9 @@ export interface FileRoutesByFullPath {
   '/app/profissionais': typeof AppProfissionaisRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/servicos': typeof AppServicosRoute
+  '/cliente/agendamentos': typeof ClienteAgendamentosRoute
+  '/cliente/entrar': typeof ClienteEntrarRoute
+  '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
   '/demo/agenda': typeof DemoAgendaRoute
   '/demo/aigrowth': typeof DemoAigrowthRoute
@@ -317,6 +345,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/cliente': typeof ClienteRouteWithChildren
   '/demo': typeof DemoRouteWithChildren
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
@@ -340,6 +369,9 @@ export interface FileRoutesByTo {
   '/app/profissionais': typeof AppProfissionaisRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/servicos': typeof AppServicosRoute
+  '/cliente/agendamentos': typeof ClienteAgendamentosRoute
+  '/cliente/entrar': typeof ClienteEntrarRoute
+  '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
   '/demo/agenda': typeof DemoAgendaRoute
   '/demo/aigrowth': typeof DemoAigrowthRoute
@@ -363,6 +395,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/cliente': typeof ClienteRouteWithChildren
   '/demo': typeof DemoRouteWithChildren
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
@@ -386,6 +419,9 @@ export interface FileRoutesById {
   '/app/profissionais': typeof AppProfissionaisRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/servicos': typeof AppServicosRoute
+  '/cliente/agendamentos': typeof ClienteAgendamentosRoute
+  '/cliente/entrar': typeof ClienteEntrarRoute
+  '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
   '/demo/agenda': typeof DemoAgendaRoute
   '/demo/aigrowth': typeof DemoAigrowthRoute
@@ -410,6 +446,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/cliente'
     | '/demo'
     | '/entrar'
     | '/esqueci-senha'
@@ -433,6 +470,9 @@ export interface FileRouteTypes {
     | '/app/profissionais'
     | '/app/relatorios'
     | '/app/servicos'
+    | '/cliente/agendamentos'
+    | '/cliente/entrar'
+    | '/cliente/perfil'
     | '/confirmar/$token'
     | '/demo/agenda'
     | '/demo/aigrowth'
@@ -455,6 +495,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/app'
+    | '/cliente'
     | '/demo'
     | '/entrar'
     | '/esqueci-senha'
@@ -478,6 +519,9 @@ export interface FileRouteTypes {
     | '/app/profissionais'
     | '/app/relatorios'
     | '/app/servicos'
+    | '/cliente/agendamentos'
+    | '/cliente/entrar'
+    | '/cliente/perfil'
     | '/confirmar/$token'
     | '/demo/agenda'
     | '/demo/aigrowth'
@@ -500,6 +544,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/cliente'
     | '/demo'
     | '/entrar'
     | '/esqueci-senha'
@@ -523,6 +568,9 @@ export interface FileRouteTypes {
     | '/app/profissionais'
     | '/app/relatorios'
     | '/app/servicos'
+    | '/cliente/agendamentos'
+    | '/cliente/entrar'
+    | '/cliente/perfil'
     | '/confirmar/$token'
     | '/demo/agenda'
     | '/demo/aigrowth'
@@ -546,6 +594,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  ClienteRoute: typeof ClienteRouteWithChildren
   DemoRoute: typeof DemoRouteWithChildren
   EntrarRoute: typeof EntrarRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
@@ -599,6 +648,13 @@ declare module '@tanstack/react-router' {
       path: '/demo'
       fullPath: '/demo'
       preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cliente': {
+      id: '/cliente'
+      path: '/cliente'
+      fullPath: '/cliente'
+      preLoaderRoute: typeof ClienteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -733,6 +789,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/confirmar/$token'
       preLoaderRoute: typeof ConfirmarTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/cliente/perfil': {
+      id: '/cliente/perfil'
+      path: '/perfil'
+      fullPath: '/cliente/perfil'
+      preLoaderRoute: typeof ClientePerfilRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/entrar': {
+      id: '/cliente/entrar'
+      path: '/entrar'
+      fullPath: '/cliente/entrar'
+      preLoaderRoute: typeof ClienteEntrarRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/agendamentos': {
+      id: '/cliente/agendamentos'
+      path: '/agendamentos'
+      fullPath: '/cliente/agendamentos'
+      preLoaderRoute: typeof ClienteAgendamentosRouteImport
+      parentRoute: typeof ClienteRoute
     }
     '/app/servicos': {
       id: '/app/servicos'
@@ -903,6 +980,21 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface ClienteRouteChildren {
+  ClienteAgendamentosRoute: typeof ClienteAgendamentosRoute
+  ClienteEntrarRoute: typeof ClienteEntrarRoute
+  ClientePerfilRoute: typeof ClientePerfilRoute
+}
+
+const ClienteRouteChildren: ClienteRouteChildren = {
+  ClienteAgendamentosRoute: ClienteAgendamentosRoute,
+  ClienteEntrarRoute: ClienteEntrarRoute,
+  ClientePerfilRoute: ClientePerfilRoute,
+}
+
+const ClienteRouteWithChildren =
+  ClienteRoute._addFileChildren(ClienteRouteChildren)
+
 interface DemoRouteChildren {
   DemoAgendaRoute: typeof DemoAgendaRoute
   DemoAigrowthRoute: typeof DemoAigrowthRoute
@@ -955,6 +1047,7 @@ const MasterRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  ClienteRoute: ClienteRouteWithChildren,
   DemoRoute: DemoRouteWithChildren,
   EntrarRoute: EntrarRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
