@@ -311,13 +311,14 @@ function AgendarPage() {
         console.error("[agendar] conflict check exception", e);
       }
 
-      // Upsert de cliente via RPC (anon só tem INSERT direto na tabela)
-      const { data: customerId, error: cErr } = await supabase.rpc("upsert_customer_public", {
-        _company_id: company.id,
-        _name: customerName,
-        _phone: customerPhone,
-      });
-      console.log("[agendar] upsert_customer_public result", { customerId, error: cErr });
+      // Upsert de cliente: usa versão autenticada quando há sessão (vincula user_id)
+      const customerEmail = email.trim() || null;
+      const rpcName = clientSession ? "upsert_customer_for_user" : "upsert_customer_public";
+      const rpcArgs: any = clientSession
+        ? { _company_id: company.id, _name: customerName, _phone: customerPhone, _email: customerEmail }
+        : { _company_id: company.id, _name: customerName, _phone: customerPhone };
+      const { data: customerId, error: cErr } = await supabase.rpc(rpcName as any, rpcArgs);
+      console.log("[agendar] upsert result", { rpcName, customerId, error: cErr });
       if (cErr || !customerId) {
         setSubmitting(false);
         toast.error("Erro ao registrar cliente: " + (cErr?.message ?? "desconhecido"));
