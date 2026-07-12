@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -97,6 +98,31 @@ function AgendarPage() {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState<string | null>(null);
+  const [clientSession, setClientSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setClientSession(data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setClientSession(s));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!clientSession) return;
+    supabase.from("client_profile").select("full_name,phone,email").eq("user_id", clientSession.user.id).maybeSingle().then(({ data }) => {
+      if (data) {
+        setNome((v) => v || data.full_name || "");
+        setPhone((v) => v || data.phone || "");
+        setEmail((v) => v || data.email || clientSession.user.email || "");
+      } else {
+        setEmail((v) => v || clientSession.user.email || "");
+        const meta: any = clientSession.user.user_metadata || {};
+        setNome((v) => v || meta.full_name || "");
+        setPhone((v) => v || meta.phone || "");
+      }
+    });
+  }, [clientSession]);
+
+
 
   const service = useMemo(
     () => servicesQuery.data?.find((s) => s.id === serviceId),
