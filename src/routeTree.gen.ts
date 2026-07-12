@@ -15,9 +15,9 @@ import { Route as MasterRouteImport } from './routes/master'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as DemoRouteImport } from './routes/demo'
-import { Route as ClienteRouteImport } from './routes/cliente'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClienteIndexRouteImport } from './routes/cliente.index'
 import { Route as MasterPlanosRouteImport } from './routes/master.planos'
 import { Route as MasterPainelRouteImport } from './routes/master.painel'
 import { Route as MasterNovaBarbeariaRouteImport } from './routes/master.novaBarbearia'
@@ -87,11 +87,6 @@ const DemoRoute = DemoRouteImport.update({
   path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ClienteRoute = ClienteRouteImport.update({
-  id: '/cliente',
-  path: '/cliente',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
@@ -100,6 +95,11 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClienteIndexRoute = ClienteIndexRouteImport.update({
+  id: '/cliente/',
+  path: '/cliente/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MasterPlanosRoute = MasterPlanosRouteImport.update({
@@ -188,19 +188,19 @@ const ConfirmarTokenRoute = ConfirmarTokenRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClientePerfilRoute = ClientePerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => ClienteRoute,
+  id: '/cliente/perfil',
+  path: '/cliente/perfil',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ClienteEntrarRoute = ClienteEntrarRouteImport.update({
-  id: '/entrar',
-  path: '/entrar',
-  getParentRoute: () => ClienteRoute,
+  id: '/cliente/entrar',
+  path: '/cliente/entrar',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ClienteAgendamentosRoute = ClienteAgendamentosRouteImport.update({
-  id: '/agendamentos',
-  path: '/agendamentos',
-  getParentRoute: () => ClienteRoute,
+  id: '/cliente/agendamentos',
+  path: '/cliente/agendamentos',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppServicosRoute = AppServicosRouteImport.update({
   id: '/servicos',
@@ -296,7 +296,6 @@ const ApiPublicBillingWebhookRoute = ApiPublicBillingWebhookRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/cliente': typeof ClienteRouteWithChildren
   '/demo': typeof DemoRouteWithChildren
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
@@ -340,12 +339,12 @@ export interface FileRoutesByFullPath {
   '/master/novaBarbearia': typeof MasterNovaBarbeariaRoute
   '/master/painel': typeof MasterPainelRoute
   '/master/planos': typeof MasterPlanosRoute
+  '/cliente/': typeof ClienteIndexRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/cliente': typeof ClienteRouteWithChildren
   '/demo': typeof DemoRouteWithChildren
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
@@ -389,13 +388,13 @@ export interface FileRoutesByTo {
   '/master/novaBarbearia': typeof MasterNovaBarbeariaRoute
   '/master/painel': typeof MasterPainelRoute
   '/master/planos': typeof MasterPlanosRoute
+  '/cliente': typeof ClienteIndexRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/cliente': typeof ClienteRouteWithChildren
   '/demo': typeof DemoRouteWithChildren
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
@@ -439,6 +438,7 @@ export interface FileRoutesById {
   '/master/novaBarbearia': typeof MasterNovaBarbeariaRoute
   '/master/painel': typeof MasterPainelRoute
   '/master/planos': typeof MasterPlanosRoute
+  '/cliente/': typeof ClienteIndexRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
 }
 export interface FileRouteTypes {
@@ -446,7 +446,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
-    | '/cliente'
     | '/demo'
     | '/entrar'
     | '/esqueci-senha'
@@ -490,12 +489,12 @@ export interface FileRouteTypes {
     | '/master/novaBarbearia'
     | '/master/painel'
     | '/master/planos'
+    | '/cliente/'
     | '/api/public/billing/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/app'
-    | '/cliente'
     | '/demo'
     | '/entrar'
     | '/esqueci-senha'
@@ -539,12 +538,12 @@ export interface FileRouteTypes {
     | '/master/novaBarbearia'
     | '/master/painel'
     | '/master/planos'
+    | '/cliente'
     | '/api/public/billing/webhook'
   id:
     | '__root__'
     | '/'
     | '/app'
-    | '/cliente'
     | '/demo'
     | '/entrar'
     | '/esqueci-senha'
@@ -588,13 +587,13 @@ export interface FileRouteTypes {
     | '/master/novaBarbearia'
     | '/master/painel'
     | '/master/planos'
+    | '/cliente/'
     | '/api/public/billing/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
-  ClienteRoute: typeof ClienteRouteWithChildren
   DemoRoute: typeof DemoRouteWithChildren
   EntrarRoute: typeof EntrarRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
@@ -602,7 +601,11 @@ export interface RootRouteChildren {
   ResetSenhaRoute: typeof ResetSenhaRoute
   TrocarSenhaRoute: typeof TrocarSenhaRoute
   AgendarSlugRoute: typeof AgendarSlugRoute
+  ClienteAgendamentosRoute: typeof ClienteAgendamentosRoute
+  ClienteEntrarRoute: typeof ClienteEntrarRoute
+  ClientePerfilRoute: typeof ClientePerfilRoute
   ConfirmarTokenRoute: typeof ConfirmarTokenRoute
+  ClienteIndexRoute: typeof ClienteIndexRoute
   ApiPublicBillingWebhookRoute: typeof ApiPublicBillingWebhookRoute
 }
 
@@ -650,13 +653,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/cliente': {
-      id: '/cliente'
-      path: '/cliente'
-      fullPath: '/cliente'
-      preLoaderRoute: typeof ClienteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/app': {
       id: '/app'
       path: '/app'
@@ -669,6 +665,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cliente/': {
+      id: '/cliente/'
+      path: '/cliente'
+      fullPath: '/cliente/'
+      preLoaderRoute: typeof ClienteIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/master/planos': {
@@ -792,24 +795,24 @@ declare module '@tanstack/react-router' {
     }
     '/cliente/perfil': {
       id: '/cliente/perfil'
-      path: '/perfil'
+      path: '/cliente/perfil'
       fullPath: '/cliente/perfil'
       preLoaderRoute: typeof ClientePerfilRouteImport
-      parentRoute: typeof ClienteRoute
+      parentRoute: typeof rootRouteImport
     }
     '/cliente/entrar': {
       id: '/cliente/entrar'
-      path: '/entrar'
+      path: '/cliente/entrar'
       fullPath: '/cliente/entrar'
       preLoaderRoute: typeof ClienteEntrarRouteImport
-      parentRoute: typeof ClienteRoute
+      parentRoute: typeof rootRouteImport
     }
     '/cliente/agendamentos': {
       id: '/cliente/agendamentos'
-      path: '/agendamentos'
+      path: '/cliente/agendamentos'
       fullPath: '/cliente/agendamentos'
       preLoaderRoute: typeof ClienteAgendamentosRouteImport
-      parentRoute: typeof ClienteRoute
+      parentRoute: typeof rootRouteImport
     }
     '/app/servicos': {
       id: '/app/servicos'
@@ -980,21 +983,6 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
-interface ClienteRouteChildren {
-  ClienteAgendamentosRoute: typeof ClienteAgendamentosRoute
-  ClienteEntrarRoute: typeof ClienteEntrarRoute
-  ClientePerfilRoute: typeof ClientePerfilRoute
-}
-
-const ClienteRouteChildren: ClienteRouteChildren = {
-  ClienteAgendamentosRoute: ClienteAgendamentosRoute,
-  ClienteEntrarRoute: ClienteEntrarRoute,
-  ClientePerfilRoute: ClientePerfilRoute,
-}
-
-const ClienteRouteWithChildren =
-  ClienteRoute._addFileChildren(ClienteRouteChildren)
-
 interface DemoRouteChildren {
   DemoAgendaRoute: typeof DemoAgendaRoute
   DemoAigrowthRoute: typeof DemoAigrowthRoute
@@ -1047,7 +1035,6 @@ const MasterRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
-  ClienteRoute: ClienteRouteWithChildren,
   DemoRoute: DemoRouteWithChildren,
   EntrarRoute: EntrarRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
@@ -1055,7 +1042,11 @@ const rootRouteChildren: RootRouteChildren = {
   ResetSenhaRoute: ResetSenhaRoute,
   TrocarSenhaRoute: TrocarSenhaRoute,
   AgendarSlugRoute: AgendarSlugRoute,
+  ClienteAgendamentosRoute: ClienteAgendamentosRoute,
+  ClienteEntrarRoute: ClienteEntrarRoute,
+  ClientePerfilRoute: ClientePerfilRoute,
   ConfirmarTokenRoute: ConfirmarTokenRoute,
+  ClienteIndexRoute: ClienteIndexRoute,
   ApiPublicBillingWebhookRoute: ApiPublicBillingWebhookRoute,
 }
 export const routeTree = rootRouteImport
