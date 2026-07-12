@@ -175,6 +175,54 @@ export type Database = {
         }
         Relationships: []
       }
+      client_profile: {
+        Row: {
+          birthdate: string | null
+          cep: string | null
+          cidade: string | null
+          cpf: string | null
+          created_at: string
+          email: string | null
+          endereco: string | null
+          estado: string | null
+          full_name: string
+          phone: string | null
+          photo_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          birthdate?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          full_name?: string
+          phone?: string | null
+          photo_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          birthdate?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          full_name?: string
+          phone?: string | null
+          photo_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       club_member: {
         Row: {
           club_plan_id: string
@@ -447,6 +495,7 @@ export type Database = {
           tags: string[] | null
           total_appointments: number
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           company_id: string
@@ -462,6 +511,7 @@ export type Database = {
           tags?: string[] | null
           total_appointments?: number
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           company_id?: string
@@ -477,6 +527,7 @@ export type Database = {
           tags?: string[] | null
           total_appointments?: number
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1287,6 +1338,10 @@ export type Database = {
         Args: { _token: string }
         Returns: boolean
       }
+      cancel_client_appointment: {
+        Args: { _appointment_id: string }
+        Returns: boolean
+      }
       close_sale: {
         Args: {
           _desconto_cents?: number
@@ -1345,6 +1400,21 @@ export type Database = {
           starts_at: string
         }[]
       }
+      get_client_appointments: {
+        Args: never
+        Returns: {
+          company_id: string
+          company_name: string
+          company_slug: string
+          duration_minutes: number
+          id: string
+          price: number
+          professional_name: string
+          scheduled_at: string
+          service_name: string
+          status: Database["public"]["Enums"]["appointment_status"]
+        }[]
+      }
       has_company_access: { Args: { _company_id: string }; Returns: boolean }
       has_company_role: {
         Args: { _company_id: string; _roles: string[] }
@@ -1353,6 +1423,15 @@ export type Database = {
       is_super_admin: { Args: never; Returns: boolean }
       trial_identity_conflict: {
         Args: { _cpf: string; _email: string; _phone: string }
+        Returns: string
+      }
+      upsert_customer_for_user: {
+        Args: {
+          _company_id: string
+          _email?: string
+          _name: string
+          _phone: string
+        }
         Returns: string
       }
       upsert_customer_public: {
