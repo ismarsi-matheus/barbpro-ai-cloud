@@ -55,6 +55,7 @@ import { Route as AppCheckoutRouteImport } from './routes/app.checkout'
 import { Route as AppAigrowthRouteImport } from './routes/app.aigrowth'
 import { Route as AppAgendaRouteImport } from './routes/app.agenda'
 import { Route as AgendarSlugRouteImport } from './routes/agendar.$slug'
+import { Route as ApiPublicEmailTestRouteImport } from './routes/api/public/email-test'
 import { Route as ApiPublicBillingWebhookRouteImport } from './routes/api/public/billing/webhook'
 
 const TrocarSenhaRoute = TrocarSenhaRouteImport.update({
@@ -287,6 +288,11 @@ const AgendarSlugRoute = AgendarSlugRouteImport.update({
   path: '/agendar/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicEmailTestRoute = ApiPublicEmailTestRouteImport.update({
+  id: '/api/public/email-test',
+  path: '/api/public/email-test',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicBillingWebhookRoute = ApiPublicBillingWebhookRouteImport.update({
   id: '/api/public/billing/webhook',
   path: '/api/public/billing/webhook',
@@ -340,6 +346,7 @@ export interface FileRoutesByFullPath {
   '/master/painel': typeof MasterPainelRoute
   '/master/planos': typeof MasterPlanosRoute
   '/cliente/': typeof ClienteIndexRoute
+  '/api/public/email-test': typeof ApiPublicEmailTestRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -389,6 +396,7 @@ export interface FileRoutesByTo {
   '/master/painel': typeof MasterPainelRoute
   '/master/planos': typeof MasterPlanosRoute
   '/cliente': typeof ClienteIndexRoute
+  '/api/public/email-test': typeof ApiPublicEmailTestRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
 }
 export interface FileRoutesById {
@@ -439,6 +447,7 @@ export interface FileRoutesById {
   '/master/painel': typeof MasterPainelRoute
   '/master/planos': typeof MasterPlanosRoute
   '/cliente/': typeof ClienteIndexRoute
+  '/api/public/email-test': typeof ApiPublicEmailTestRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
 }
 export interface FileRouteTypes {
@@ -490,6 +499,7 @@ export interface FileRouteTypes {
     | '/master/painel'
     | '/master/planos'
     | '/cliente/'
+    | '/api/public/email-test'
     | '/api/public/billing/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -539,6 +549,7 @@ export interface FileRouteTypes {
     | '/master/painel'
     | '/master/planos'
     | '/cliente'
+    | '/api/public/email-test'
     | '/api/public/billing/webhook'
   id:
     | '__root__'
@@ -588,6 +599,7 @@ export interface FileRouteTypes {
     | '/master/painel'
     | '/master/planos'
     | '/cliente/'
+    | '/api/public/email-test'
     | '/api/public/billing/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -606,6 +618,7 @@ export interface RootRouteChildren {
   ClientePerfilRoute: typeof ClientePerfilRoute
   ConfirmarTokenRoute: typeof ConfirmarTokenRoute
   ClienteIndexRoute: typeof ClienteIndexRoute
+  ApiPublicEmailTestRoute: typeof ApiPublicEmailTestRoute
   ApiPublicBillingWebhookRoute: typeof ApiPublicBillingWebhookRoute
 }
 
@@ -933,6 +946,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgendarSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/email-test': {
+      id: '/api/public/email-test'
+      path: '/api/public/email-test'
+      fullPath: '/api/public/email-test'
+      preLoaderRoute: typeof ApiPublicEmailTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/billing/webhook': {
       id: '/api/public/billing/webhook'
       path: '/api/public/billing/webhook'
@@ -1047,6 +1067,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClientePerfilRoute: ClientePerfilRoute,
   ConfirmarTokenRoute: ConfirmarTokenRoute,
   ClienteIndexRoute: ClienteIndexRoute,
+  ApiPublicEmailTestRoute: ApiPublicEmailTestRoute,
   ApiPublicBillingWebhookRoute: ApiPublicBillingWebhookRoute,
 }
 export const routeTree = rootRouteImport
