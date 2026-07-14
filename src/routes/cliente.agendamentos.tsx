@@ -49,6 +49,12 @@ function AgendamentosPage() {
     toast.success("Agendamento cancelado");
     qc.invalidateQueries({ queryKey: ["client-appointments"] });
     qc.invalidateQueries({ queryKey: ["client-next-appt"] });
+    try {
+      const { notifyAppointmentEvent } = await import("@/lib/email/notify.functions");
+      void notifyAppointmentEvent({ data: { appointmentId: id, kind: "canceled" } });
+    } catch (e) {
+      console.error("[cliente] notify cancel failed", e);
+    }
   };
 
   const renderCard = (a: any, allowCancel: boolean) => (
