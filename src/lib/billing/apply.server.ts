@@ -196,6 +196,31 @@ export async function applyEvent(
     processed: true,
   });
 
+  // Dispatch de e-mails (nunca falha silenciosamente o webhook)
+  try {
+    const notify = await import("@/lib/email/notify.server");
+    const buyerEmail = evt.buyerEmail ?? null;
+    switch (evt.eventType) {
+      case "purchase_approved":
+        await notify.notifyPaymentApproved(companyId, buyerEmail, (evt as any).amount);
+        if (plan?.slug) await notify.notifySubscriptionCreated(companyId, buyerEmail, plan.slug);
+        break;
+      case "subscription_renewed":
+        await notify.notifyPaymentApproved(companyId, buyerEmail, (evt as any).amount);
+        break;
+      case "payment_failed":
+        await notify.notifyPaymentFailed(companyId, buyerEmail);
+        break;
+      case "subscription_canceled":
+      case "refunded":
+      case "chargeback":
+        await notify.notifySubscriptionCanceled(companyId, buyerEmail);
+        break;
+    }
+  } catch (e) {
+    console.error("[billing] email dispatch failed", e);
+  }
+
   return { ok: true, companyId };
 }
 
