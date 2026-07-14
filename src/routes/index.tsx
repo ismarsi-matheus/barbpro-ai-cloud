@@ -383,11 +383,12 @@ function LandingPage() {
                 </li>
               ))}
             </ul>
-            <Link to="/demo/aigrowth">
-              <Button size="lg" className="mt-8 text-white" style={{ backgroundColor: BRAND }}>
+            <Button asChild size="lg" className="mt-8 text-white" style={{ backgroundColor: BRAND }}>
+              <Link to="/demo/aigrowth">
                 Ver AI Growth na Demo <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
+
           </div>
           <div className="space-y-3">
             <div className="bg-white rounded-2xl border border-black/5 p-5 flex items-start gap-3 shadow-sm">
