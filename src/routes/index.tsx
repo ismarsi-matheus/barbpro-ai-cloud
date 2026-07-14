@@ -242,10 +242,11 @@ function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#F8F7F3] text-[#1B1C1E]">
-      <header className="border-b border-black/5 bg-white/90 backdrop-blur sticky top-0 z-10">
+      <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:text-black focus:px-3 focus:py-2 focus:rounded-md focus:shadow">Ir para o conteúdo</a>
+      <header className="border-b border-black/5 bg-white/90 backdrop-blur sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: BRAND }}>
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: BRAND }} aria-hidden="true">
               <Scissors className="w-4 h-4 text-white" />
             </div>
             <div className="leading-tight min-w-0">
@@ -253,14 +254,19 @@ function LandingPage() {
               <div className="text-[10px] text-black/50 truncate hidden sm:block">{TAGLINE}</div>
             </div>
           </div>
-          <nav className="flex items-center gap-2 shrink-0">
-            <Link to="/entrar"><Button variant="ghost" size="sm">Entrar</Button></Link>
+          <nav className="flex items-center gap-2 shrink-0" aria-label="Navegação principal">
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/entrar">Entrar</Link>
+            </Button>
             <Button size="sm" className="text-white" style={{ backgroundColor: BRAND }} onClick={() => scrollToPlans()}>
               Ver planos
             </Button>
           </nav>
         </div>
       </header>
+
+      <main id="conteudo">
+
 
       {/* HERO */}
       <section className="max-w-6xl mx-auto px-6 py-20 text-center">
