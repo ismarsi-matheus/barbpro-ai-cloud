@@ -586,10 +586,13 @@ function LandingPage() {
         </div>
       </section>
 
-      <footer className="py-10 px-6" style={{ backgroundColor: "#111418" }}>
+      </main>
+
+      <footer className="py-10 px-4 sm:px-6" style={{ backgroundColor: "#111418" }}>
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: BRAND }}>
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: BRAND }} aria-hidden="true">
+
               <Scissors className="w-4 h-4 text-white" />
             </div>
             <div className="leading-tight">
