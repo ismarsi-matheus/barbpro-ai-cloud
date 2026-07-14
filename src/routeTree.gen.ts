@@ -56,6 +56,7 @@ import { Route as AppAigrowthRouteImport } from './routes/app.aigrowth'
 import { Route as AppAgendaRouteImport } from './routes/app.agenda'
 import { Route as AgendarSlugRouteImport } from './routes/agendar.$slug'
 import { Route as ApiPublicEmailTestRouteImport } from './routes/api/public/email-test'
+import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe/webhook'
 import { Route as ApiPublicCronAppointmentRemindersRouteImport } from './routes/api/public/cron/appointment-reminders'
 import { Route as ApiPublicBillingWebhookRouteImport } from './routes/api/public/billing/webhook'
 
@@ -294,6 +295,11 @@ const ApiPublicEmailTestRoute = ApiPublicEmailTestRouteImport.update({
   path: '/api/public/email-test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
+  id: '/api/public/stripe/webhook',
+  path: '/api/public/stripe/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicCronAppointmentRemindersRoute =
   ApiPublicCronAppointmentRemindersRouteImport.update({
     id: '/api/public/cron/appointment-reminders',
@@ -356,6 +362,7 @@ export interface FileRoutesByFullPath {
   '/api/public/email-test': typeof ApiPublicEmailTestRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
   '/api/public/cron/appointment-reminders': typeof ApiPublicCronAppointmentRemindersRoute
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -407,6 +414,7 @@ export interface FileRoutesByTo {
   '/api/public/email-test': typeof ApiPublicEmailTestRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
   '/api/public/cron/appointment-reminders': typeof ApiPublicCronAppointmentRemindersRoute
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -459,6 +467,7 @@ export interface FileRoutesById {
   '/api/public/email-test': typeof ApiPublicEmailTestRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
   '/api/public/cron/appointment-reminders': typeof ApiPublicCronAppointmentRemindersRoute
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -512,6 +521,7 @@ export interface FileRouteTypes {
     | '/api/public/email-test'
     | '/api/public/billing/webhook'
     | '/api/public/cron/appointment-reminders'
+    | '/api/public/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -563,6 +573,7 @@ export interface FileRouteTypes {
     | '/api/public/email-test'
     | '/api/public/billing/webhook'
     | '/api/public/cron/appointment-reminders'
+    | '/api/public/stripe/webhook'
   id:
     | '__root__'
     | '/'
@@ -614,6 +625,7 @@ export interface FileRouteTypes {
     | '/api/public/email-test'
     | '/api/public/billing/webhook'
     | '/api/public/cron/appointment-reminders'
+    | '/api/public/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -634,6 +646,7 @@ export interface RootRouteChildren {
   ApiPublicEmailTestRoute: typeof ApiPublicEmailTestRoute
   ApiPublicBillingWebhookRoute: typeof ApiPublicBillingWebhookRoute
   ApiPublicCronAppointmentRemindersRoute: typeof ApiPublicCronAppointmentRemindersRoute
+  ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -967,6 +980,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEmailTestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/stripe/webhook': {
+      id: '/api/public/stripe/webhook'
+      path: '/api/public/stripe/webhook'
+      fullPath: '/api/public/stripe/webhook'
+      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/cron/appointment-reminders': {
       id: '/api/public/cron/appointment-reminders'
       path: '/api/public/cron/appointment-reminders'
@@ -1092,6 +1112,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBillingWebhookRoute: ApiPublicBillingWebhookRoute,
   ApiPublicCronAppointmentRemindersRoute:
     ApiPublicCronAppointmentRemindersRoute,
+  ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
