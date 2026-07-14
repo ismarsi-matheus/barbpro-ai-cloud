@@ -269,7 +269,7 @@ function LandingPage() {
 
 
       {/* HERO */}
-      <section className="max-w-6xl mx-auto px-6 py-20 text-center">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-6" style={{ backgroundColor: BRAND + "1A", color: BRAND }}>
           <Sparkles className="w-3 h-3" /> 14 dias grátis, sem cartão de crédito
         </div>
@@ -291,7 +291,7 @@ function LandingPage() {
       </section>
 
       {/* STATS BANNER */}
-      <section className="py-16 px-6" style={{ backgroundColor: BRAND }}>
+      <section className="py-14 sm:py-16 px-4 sm:px-6" style={{ backgroundColor: BRAND }}>
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {STATS.map((s) => (
             <div key={s.label}>
@@ -304,7 +304,7 @@ function LandingPage() {
 
       {/* PAIN POINTS */}
       <section className="bg-white border-y border-black/5 py-20">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold" style={{ color: BRAND }}>Você se reconhece nisso?</h2>
             <p className="text-black/60 mt-2">Os 6 problemas mais comuns que a gente resolve.</p>
@@ -324,7 +324,7 @@ function LandingPage() {
       </section>
 
       {/* MODULES */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold" style={{ color: BRAND }}>9 módulos. Um sistema.</h2>
           <p className="text-black/60 mt-2">Tudo o que sua barbearia precisa, integrado de verdade.</p>
@@ -344,7 +344,7 @@ function LandingPage() {
 
       {/* HOW IT WORKS */}
       <section className="bg-white border-y border-black/5 py-20">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold" style={{ color: BRAND }}>Como funciona</h2>
             <p className="text-black/60 mt-2">Em minutos sua barbearia está operando.</p>
@@ -364,7 +364,7 @@ function LandingPage() {
       </section>
 
       {/* AI GROWTH SECTION */}
-      <section className="py-20 px-6" style={{ backgroundColor: "#F8F7F3" }}>
+      <section className="py-16 sm:py-20 px-4 sm:px-6" style={{ backgroundColor: "#F8F7F3" }}>
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4" style={{ backgroundColor: BRAND + "1A", color: BRAND }}>
@@ -433,7 +433,7 @@ function LandingPage() {
 
       {/* TUDO QUE SUA BARBEARIA PRECISA */}
       <section className="bg-white border-y border-black/5 py-20 sm:py-24">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14 max-w-3xl mx-auto">
             <h2 className="text-3xl sm:text-4xl font-black leading-tight" style={{ color: BRAND }}>
               Tudo que sua barbearia precisa em um só lugar
@@ -473,7 +473,7 @@ function LandingPage() {
         <div aria-hidden className="absolute inset-0 pointer-events-none opacity-40" style={{
           backgroundImage: "radial-gradient(circle at 20% 10%, rgba(27,58,75,0.08), transparent 40%), radial-gradient(circle at 80% 90%, rgba(139,92,246,0.08), transparent 40%)",
         }} />
-        <div className="relative max-w-6xl mx-auto px-6">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14 max-w-3xl mx-auto">
             <h2 className="text-3xl sm:text-4xl font-black leading-tight" style={{ color: BRAND }}>
               Escolha o plano ideal para sua barbearia
@@ -567,7 +567,7 @@ function LandingPage() {
       </section>
 
       {/* FINAL CTA */}
-      <section className="py-20 px-6" style={{ backgroundColor: BRAND }}>
+      <section className="py-16 sm:py-20 px-4 sm:px-6" style={{ backgroundColor: BRAND }}>
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight">
             Pronto para transformar sua barbearia?
