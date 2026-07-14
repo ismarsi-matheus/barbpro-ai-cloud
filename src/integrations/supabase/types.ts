@@ -1198,9 +1198,90 @@ export type Database = {
           },
         ]
       }
+      stripe_customer: {
+        Row: {
+          company_id: string
+          created_at: string
+          email: string | null
+          id: string
+          metadata: Json
+          stripe_customer_id: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          metadata?: Json
+          stripe_customer_id: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          metadata?: Json
+          stripe_customer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_customer_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "company"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stripe_webhook_event: {
+        Row: {
+          api_version: string | null
+          attempts: number
+          created_at: string
+          error: string | null
+          id: string
+          payload: Json
+          processed: boolean
+          processed_at: string | null
+          stripe_event_id: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          api_version?: string | null
+          attempts?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json
+          processed?: boolean
+          processed_at?: string | null
+          stripe_event_id: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          api_version?: string | null
+          attempts?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json
+          processed?: boolean
+          processed_at?: string | null
+          stripe_event_id?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscription: {
         Row: {
           buyer_email: string | null
+          cancel_at: string | null
           cancel_at_period_end: boolean | null
           canceled_at: string | null
           company_id: string
@@ -1214,11 +1295,15 @@ export type Database = {
           plan_id: string | null
           provider: string
           status: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
           trial_ends_at: string | null
+          trial_start: string | null
           updated_at: string
         }
         Insert: {
           buyer_email?: string | null
+          cancel_at?: string | null
           cancel_at_period_end?: boolean | null
           canceled_at?: string | null
           company_id: string
@@ -1232,11 +1317,15 @@ export type Database = {
           plan_id?: string | null
           provider?: string
           status?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           trial_ends_at?: string | null
+          trial_start?: string | null
           updated_at?: string
         }
         Update: {
           buyer_email?: string | null
+          cancel_at?: string | null
           cancel_at_period_end?: boolean | null
           canceled_at?: string | null
           company_id?: string
@@ -1250,7 +1339,10 @@ export type Database = {
           plan_id?: string | null
           provider?: string
           status?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           trial_ends_at?: string | null
+          trial_start?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1376,6 +1468,37 @@ export type Database = {
         Returns: boolean
       }
       current_company_id: { Args: never; Returns: string }
+      get_active_subscription: {
+        Args: { _company_id: string }
+        Returns: {
+          buyer_email: string | null
+          cancel_at: string | null
+          cancel_at_period_end: boolean | null
+          canceled_at: string | null
+          company_id: string
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          external_customer_id: string | null
+          external_subscription_id: string | null
+          id: string
+          metadata: Json | null
+          plan_id: string | null
+          provider: string
+          status: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          trial_ends_at: string | null
+          trial_start: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subscription"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_appointment_by_token: {
         Args: { _token: string }
         Returns: {
@@ -1415,15 +1538,117 @@ export type Database = {
           status: Database["public"]["Enums"]["appointment_status"]
         }[]
       }
+      get_current_plan_slug: { Args: { _company_id: string }; Returns: string }
+      get_stripe_customer: {
+        Args: { _company_id: string }
+        Returns: {
+          company_id: string
+          created_at: string
+          email: string | null
+          id: string
+          metadata: Json
+          stripe_customer_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "stripe_customer"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_company_access: { Args: { _company_id: string }; Returns: boolean }
       has_company_role: {
         Args: { _company_id: string; _roles: string[] }
         Returns: boolean
       }
       is_super_admin: { Args: never; Returns: boolean }
+      mark_webhook_processed: {
+        Args: { _error?: string; _stripe_event_id: string }
+        Returns: undefined
+      }
+      sync_stripe_subscription: {
+        Args: {
+          _cancel_at: string
+          _cancel_at_period_end: boolean
+          _canceled_at: string
+          _company_id: string
+          _current_period_end: string
+          _current_period_start: string
+          _customer_email: string
+          _metadata: Json
+          _plan_id?: string
+          _status: string
+          _stripe_customer_id: string
+          _stripe_price_id: string
+          _stripe_product_id: string
+          _stripe_subscription_id: string
+          _trial_end: string
+          _trial_start: string
+        }
+        Returns: {
+          buyer_email: string | null
+          cancel_at: string | null
+          cancel_at_period_end: boolean | null
+          canceled_at: string | null
+          company_id: string
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          external_customer_id: string | null
+          external_subscription_id: string | null
+          id: string
+          metadata: Json | null
+          plan_id: string | null
+          provider: string
+          status: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          trial_ends_at: string | null
+          trial_start: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subscription"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       trial_identity_conflict: {
         Args: { _cpf: string; _email: string; _phone: string }
         Returns: string
+      }
+      update_subscription_status: {
+        Args: { _status: string; _stripe_subscription_id: string }
+        Returns: {
+          buyer_email: string | null
+          cancel_at: string | null
+          cancel_at_period_end: boolean | null
+          canceled_at: string | null
+          company_id: string
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          external_customer_id: string | null
+          external_subscription_id: string | null
+          id: string
+          metadata: Json | null
+          plan_id: string | null
+          provider: string
+          status: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          trial_ends_at: string | null
+          trial_start: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subscription"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       upsert_customer_for_user: {
         Args: {
