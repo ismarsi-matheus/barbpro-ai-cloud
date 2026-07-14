@@ -10,10 +10,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type {
-  StripeCustomerRow,
-  SubscriptionRow,
-} from "./db-types";
+// db-types re-exported for consumers that want typed casts on the client side.
+export type { StripeCustomerRow, SubscriptionRow } from "./db-types";
 
 async function assertCompanyAccess(ctx: any, companyId: string) {
   const { data, error } = await ctx.supabase.rpc("has_company_access", {
