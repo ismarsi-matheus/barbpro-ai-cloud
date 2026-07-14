@@ -242,10 +242,11 @@ function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#F8F7F3] text-[#1B1C1E]">
-      <header className="border-b border-black/5 bg-white/90 backdrop-blur sticky top-0 z-10">
+      <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:text-black focus:px-3 focus:py-2 focus:rounded-md focus:shadow">Ir para o conteúdo</a>
+      <header className="border-b border-black/5 bg-white/90 backdrop-blur sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: BRAND }}>
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: BRAND }} aria-hidden="true">
               <Scissors className="w-4 h-4 text-white" />
             </div>
             <div className="leading-tight min-w-0">
@@ -253,8 +254,10 @@ function LandingPage() {
               <div className="text-[10px] text-black/50 truncate hidden sm:block">{TAGLINE}</div>
             </div>
           </div>
-          <nav className="flex items-center gap-2 shrink-0">
-            <Link to="/entrar"><Button variant="ghost" size="sm">Entrar</Button></Link>
+          <nav className="flex items-center gap-2 shrink-0" aria-label="Navegação principal">
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/entrar">Entrar</Link>
+            </Button>
             <Button size="sm" className="text-white" style={{ backgroundColor: BRAND }} onClick={() => scrollToPlans()}>
               Ver planos
             </Button>
@@ -262,8 +265,11 @@ function LandingPage() {
         </div>
       </header>
 
+      <main id="conteudo">
+
+
       {/* HERO */}
-      <section className="max-w-6xl mx-auto px-6 py-20 text-center">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-6" style={{ backgroundColor: BRAND + "1A", color: BRAND }}>
           <Sparkles className="w-3 h-3" /> 14 dias grátis, sem cartão de crédito
         </div>
@@ -277,14 +283,15 @@ function LandingPage() {
           <Button size="lg" className="text-white" style={{ backgroundColor: BRAND }} onClick={() => scrollToPlans()}>
             Ver planos <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
-          <Link to="/demo/dashboard">
-            <Button size="lg" variant="outline">Ver demo</Button>
-          </Link>
+          <Button asChild size="lg" variant="outline">
+            <Link to="/demo/dashboard">Ver demo</Link>
+          </Button>
+
         </div>
       </section>
 
       {/* STATS BANNER */}
-      <section className="py-16 px-6" style={{ backgroundColor: BRAND }}>
+      <section className="py-14 sm:py-16 px-4 sm:px-6" style={{ backgroundColor: BRAND }}>
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {STATS.map((s) => (
             <div key={s.label}>
@@ -296,8 +303,8 @@ function LandingPage() {
       </section>
 
       {/* PAIN POINTS */}
-      <section className="bg-white border-y border-black/5 py-20">
-        <div className="max-w-6xl mx-auto px-6">
+      <section className="bg-white border-y border-black/5 py-16 sm:py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold" style={{ color: BRAND }}>Você se reconhece nisso?</h2>
             <p className="text-black/60 mt-2">Os 6 problemas mais comuns que a gente resolve.</p>
@@ -317,7 +324,7 @@ function LandingPage() {
       </section>
 
       {/* MODULES */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold" style={{ color: BRAND }}>9 módulos. Um sistema.</h2>
           <p className="text-black/60 mt-2">Tudo o que sua barbearia precisa, integrado de verdade.</p>
@@ -336,8 +343,8 @@ function LandingPage() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="bg-white border-y border-black/5 py-20">
-        <div className="max-w-6xl mx-auto px-6">
+      <section className="bg-white border-y border-black/5 py-16 sm:py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold" style={{ color: BRAND }}>Como funciona</h2>
             <p className="text-black/60 mt-2">Em minutos sua barbearia está operando.</p>
@@ -357,7 +364,7 @@ function LandingPage() {
       </section>
 
       {/* AI GROWTH SECTION */}
-      <section className="py-20 px-6" style={{ backgroundColor: "#F8F7F3" }}>
+      <section className="py-16 sm:py-20 px-4 sm:px-6" style={{ backgroundColor: "#F8F7F3" }}>
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4" style={{ backgroundColor: BRAND + "1A", color: BRAND }}>
@@ -376,11 +383,12 @@ function LandingPage() {
                 </li>
               ))}
             </ul>
-            <Link to="/demo/aigrowth">
-              <Button size="lg" className="mt-8 text-white" style={{ backgroundColor: BRAND }}>
+            <Button asChild size="lg" className="mt-8 text-white" style={{ backgroundColor: BRAND }}>
+              <Link to="/demo/aigrowth">
                 Ver AI Growth na Demo <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
+
           </div>
           <div className="space-y-3">
             <div className="bg-white rounded-2xl border border-black/5 p-5 flex items-start gap-3 shadow-sm">
@@ -425,7 +433,7 @@ function LandingPage() {
 
       {/* TUDO QUE SUA BARBEARIA PRECISA */}
       <section className="bg-white border-y border-black/5 py-20 sm:py-24">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14 max-w-3xl mx-auto">
             <h2 className="text-3xl sm:text-4xl font-black leading-tight" style={{ color: BRAND }}>
               Tudo que sua barbearia precisa em um só lugar
@@ -465,7 +473,7 @@ function LandingPage() {
         <div aria-hidden className="absolute inset-0 pointer-events-none opacity-40" style={{
           backgroundImage: "radial-gradient(circle at 20% 10%, rgba(27,58,75,0.08), transparent 40%), radial-gradient(circle at 80% 90%, rgba(139,92,246,0.08), transparent 40%)",
         }} />
-        <div className="relative max-w-6xl mx-auto px-6">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14 max-w-3xl mx-auto">
             <h2 className="text-3xl sm:text-4xl font-black leading-tight" style={{ color: BRAND }}>
               Escolha o plano ideal para sua barbearia
@@ -559,7 +567,7 @@ function LandingPage() {
       </section>
 
       {/* FINAL CTA */}
-      <section className="py-20 px-6" style={{ backgroundColor: BRAND }}>
+      <section className="py-16 sm:py-20 px-4 sm:px-6" style={{ backgroundColor: BRAND }}>
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight">
             Pronto para transformar sua barbearia?
@@ -571,19 +579,21 @@ function LandingPage() {
             <Button size="lg" className="bg-white hover:bg-white/90" style={{ color: BRAND }} onClick={() => scrollToPlans()}>
               Ver Planos <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
-            <Link to="/demo/dashboard">
-              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
-                Ver Demo
-              </Button>
-            </Link>
+            <Button asChild size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Link to="/demo/dashboard">Ver Demo</Link>
+            </Button>
+
           </div>
         </div>
       </section>
 
-      <footer className="py-10 px-6" style={{ backgroundColor: "#111418" }}>
+      </main>
+
+      <footer className="py-10 px-4 sm:px-6" style={{ backgroundColor: "#111418" }}>
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: BRAND }}>
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: BRAND }} aria-hidden="true">
+
               <Scissors className="w-4 h-4 text-white" />
             </div>
             <div className="leading-tight">
