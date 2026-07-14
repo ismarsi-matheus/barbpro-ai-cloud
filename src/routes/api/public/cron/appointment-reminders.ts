@@ -31,10 +31,11 @@ export const Route = createFileRoute("/api/public/cron/appointment-reminders")({
           return Response.json({ ok: true, mode: "single", kind, result: r });
         }
 
+        const now = new Date();
+        const in24 = new Date(now.getTime() + 24 * 60 * 60 * 1000);
         const in25 = new Date(now.getTime() + 25 * 60 * 60 * 1000);
 
         // Grab appointments starting between 24h and 25h from now (1h window).
-        // This assumes cron runs hourly; adjust window as needed.
         const { data: apts, error } = await supabaseAdmin
           .from("appointment")
           .select("id, status")
@@ -48,7 +49,7 @@ export const Route = createFileRoute("/api/public/cron/appointment-reminders")({
 
         const results: any[] = [];
         for (const a of apts ?? []) {
-          const r = await notifyAppointmentReminder(a.id);
+          const r = await notify.notifyAppointmentReminder(a.id);
           results.push({ id: a.id, ...r });
         }
         return Response.json({ ok: true, count: results.length, results });
