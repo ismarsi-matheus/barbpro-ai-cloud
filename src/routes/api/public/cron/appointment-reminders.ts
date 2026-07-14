@@ -16,10 +16,21 @@ export const Route = createFileRoute("/api/public/cron/appointment-reminders")({
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { notifyAppointmentReminder } = await import("@/lib/email/notify.server");
+        const notify = await import("@/lib/email/notify.server");
 
-        const now = new Date();
-        const in24 = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        const url = new URL(request.url);
+        const oneId = url.searchParams.get("appointment_id");
+        const kind = (url.searchParams.get("kind") ?? "reminder") as "created" | "canceled" | "reminder";
+
+        // Disparo pontual (retry / teste)
+        if (oneId) {
+          let r: any;
+          if (kind === "created") r = await notify.notifyAppointmentCreated(oneId);
+          else if (kind === "canceled") r = await notify.notifyAppointmentCanceled(oneId);
+          else r = await notify.notifyAppointmentReminder(oneId);
+          return Response.json({ ok: true, mode: "single", kind, result: r });
+        }
+
         const in25 = new Date(now.getTime() + 25 * 60 * 60 * 1000);
 
         // Grab appointments starting between 24h and 25h from now (1h window).
