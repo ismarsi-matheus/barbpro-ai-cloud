@@ -38,9 +38,9 @@ export const getSubscriptionForCompany = createServerFn({ method: "GET" })
       findStripeCustomerByCompany(data.companyId),
     ]);
     return {
-      subscription: subscription as SubscriptionRow | null,
-      customer: customer as StripeCustomerRow | null,
-    };
+      subscription: (subscription ?? null) as unknown as any,
+      customer: (customer ?? null) as unknown as any,
+    } as { subscription: SubscriptionRow | null; customer: StripeCustomerRow | null };
   });
 
 export const getCurrentPlan = createServerFn({ method: "GET" })
