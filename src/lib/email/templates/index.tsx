@@ -82,6 +82,15 @@ export const templates = {
       </EmailLayout>
     ),
   }),
+  "assinatura-cancelada": (d: Base) => ({
+    subject: "Assinatura cancelada",
+    react: (
+      <EmailLayout preview="Sua assinatura foi cancelada">
+        <Heading>Assinatura cancelada</Heading>
+        <Text>Olá{d.nome ? `, ${d.nome}` : ""}, sua assinatura foi cancelada. Se foi um engano, fale com nosso suporte.</Text>
+      </EmailLayout>
+    ),
+  }),
   "pagamento-aprovado": (d: Base & { valor: string }) => ({
     subject: "Pagamento aprovado",
     react: (
