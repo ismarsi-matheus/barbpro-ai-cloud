@@ -283,9 +283,10 @@ function LandingPage() {
           <Button size="lg" className="text-white" style={{ backgroundColor: BRAND }} onClick={() => scrollToPlans()}>
             Ver planos <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
-          <Link to="/demo/dashboard">
-            <Button size="lg" variant="outline">Ver demo</Button>
-          </Link>
+          <Button asChild size="lg" variant="outline">
+            <Link to="/demo/dashboard">Ver demo</Link>
+          </Button>
+
         </div>
       </section>
 
