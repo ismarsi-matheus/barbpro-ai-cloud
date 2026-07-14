@@ -9,7 +9,7 @@ export const Route = createFileRoute("/api/public/email-test")({
         if (!expected || token !== expected) {
           return new Response("Unauthorized", { status: 401 });
         }
-        let body: { to?: string };
+        let body: { to?: string; template?: string; data?: Record<string, any> };
         try {
           body = await request.json();
         } catch {
@@ -20,8 +20,13 @@ export const Route = createFileRoute("/api/public/email-test")({
         }
         try {
           const { sendEmail } = await import("@/lib/email/email-service.server");
-          const res = await sendEmail({ to: body.to, template: "teste" });
-          return Response.json({ ok: true, id: res.id });
+          const { templates } = await import("@/lib/email/templates");
+          const template = (body.template ?? "teste") as keyof typeof templates;
+          if (!(template in templates)) {
+            return Response.json({ ok: false, error: `template inválido: ${template}` }, { status: 400 });
+          }
+          const res = await sendEmail({ to: body.to, template, data: body.data ?? {} });
+          return Response.json({ ok: true, id: res.id, template });
         } catch (e: any) {
           console.error("email-test failed", e);
           return Response.json({ ok: false, error: e.message }, { status: 500 });

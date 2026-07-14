@@ -164,5 +164,13 @@ export const signupTrial = createServerFn({ method: "POST" })
       console.error("trial_identity insert failed:", tiErr.message);
     }
 
+    // 8) E-mail de boas-vindas (fire-and-forget; nunca bloqueia signup)
+    try {
+      const { notifyWelcome } = await import("./email/notify.server");
+      await notifyWelcome(email, data.nome);
+    } catch (e) {
+      console.error("[signup] welcome email failed", e);
+    }
+
     return { ok: true, company_id: company.id, trial_ate: trialAte };
   });

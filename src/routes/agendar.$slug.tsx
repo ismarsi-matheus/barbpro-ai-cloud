@@ -379,6 +379,14 @@ function AgendarPage() {
       setConfirmed(appointmentPayload.id);
       toast.success("Agendamento confirmado!");
 
+      // Dispara e-mail de confirmação (fire-and-forget)
+      try {
+        const { notifyAppointmentEvent } = await import("@/lib/email/notify.functions");
+        void notifyAppointmentEvent({ data: { appointmentId: appointmentPayload.id, kind: "created" } });
+      } catch (e) {
+        console.error("[agendar] notify failed", e);
+      }
+
     } catch (e: any) {
       console.error("[agendar] submit exception", e);
       setSubmitting(false);
