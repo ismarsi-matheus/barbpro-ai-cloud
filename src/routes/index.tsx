@@ -303,7 +303,7 @@ function LandingPage() {
       </section>
 
       {/* PAIN POINTS */}
-      <section className="bg-white border-y border-black/5 py-20">
+      <section className="bg-white border-y border-black/5 py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold" style={{ color: BRAND }}>Você se reconhece nisso?</h2>
@@ -343,7 +343,7 @@ function LandingPage() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="bg-white border-y border-black/5 py-20">
+      <section className="bg-white border-y border-black/5 py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold" style={{ color: BRAND }}>Como funciona</h2>
