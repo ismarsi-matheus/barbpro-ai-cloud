@@ -1,8 +1,17 @@
 /**
  * Processamento centralizado dos eventos de webhook do Stripe.
  *
- * Server-only. Usa exclusivamente a camada de repositório criada na
- * etapa anterior — não acessa o banco diretamente.
+ * Server-only. Suporta os dois formatos de payload emitidos pelo Stripe:
+ *  - Snapshot events (API v1 clássica) — payload contém o objeto completo em
+ *    `data.object`. Verificados com `webhooks.constructEventAsync`.
+ *  - Thin event notifications (API v2 / Event Destinations) — payload traz
+ *    apenas `id`, `type`, `related_object`. Verificados com
+ *    `parseEventNotificationAsync` e o objeto real é buscado sob demanda via
+ *    `fetchRelatedObject()`.
+ *
+ * A idempotência é preservada gravando o `id` do evento em
+ * `stripe_webhook_event` — funciona igual para os dois formatos, já que ambos
+ * têm identificadores únicos.
  */
 import type Stripe from "stripe";
 import { getStripe } from "./client.server";
@@ -17,7 +26,10 @@ import {
   upsertStripeCustomer,
 } from "./repository.server";
 
-/** Eventos que este handler processa ativamente. */
+/**
+ * Tipos snapshot (v1) que despachamos ativamente. Thin events são mapeados
+ * para o mesmo conjunto lógico via `normalizeThinType()` antes do dispatch.
+ */
 const HANDLED = new Set<string>([
   "checkout.session.completed",
   "customer.created",
@@ -35,10 +47,8 @@ export interface WebhookResult {
 }
 
 /**
- * Valida assinatura HMAC do Stripe, registra o evento, garante idempotência,
- * dispatch por tipo e marca sucesso/erro na tabela stripe_webhook_event.
- *
- * Nunca lança — sempre devolve um WebhookResult apropriado para a resposta HTTP.
+ * Valida assinatura HMAC, registra o evento (dedup), despacha e marca
+ * processado. Nunca lança — devolve sempre um WebhookResult.
  */
 export async function handleStripeWebhook(
   rawBody: string,
@@ -52,11 +62,42 @@ export async function handleStripeWebhook(
     return { status: 400, body: { ok: false, error: "assinatura ausente" } };
   }
 
-  // 1) Validação de assinatura HMAC — obrigatório usar constructEventAsync no runtime Workers.
-  let event: Stripe.Event;
+  // Detecta thin (v2) vs snapshot (v1) sem consumir o corpo — precisamos do
+  // texto cru para validar HMAC em ambos os caminhos.
+  const format = detectPayloadFormat(rawBody);
+
+  const stripe = getStripe();
+  let normalized: NormalizedEvent;
   try {
-    const stripe = getStripe();
-    event = await stripe.webhooks.constructEventAsync(rawBody, signatureHeader, webhookSecret);
+    if (format === "thin") {
+      const notification: any = await (stripe as any).parseEventNotificationAsync(
+        rawBody,
+        signatureHeader,
+        webhookSecret,
+      );
+      normalized = {
+        format: "thin",
+        id: notification.id,
+        type: notification.type,
+        apiVersion: "v2",
+        payload: notification,
+        notification,
+      };
+    } else {
+      const event = await stripe.webhooks.constructEventAsync(
+        rawBody,
+        signatureHeader,
+        webhookSecret,
+      );
+      normalized = {
+        format: "snapshot",
+        id: event.id,
+        type: event.type,
+        apiVersion: event.api_version ?? null,
+        payload: event,
+        event,
+      };
+    }
   } catch (err: any) {
     return {
       status: 400,
@@ -64,49 +105,104 @@ export async function handleStripeWebhook(
     };
   }
 
-  // 2) Registro + idempotência
+  // Registro + idempotência (compartilhado entre formatos via id único).
   let duplicate = false;
   try {
     const rec = await recordWebhookEvent({
-      stripeEventId: event.id,
-      type: event.type,
-      apiVersion: event.api_version ?? null,
-      payload: event as unknown,
+      stripeEventId: normalized.id,
+      type: normalized.type,
+      apiVersion: normalized.apiVersion,
+      payload: normalized.payload,
     });
     duplicate = rec.duplicate;
   } catch (err: any) {
-    // erro inesperado de persistência
-    return { status: 500, body: { ok: false, error: `falha ao registrar evento: ${err?.message ?? err}` } };
+    return {
+      status: 500,
+      body: { ok: false, error: `falha ao registrar evento: ${err?.message ?? err}` },
+    };
   }
 
   if (duplicate) {
-    return { status: 200, body: { ok: true, duplicate: true, id: event.id, type: event.type } };
+    return {
+      status: 200,
+      body: { ok: true, duplicate: true, id: normalized.id, type: normalized.type },
+    };
   }
 
-  if (!HANDLED.has(event.type)) {
-    // Aceito, mas não temos handler dedicado — marcar processado sem erro.
-    await safeMarkProcessed(event.id, null);
-    return { status: 200, body: { ok: true, ignored: true, id: event.id, type: event.type } };
+  const canonicalType = normalizeThinType(normalized.type);
+  if (!HANDLED.has(canonicalType)) {
+    await safeMarkProcessed(normalized.id, null);
+    return {
+      status: 200,
+      body: { ok: true, ignored: true, id: normalized.id, type: normalized.type },
+    };
   }
 
-  // 3) Dispatch
   try {
-    await dispatch(event);
-    await safeMarkProcessed(event.id, null);
-    return { status: 200, body: { ok: true, id: event.id, type: event.type } };
+    await dispatch(normalized, canonicalType);
+    await safeMarkProcessed(normalized.id, null);
+    return { status: 200, body: { ok: true, id: normalized.id, type: normalized.type } };
   } catch (err: any) {
     const msg = err?.message ?? String(err);
-    await safeMarkProcessed(event.id, msg);
-    // 200 para o Stripe não retentar em erro de negócio; retentativa manual via dashboard.
-    return { status: 200, body: { ok: false, id: event.id, type: event.type, error: msg } };
+    await safeMarkProcessed(normalized.id, msg);
+    // 200 evita retry infinito por erro de negócio — retry manual via dashboard.
+    return {
+      status: 200,
+      body: { ok: false, id: normalized.id, type: normalized.type, error: msg },
+    };
   }
+}
+
+// -----------------------------------------------------------------
+// Detecção e normalização
+// -----------------------------------------------------------------
+
+type NormalizedEvent =
+  | {
+      format: "snapshot";
+      id: string;
+      type: string;
+      apiVersion: string | null;
+      payload: unknown;
+      event: Stripe.Event;
+    }
+  | {
+      format: "thin";
+      id: string;
+      type: string;
+      apiVersion: "v2";
+      payload: unknown;
+      notification: any;
+    };
+
+function detectPayloadFormat(rawBody: string): "thin" | "snapshot" {
+  try {
+    const parsed = JSON.parse(rawBody);
+    if (parsed && parsed.object === "v2.core.event") return "thin";
+  } catch {
+    /* fallback abaixo */
+  }
+  return "snapshot";
+}
+
+/**
+ * Converte um `type` thin (v1/v2 namespaced) no `type` snapshot equivalente
+ * quando existir. Exemplos:
+ *   v1.customer.subscription.updated   -> customer.subscription.updated
+ *   v1.checkout.session.completed      -> checkout.session.completed
+ * Tipos sem prefixo `v1.`/`v2.` são retornados inalterados.
+ */
+function normalizeThinType(type: string): string {
+  if (type.startsWith("v1.")) return type.slice(3);
+  if (type.startsWith("v2.")) return type.slice(3);
+  return type;
 }
 
 async function safeMarkProcessed(eventId: string, error: string | null): Promise<void> {
   try {
     await markWebhookProcessed(eventId, error);
   } catch {
-    /* noop — evitar loop de erro no webhook */
+    /* noop */
   }
 }
 
@@ -114,26 +210,41 @@ async function safeMarkProcessed(eventId: string, error: string | null): Promise
 // Dispatch
 // -----------------------------------------------------------------
 
-async function dispatch(event: Stripe.Event): Promise<void> {
-  switch (event.type) {
+async function dispatch(evt: NormalizedEvent, canonicalType: string): Promise<void> {
+  // Resolve o objeto associado — snapshot já traz inline; thin precisa buscar.
+  const object = await resolveEventObject(evt);
+  if (!object) {
+    throw new Error(`objeto do evento indisponível (${evt.type})`);
+  }
+
+  switch (canonicalType) {
     case "customer.created":
     case "customer.updated":
-      return handleCustomer(event.data.object as Stripe.Customer);
+      return handleCustomer(object as Stripe.Customer);
     case "checkout.session.completed":
-      return handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
+      return handleCheckoutCompleted(object as Stripe.Checkout.Session);
     case "customer.subscription.created":
     case "customer.subscription.updated":
-      return handleSubscriptionUpsert(event.data.object as Stripe.Subscription);
+      return handleSubscriptionUpsert(object as Stripe.Subscription);
     case "customer.subscription.deleted": {
-      const sub = event.data.object as Stripe.Subscription;
+      const sub = object as Stripe.Subscription;
       await updateSubscriptionStatus(sub.id, "canceled");
       return;
     }
     case "invoice.paid":
-      return handleInvoicePaid(event.data.object as Stripe.Invoice);
+      return handleInvoicePaid(object as Stripe.Invoice);
     case "invoice.payment_failed":
-      return handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+      return handleInvoicePaymentFailed(object as Stripe.Invoice);
   }
+}
+
+async function resolveEventObject(evt: NormalizedEvent): Promise<any | null> {
+  if (evt.format === "snapshot") {
+    return (evt.event.data as any)?.object ?? null;
+  }
+  // Thin: buscar o objeto real via SDK.
+  const fetched = await evt.notification.fetchRelatedObject?.();
+  return fetched ?? null;
 }
 
 /**
@@ -153,10 +264,7 @@ async function resolveCompanyId(
 
 async function handleCustomer(c: Stripe.Customer): Promise<void> {
   const companyId = await resolveCompanyId(c.metadata ?? null, c.id);
-  if (!companyId) {
-    // Sem vínculo — não sabemos a empresa. Aceito, mas nada a fazer.
-    return;
-  }
+  if (!companyId) return;
   await upsertStripeCustomer({
     companyId,
     stripeCustomerId: c.id,
@@ -172,7 +280,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   const companyId = await resolveCompanyId(session.metadata ?? null, stripeCustomerId);
   if (!companyId || !stripeCustomerId) return;
 
-  // Garante o vínculo customer↔company antes do upsert da subscription.
   await upsertStripeCustomer({
     companyId,
     stripeCustomerId,
@@ -196,9 +303,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
 async function handleSubscriptionUpsert(sub: Stripe.Subscription): Promise<void> {
   const stripeCustomerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
   const companyId = await resolveCompanyId(sub.metadata ?? null, stripeCustomerId);
-  if (!companyId) return; // sem vínculo → nada a sincronizar
+  if (!companyId) return;
 
-  // Tenta obter e-mail do Customer para persistência.
   let email: string | null = null;
   try {
     const stripe = getStripe();
