@@ -55,6 +55,8 @@ import { Route as AppCheckoutRouteImport } from './routes/app.checkout'
 import { Route as AppAigrowthRouteImport } from './routes/app.aigrowth'
 import { Route as AppAgendaRouteImport } from './routes/app.agenda'
 import { Route as AgendarSlugRouteImport } from './routes/agendar.$slug'
+import { Route as DashboardAssinaturaIndexRouteImport } from './routes/dashboard.assinatura.index'
+import { Route as DashboardAssinaturaSucessoRouteImport } from './routes/dashboard.assinatura.sucesso'
 import { Route as ApiPublicEmailTestRouteImport } from './routes/api/public/email-test'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe/webhook'
 import { Route as ApiPublicCronAppointmentRemindersRouteImport } from './routes/api/public/cron/appointment-reminders'
@@ -290,6 +292,18 @@ const AgendarSlugRoute = AgendarSlugRouteImport.update({
   path: '/agendar/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardAssinaturaIndexRoute =
+  DashboardAssinaturaIndexRouteImport.update({
+    id: '/dashboard/assinatura/',
+    path: '/dashboard/assinatura/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DashboardAssinaturaSucessoRoute =
+  DashboardAssinaturaSucessoRouteImport.update({
+    id: '/dashboard/assinatura/sucesso',
+    path: '/dashboard/assinatura/sucesso',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicEmailTestRoute = ApiPublicEmailTestRouteImport.update({
   id: '/api/public/email-test',
   path: '/api/public/email-test',
@@ -360,6 +374,8 @@ export interface FileRoutesByFullPath {
   '/master/planos': typeof MasterPlanosRoute
   '/cliente/': typeof ClienteIndexRoute
   '/api/public/email-test': typeof ApiPublicEmailTestRoute
+  '/dashboard/assinatura/sucesso': typeof DashboardAssinaturaSucessoRoute
+  '/dashboard/assinatura/': typeof DashboardAssinaturaIndexRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
   '/api/public/cron/appointment-reminders': typeof ApiPublicCronAppointmentRemindersRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
@@ -412,6 +428,8 @@ export interface FileRoutesByTo {
   '/master/planos': typeof MasterPlanosRoute
   '/cliente': typeof ClienteIndexRoute
   '/api/public/email-test': typeof ApiPublicEmailTestRoute
+  '/dashboard/assinatura/sucesso': typeof DashboardAssinaturaSucessoRoute
+  '/dashboard/assinatura': typeof DashboardAssinaturaIndexRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
   '/api/public/cron/appointment-reminders': typeof ApiPublicCronAppointmentRemindersRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
@@ -465,6 +483,8 @@ export interface FileRoutesById {
   '/master/planos': typeof MasterPlanosRoute
   '/cliente/': typeof ClienteIndexRoute
   '/api/public/email-test': typeof ApiPublicEmailTestRoute
+  '/dashboard/assinatura/sucesso': typeof DashboardAssinaturaSucessoRoute
+  '/dashboard/assinatura/': typeof DashboardAssinaturaIndexRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
   '/api/public/cron/appointment-reminders': typeof ApiPublicCronAppointmentRemindersRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
@@ -519,6 +539,8 @@ export interface FileRouteTypes {
     | '/master/planos'
     | '/cliente/'
     | '/api/public/email-test'
+    | '/dashboard/assinatura/sucesso'
+    | '/dashboard/assinatura/'
     | '/api/public/billing/webhook'
     | '/api/public/cron/appointment-reminders'
     | '/api/public/stripe/webhook'
@@ -571,6 +593,8 @@ export interface FileRouteTypes {
     | '/master/planos'
     | '/cliente'
     | '/api/public/email-test'
+    | '/dashboard/assinatura/sucesso'
+    | '/dashboard/assinatura'
     | '/api/public/billing/webhook'
     | '/api/public/cron/appointment-reminders'
     | '/api/public/stripe/webhook'
@@ -623,6 +647,8 @@ export interface FileRouteTypes {
     | '/master/planos'
     | '/cliente/'
     | '/api/public/email-test'
+    | '/dashboard/assinatura/sucesso'
+    | '/dashboard/assinatura/'
     | '/api/public/billing/webhook'
     | '/api/public/cron/appointment-reminders'
     | '/api/public/stripe/webhook'
@@ -644,6 +670,8 @@ export interface RootRouteChildren {
   ConfirmarTokenRoute: typeof ConfirmarTokenRoute
   ClienteIndexRoute: typeof ClienteIndexRoute
   ApiPublicEmailTestRoute: typeof ApiPublicEmailTestRoute
+  DashboardAssinaturaSucessoRoute: typeof DashboardAssinaturaSucessoRoute
+  DashboardAssinaturaIndexRoute: typeof DashboardAssinaturaIndexRoute
   ApiPublicBillingWebhookRoute: typeof ApiPublicBillingWebhookRoute
   ApiPublicCronAppointmentRemindersRoute: typeof ApiPublicCronAppointmentRemindersRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
@@ -973,6 +1001,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgendarSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/assinatura/': {
+      id: '/dashboard/assinatura/'
+      path: '/dashboard/assinatura'
+      fullPath: '/dashboard/assinatura/'
+      preLoaderRoute: typeof DashboardAssinaturaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/assinatura/sucesso': {
+      id: '/dashboard/assinatura/sucesso'
+      path: '/dashboard/assinatura/sucesso'
+      fullPath: '/dashboard/assinatura/sucesso'
+      preLoaderRoute: typeof DashboardAssinaturaSucessoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/email-test': {
       id: '/api/public/email-test'
       path: '/api/public/email-test'
@@ -1109,6 +1151,8 @@ const rootRouteChildren: RootRouteChildren = {
   ConfirmarTokenRoute: ConfirmarTokenRoute,
   ClienteIndexRoute: ClienteIndexRoute,
   ApiPublicEmailTestRoute: ApiPublicEmailTestRoute,
+  DashboardAssinaturaSucessoRoute: DashboardAssinaturaSucessoRoute,
+  DashboardAssinaturaIndexRoute: DashboardAssinaturaIndexRoute,
   ApiPublicBillingWebhookRoute: ApiPublicBillingWebhookRoute,
   ApiPublicCronAppointmentRemindersRoute:
     ApiPublicCronAppointmentRemindersRoute,
