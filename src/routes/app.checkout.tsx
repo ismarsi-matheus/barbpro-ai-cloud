@@ -148,11 +148,15 @@ function CheckoutPage() {
               )}
               <Button
                 onClick={() => openCheckout(p)}
-                disabled={!p.checkout_url}
+                disabled={loadingSlug === p.slug}
                 className="w-full bg-[var(--brand)] text-white hover:bg-[var(--brand)]/90"
               >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                {p.checkout_url ? "Assinar agora" : "Indisponível"}
+                {loadingSlug === p.slug ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                )}
+                {loadingSlug === p.slug ? "Redirecionando..." : "Assinar Plano"}
               </Button>
             </CardContent>
           </Card>
