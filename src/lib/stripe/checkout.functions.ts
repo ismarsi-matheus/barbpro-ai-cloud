@@ -85,9 +85,10 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     if (existing?.stripe_customer_id) {
       sessionParams.customer = existing.stripe_customer_id;
       sessionParams.customer_update = { address: "auto", name: "auto" };
-    } else {
-      sessionParams.customer_creation = "always";
-      if (email) sessionParams.customer_email = email;
+    } else if (email) {
+      // Em mode=subscription o Stripe sempre cria um Customer;
+      // `customer_creation` só é válido em mode=payment.
+      sessionParams.customer_email = email;
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
