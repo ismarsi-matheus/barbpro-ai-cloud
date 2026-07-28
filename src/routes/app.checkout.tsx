@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentCompany } from "@/hooks/use-current-company";
@@ -8,10 +9,12 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Star, Check } from "lucide-react";
+import { ExternalLink, Star, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { createCheckoutSession } from "@/lib/stripe/checkout.functions";
 
 export const Route = createFileRoute("/app/checkout")({ component: CheckoutPage });
+
 
 type Plan = {
   id: string;
@@ -67,17 +70,36 @@ function CheckoutPage() {
     return () => clearInterval(t);
   }, [company?.id, navigate, qc]);
 
-  const openCheckout = (p: Plan) => {
-    if (!p.checkout_url) {
-      toast.error("Este plano ainda não tem URL de checkout configurada.");
+  const createCheckoutFn = useServerFn(createCheckoutSession);
+  const [loadingSlug, setLoadingSlug] = useState<string | null>(null);
+
+  const openCheckout = async (p: Plan) => {
+    if (!company?.id) {
+      toast.error("Empresa não carregada.");
       return;
     }
-    const url = new URL(p.checkout_url);
-    if (user?.email) url.searchParams.set("email", user.email);
-    if (company?.id) url.searchParams.set("ref", company.id);
-    window.open(url.toString(), "_blank", "noopener");
-    toast.info("Após concluir o pagamento, aguarde alguns segundos — sua conta será liberada automaticamente.");
+    const slug = p.slug as "starter" | "pro" | "elite";
+    if (!["starter", "pro", "elite"].includes(slug)) {
+      toast.error(`Plano "${p.slug}" não está mapeado no Stripe.`);
+      return;
+    }
+    setLoadingSlug(slug);
+    try {
+      const res = await createCheckoutFn({
+        data: {
+          companyId: company.id,
+          planSlug: slug,
+          origin: window.location.origin,
+        },
+      });
+      if (!res?.url) throw new Error("URL de checkout não retornada.");
+      window.location.href = res.url;
+    } catch (err: any) {
+      toast.error(err?.message ?? "Erro ao iniciar checkout.");
+      setLoadingSlug(null);
+    }
   };
+
 
   const status = company?.status_cobranca;
   const headerMsg = useMemo(() => {
@@ -126,11 +148,15 @@ function CheckoutPage() {
               )}
               <Button
                 onClick={() => openCheckout(p)}
-                disabled={!p.checkout_url}
+                disabled={loadingSlug === p.slug}
                 className="w-full bg-[var(--brand)] text-white hover:bg-[var(--brand)]/90"
               >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                {p.checkout_url ? "Assinar agora" : "Indisponível"}
+                {loadingSlug === p.slug ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                )}
+                {loadingSlug === p.slug ? "Redirecionando..." : "Assinar Plano"}
               </Button>
             </CardContent>
           </Card>
