@@ -70,17 +70,36 @@ function CheckoutPage() {
     return () => clearInterval(t);
   }, [company?.id, navigate, qc]);
 
-  const openCheckout = (p: Plan) => {
-    if (!p.checkout_url) {
-      toast.error("Este plano ainda não tem URL de checkout configurada.");
+  const createCheckoutFn = useServerFn(createCheckoutSession);
+  const [loadingSlug, setLoadingSlug] = useState<string | null>(null);
+
+  const openCheckout = async (p: Plan) => {
+    if (!company?.id) {
+      toast.error("Empresa não carregada.");
       return;
     }
-    const url = new URL(p.checkout_url);
-    if (user?.email) url.searchParams.set("email", user.email);
-    if (company?.id) url.searchParams.set("ref", company.id);
-    window.open(url.toString(), "_blank", "noopener");
-    toast.info("Após concluir o pagamento, aguarde alguns segundos — sua conta será liberada automaticamente.");
+    const slug = p.slug as "starter" | "pro" | "elite";
+    if (!["starter", "pro", "elite"].includes(slug)) {
+      toast.error(`Plano "${p.slug}" não está mapeado no Stripe.`);
+      return;
+    }
+    setLoadingSlug(slug);
+    try {
+      const res = await createCheckoutFn({
+        data: {
+          companyId: company.id,
+          planSlug: slug,
+          origin: window.location.origin,
+        },
+      });
+      if (!res?.url) throw new Error("URL de checkout não retornada.");
+      window.location.href = res.url;
+    } catch (err: any) {
+      toast.error(err?.message ?? "Erro ao iniciar checkout.");
+      setLoadingSlug(null);
+    }
   };
+
 
   const status = company?.status_cobranca;
   const headerMsg = useMemo(() => {
