@@ -18,7 +18,7 @@ import { format, subDays, startOfMonth, eachMonthOfInterval, subMonths, parseISO
 import { ptBR } from "date-fns/locale";
 import { formatBRL } from "@/lib/format";
 import { TrendingUp, TrendingDown, Percent, Receipt, Download, Lock } from "lucide-react";
-import { featureEnabled, normalizePlanSlug } from "@/lib/plan-features";
+import { useSubscription } from "@/hooks/use-subscription";
 
 export const Route = createFileRoute("/app/relatorios")({ component: RelPage });
 
@@ -39,8 +39,9 @@ function downloadCsv(filename: string, rows: (string | number)[][]) {
 function RelPage() {
   const { data: company } = useCurrentCompany();
   const cid = company?.id;
-  const planSlug = normalizePlanSlug((company as any)?.selected_plan_slug ?? (company as any)?.plano);
-  const hasAdvanced = featureEnabled(planSlug, "relatoriosAvancados");
+  const { can } = useSubscription();
+  const hasAdvanced = can("relatoriosAvancados");
+
 
   // janela de comissões / ranking
   const [from, setFrom] = useState(format(subDays(new Date(), 30), "yyyy-MM-dd"));

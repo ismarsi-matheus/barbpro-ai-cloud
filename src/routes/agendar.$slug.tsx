@@ -99,6 +99,8 @@ function AgendarPage() {
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState<string | null>(null);
   const [clientSession, setClientSession] = useState<Session | null>(null);
+  const [pagamentoTipo, setPagamentoTipo] = useState<"normal" | "clube">("normal");
+
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setClientSession(data.session));
@@ -121,6 +123,38 @@ function AgendarPage() {
       }
     });
   }, [clientSession]);
+
+  // Clube: planos públicos da barbearia + assinatura do cliente logado
+  const clubPlansQuery = useQuery({
+    queryKey: ["club-plans-public", company?.id],
+    enabled: !!company?.id,
+    queryFn: async () =>
+      (await supabase.rpc("get_public_club_plans", { _company_id: company!.id })).data ?? [],
+    retry: false,
+  });
+
+  const membershipQuery = useQuery({
+    queryKey: ["club-membership", company?.id, clientSession?.user.id],
+    enabled: !!company?.id && !!clientSession,
+    queryFn: async () =>
+      (await supabase.rpc("get_my_club_memberships", { _company_id: company!.id })).data ?? [],
+    retry: false,
+  });
+
+  const membership = useMemo(
+    () =>
+      (membershipQuery.data ?? []).find(
+        (m: any) => m.status === "ativo" && (m.creditos_restantes ?? 0) > 0,
+      ) ?? null,
+    [membershipQuery.data],
+  );
+
+  const usandoClube = pagamentoTipo === "clube" && !!membership;
+
+  useEffect(() => {
+    if (!membership && pagamentoTipo === "clube") setPagamentoTipo("normal");
+  }, [membership, pagamentoTipo]);
+
 
 
 
@@ -335,10 +369,13 @@ function AgendarPage() {
         customer_phone: customerPhone,
         professional_name: pro.name,
         service_name: service.name,
-        price: service.price,
+        price: usandoClube ? 0 : service.price,
         scheduled_at: scheduledAt.toISOString(),
         source: "online" as const,
         status: "agendado" as const,
+        pagamento_tipo: usandoClube ? "clube" : "normal",
+        club_member_id: usandoClube ? (membership as any).id : null,
+
       };
 
       const missingRequired = ([
@@ -375,9 +412,24 @@ function AgendarPage() {
         return;
       }
 
+      if (usandoClube) {
+        const { data: ok, error: rErr } = await supabase.rpc("redeem_club_benefit", {
+          _appointment_id: appointmentPayload.id,
+          _club_member_id: (membership as any).id,
+        });
+        if (rErr || !ok) {
+          console.error("[agendar] redeem club benefit failed", rErr);
+          toast.warning("Agendamento criado, mas o crédito do clube não pôde ser debitado.");
+        }
+        membershipQuery.refetch();
+      }
+
       setSubmitting(false);
       setConfirmed(appointmentPayload.id);
-      toast.success("Agendamento confirmado!");
+      toast.success(
+        usandoClube ? "Agendamento confirmado com benefício do Clube!" : "Agendamento confirmado!",
+      );
+
 
       // Dispara e-mail de confirmação (fire-and-forget)
       try {
@@ -680,6 +732,58 @@ function AgendarPage() {
                   {format(date, "dd/MM", { locale: ptBR })} às {time}
                 </div>
               </div>
+
+              {membership ? (
+                <div className="space-y-2">
+                  <Label>Como deseja agendar?</Label>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => setPagamentoTipo("normal")}
+                      className={`text-left p-3 rounded-md border transition ${
+                        pagamentoTipo === "normal"
+                          ? "border-[var(--brand)] bg-[var(--brand)]/5"
+                          : "border-border hover:border-[var(--brand)]"
+                      }`}
+                    >
+                      <div className="font-medium text-sm">Agendamento normal</div>
+                      <div className="text-xs text-muted-foreground">
+                        {service ? formatBRL(Number(service.price)) : ""} no atendimento
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPagamentoTipo("clube")}
+                      className={`text-left p-3 rounded-md border transition ${
+                        pagamentoTipo === "clube"
+                          ? "border-[var(--brand)] bg-[var(--brand)]/5"
+                          : "border-border hover:border-[var(--brand)]"
+                      }`}
+                    >
+                      <div className="font-medium text-sm">
+                        Utilizar benefício do Clube
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {(membership as any).plano_nome} • {(membership as any).creditos_restantes} crédito(s) restante(s)
+                      </div>
+                    </button>
+                  </div>
+                  {pagamentoTipo === "clube" && (
+                    <p className="text-xs text-muted-foreground">
+                      1 crédito será debitado ao confirmar. Se o agendamento for cancelado, o
+                      crédito volta automaticamente.
+                    </p>
+                  )}
+                </div>
+              ) : (clubPlansQuery.data?.length ?? 0) > 0 ? (
+                <div className="p-3 rounded-md border border-dashed text-sm">
+                  <span className="font-medium">Esta barbearia tem Clube de Assinatura.</span>{" "}
+                  <span className="text-muted-foreground">
+                    Assine para agendar usando créditos mensais.
+                  </span>
+                </div>
+              ) : null}
+
               <div>
                 <Label>Seu nome</Label>
                 <Input value={nome} onChange={(e) => setNome(e.target.value)} required />

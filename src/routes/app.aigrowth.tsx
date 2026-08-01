@@ -10,7 +10,7 @@ import { Sparkles, AlertTriangle, TrendingUp, Calendar, Users, ArrowRight } from
 import { formatBRL } from "@/lib/format";
 import { toast } from "sonner";
 import { subDays, startOfMonth } from "date-fns";
-import { featureEnabled, normalizePlanSlug } from "@/lib/plan-features";
+import { useSubscription } from "@/hooks/use-subscription";
 
 export const Route = createFileRoute("/app/aigrowth")({ component: AIPage });
 
@@ -24,8 +24,9 @@ const ICONS: Record<string, any> = {
 function AIPage() {
   const { data: company } = useCurrentCompany();
   const cid = company?.id;
-  const planSlug = normalizePlanSlug(company?.selected_plan_slug ?? company?.plano);
-  const unlocked = featureEnabled(planSlug, "aiGrowth");
+  const { can } = useSubscription();
+  const unlocked = can("aiGrowth");
+
 
   const { data: insights = [] } = useQuery({
     queryKey: ["ai-insights", cid],

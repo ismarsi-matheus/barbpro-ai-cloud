@@ -52,6 +52,7 @@ import { Route as AppComandasRouteImport } from './routes/app.comandas'
 import { Route as AppClubeRouteImport } from './routes/app.clube'
 import { Route as AppClientesRouteImport } from './routes/app.clientes'
 import { Route as AppCheckoutRouteImport } from './routes/app.checkout'
+import { Route as AppAssinaturaRouteImport } from './routes/app.assinatura'
 import { Route as AppAigrowthRouteImport } from './routes/app.aigrowth'
 import { Route as AppAgendaRouteImport } from './routes/app.agenda'
 import { Route as AgendarSlugRouteImport } from './routes/agendar.$slug'
@@ -277,6 +278,11 @@ const AppCheckoutRoute = AppCheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAssinaturaRoute = AppAssinaturaRouteImport.update({
+  id: '/assinatura',
+  path: '/assinatura',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAigrowthRoute = AppAigrowthRouteImport.update({
   id: '/aigrowth',
   path: '/aigrowth',
@@ -338,6 +344,7 @@ export interface FileRoutesByFullPath {
   '/agendar/$slug': typeof AgendarSlugRoute
   '/app/agenda': typeof AppAgendaRoute
   '/app/aigrowth': typeof AppAigrowthRoute
+  '/app/assinatura': typeof AppAssinaturaRoute
   '/app/checkout': typeof AppCheckoutRoute
   '/app/clientes': typeof AppClientesRoute
   '/app/clube': typeof AppClubeRoute
@@ -392,6 +399,7 @@ export interface FileRoutesByTo {
   '/agendar/$slug': typeof AgendarSlugRoute
   '/app/agenda': typeof AppAgendaRoute
   '/app/aigrowth': typeof AppAigrowthRoute
+  '/app/assinatura': typeof AppAssinaturaRoute
   '/app/checkout': typeof AppCheckoutRoute
   '/app/clientes': typeof AppClientesRoute
   '/app/clube': typeof AppClubeRoute
@@ -447,6 +455,7 @@ export interface FileRoutesById {
   '/agendar/$slug': typeof AgendarSlugRoute
   '/app/agenda': typeof AppAgendaRoute
   '/app/aigrowth': typeof AppAigrowthRoute
+  '/app/assinatura': typeof AppAssinaturaRoute
   '/app/checkout': typeof AppCheckoutRoute
   '/app/clientes': typeof AppClientesRoute
   '/app/clube': typeof AppClubeRoute
@@ -503,6 +512,7 @@ export interface FileRouteTypes {
     | '/agendar/$slug'
     | '/app/agenda'
     | '/app/aigrowth'
+    | '/app/assinatura'
     | '/app/checkout'
     | '/app/clientes'
     | '/app/clube'
@@ -557,6 +567,7 @@ export interface FileRouteTypes {
     | '/agendar/$slug'
     | '/app/agenda'
     | '/app/aigrowth'
+    | '/app/assinatura'
     | '/app/checkout'
     | '/app/clientes'
     | '/app/clube'
@@ -611,6 +622,7 @@ export interface FileRouteTypes {
     | '/agendar/$slug'
     | '/app/agenda'
     | '/app/aigrowth'
+    | '/app/assinatura'
     | '/app/checkout'
     | '/app/clientes'
     | '/app/clube'
@@ -980,6 +992,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCheckoutRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/assinatura': {
+      id: '/app/assinatura'
+      path: '/assinatura'
+      fullPath: '/app/assinatura'
+      preLoaderRoute: typeof AppAssinaturaRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/aigrowth': {
       id: '/app/aigrowth'
       path: '/aigrowth'
@@ -1049,6 +1068,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppAgendaRoute: typeof AppAgendaRoute
   AppAigrowthRoute: typeof AppAigrowthRoute
+  AppAssinaturaRoute: typeof AppAssinaturaRoute
   AppCheckoutRoute: typeof AppCheckoutRoute
   AppClientesRoute: typeof AppClientesRoute
   AppClubeRoute: typeof AppClubeRoute
@@ -1068,6 +1088,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAgendaRoute: AppAgendaRoute,
   AppAigrowthRoute: AppAigrowthRoute,
+  AppAssinaturaRoute: AppAssinaturaRoute,
   AppCheckoutRoute: AppCheckoutRoute,
   AppClientesRoute: AppClientesRoute,
   AppClubeRoute: AppClubeRoute,
