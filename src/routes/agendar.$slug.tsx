@@ -88,7 +88,7 @@ function AgendarPage() {
     retry: false,
   });
 
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
   const [serviceId, setServiceId] = useState<string>("");
   const [proId, setProId] = useState<string>("");
   const [date, setDate] = useState<Date>(startOfDay(new Date()));
@@ -100,6 +100,7 @@ function AgendarPage() {
   const [confirmed, setConfirmed] = useState<string | null>(null);
   const [clientSession, setClientSession] = useState<Session | null>(null);
   const [pagamentoTipo, setPagamentoTipo] = useState<"normal" | "clube">("normal");
+  const [chosenMembership, setChosenMembership] = useState<ClubMembership | null>(null);
 
 
   useEffect(() => {
