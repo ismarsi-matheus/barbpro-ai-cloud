@@ -256,6 +256,9 @@ function LandingPage() {
           </div>
           <nav className="flex items-center gap-2 shrink-0" aria-label="Navegação principal">
             <Button asChild variant="ghost" size="sm">
+              <Link to="/cliente">Minha Conta</Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
               <Link to="/entrar">Entrar</Link>
             </Button>
             <Button size="sm" className="text-white" style={{ backgroundColor: BRAND }} onClick={() => scrollToPlans()}>
