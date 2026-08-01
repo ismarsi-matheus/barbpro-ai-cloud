@@ -412,9 +412,24 @@ function AgendarPage() {
         return;
       }
 
+      if (usandoClube) {
+        const { data: ok, error: rErr } = await supabase.rpc("redeem_club_benefit", {
+          _appointment_id: appointmentPayload.id,
+          _club_member_id: (membership as any).id,
+        });
+        if (rErr || !ok) {
+          console.error("[agendar] redeem club benefit failed", rErr);
+          toast.warning("Agendamento criado, mas o crédito do clube não pôde ser debitado.");
+        }
+        membershipQuery.refetch();
+      }
+
       setSubmitting(false);
       setConfirmed(appointmentPayload.id);
-      toast.success("Agendamento confirmado!");
+      toast.success(
+        usandoClube ? "Agendamento confirmado com benefício do Clube!" : "Agendamento confirmado!",
+      );
+
 
       // Dispara e-mail de confirmação (fire-and-forget)
       try {
