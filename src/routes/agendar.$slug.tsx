@@ -732,6 +732,58 @@ function AgendarPage() {
                   {format(date, "dd/MM", { locale: ptBR })} às {time}
                 </div>
               </div>
+
+              {membership ? (
+                <div className="space-y-2">
+                  <Label>Como deseja agendar?</Label>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => setPagamentoTipo("normal")}
+                      className={`text-left p-3 rounded-md border transition ${
+                        pagamentoTipo === "normal"
+                          ? "border-[var(--brand)] bg-[var(--brand)]/5"
+                          : "border-border hover:border-[var(--brand)]"
+                      }`}
+                    >
+                      <div className="font-medium text-sm">Agendamento normal</div>
+                      <div className="text-xs text-muted-foreground">
+                        {service ? formatBRL(Number(service.price)) : ""} no atendimento
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPagamentoTipo("clube")}
+                      className={`text-left p-3 rounded-md border transition ${
+                        pagamentoTipo === "clube"
+                          ? "border-[var(--brand)] bg-[var(--brand)]/5"
+                          : "border-border hover:border-[var(--brand)]"
+                      }`}
+                    >
+                      <div className="font-medium text-sm">
+                        Utilizar benefício do Clube
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {(membership as any).plano_nome} • {(membership as any).creditos_restantes} crédito(s) restante(s)
+                      </div>
+                    </button>
+                  </div>
+                  {pagamentoTipo === "clube" && (
+                    <p className="text-xs text-muted-foreground">
+                      1 crédito será debitado ao confirmar. Se o agendamento for cancelado, o
+                      crédito volta automaticamente.
+                    </p>
+                  )}
+                </div>
+              ) : (clubPlansQuery.data?.length ?? 0) > 0 ? (
+                <div className="p-3 rounded-md border border-dashed text-sm">
+                  <span className="font-medium">Esta barbearia tem Clube de Assinatura.</span>{" "}
+                  <span className="text-muted-foreground">
+                    Assine para agendar usando créditos mensais.
+                  </span>
+                </div>
+              ) : null}
+
               <div>
                 <Label>Seu nome</Label>
                 <Input value={nome} onChange={(e) => setNome(e.target.value)} required />
