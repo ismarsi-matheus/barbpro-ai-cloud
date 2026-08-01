@@ -35,7 +35,7 @@ export function TrialBanner({ company }: { company: any }) {
       return (
         <Banner color="red" icon={<AlertCircle className="w-4 h-4" />}>
           Seu período de teste expirou.{" "}
-          <Link to="/app/configuracoes" className="underline font-semibold">Escolher plano</Link>
+          <Link to="/app/checkout" className="underline font-semibold">Escolher plano</Link>
         </Banner>
       );
     }
@@ -43,7 +43,7 @@ export function TrialBanner({ company }: { company: any }) {
       return (
         <Banner color="amber" icon={<AlertTriangle className="w-4 h-4" />}>
           Atenção: seu trial acaba em <strong>{days === 0 ? "menos de 1 dia" : `${days} dia${days !== 1 ? "s" : ""}`}</strong>.{" "}
-          <Link to="/app/configuracoes" className="underline font-semibold">Assinar agora</Link>
+          <Link to="/app/checkout" className="underline font-semibold">Assinar agora</Link>
         </Banner>
       );
     }
