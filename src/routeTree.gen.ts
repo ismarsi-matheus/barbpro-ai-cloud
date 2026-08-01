@@ -37,6 +37,7 @@ import { Route as DemoAigrowthRouteImport } from './routes/demo.aigrowth'
 import { Route as DemoAgendaRouteImport } from './routes/demo.agenda'
 import { Route as ConfirmarTokenRouteImport } from './routes/confirmar.$token'
 import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
+import { Route as ClientePagamentosRouteImport } from './routes/cliente.pagamentos'
 import { Route as ClienteHistoricoRouteImport } from './routes/cliente.historico'
 import { Route as ClienteEntrarRouteImport } from './routes/cliente.entrar'
 import { Route as ClienteClubeRouteImport } from './routes/cliente.clube'
@@ -204,6 +205,11 @@ const ConfirmarTokenRoute = ConfirmarTokenRouteImport.update({
 const ClientePerfilRoute = ClientePerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClientePagamentosRoute = ClientePagamentosRouteImport.update({
+  id: '/pagamentos',
+  path: '/pagamentos',
   getParentRoute: () => ClienteRoute,
 } as any)
 const ClienteHistoricoRoute = ClienteHistoricoRouteImport.update({
@@ -382,6 +388,7 @@ export interface FileRoutesByFullPath {
   '/cliente/clube': typeof ClienteClubeRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
+  '/cliente/pagamentos': typeof ClientePagamentosRoute
   '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
   '/demo/agenda': typeof DemoAgendaRoute
@@ -439,6 +446,7 @@ export interface FileRoutesByTo {
   '/cliente/clube': typeof ClienteClubeRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
+  '/cliente/pagamentos': typeof ClientePagamentosRoute
   '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
   '/demo/agenda': typeof DemoAgendaRoute
@@ -498,6 +506,7 @@ export interface FileRoutesById {
   '/cliente/clube': typeof ClienteClubeRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
+  '/cliente/pagamentos': typeof ClientePagamentosRoute
   '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
   '/demo/agenda': typeof DemoAgendaRoute
@@ -558,6 +567,7 @@ export interface FileRouteTypes {
     | '/cliente/clube'
     | '/cliente/entrar'
     | '/cliente/historico'
+    | '/cliente/pagamentos'
     | '/cliente/perfil'
     | '/confirmar/$token'
     | '/demo/agenda'
@@ -615,6 +625,7 @@ export interface FileRouteTypes {
     | '/cliente/clube'
     | '/cliente/entrar'
     | '/cliente/historico'
+    | '/cliente/pagamentos'
     | '/cliente/perfil'
     | '/confirmar/$token'
     | '/demo/agenda'
@@ -673,6 +684,7 @@ export interface FileRouteTypes {
     | '/cliente/clube'
     | '/cliente/entrar'
     | '/cliente/historico'
+    | '/cliente/pagamentos'
     | '/cliente/perfil'
     | '/confirmar/$token'
     | '/demo/agenda'
@@ -916,6 +928,13 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/cliente/perfil'
       preLoaderRoute: typeof ClientePerfilRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/pagamentos': {
+      id: '/cliente/pagamentos'
+      path: '/pagamentos'
+      fullPath: '/cliente/pagamentos'
+      preLoaderRoute: typeof ClientePagamentosRouteImport
       parentRoute: typeof ClienteRoute
     }
     '/cliente/historico': {
@@ -1164,6 +1183,7 @@ interface ClienteRouteChildren {
   ClienteClubeRoute: typeof ClienteClubeRoute
   ClienteEntrarRoute: typeof ClienteEntrarRoute
   ClienteHistoricoRoute: typeof ClienteHistoricoRoute
+  ClientePagamentosRoute: typeof ClientePagamentosRoute
   ClientePerfilRoute: typeof ClientePerfilRoute
   ClienteIndexRoute: typeof ClienteIndexRoute
 }
@@ -1173,6 +1193,7 @@ const ClienteRouteChildren: ClienteRouteChildren = {
   ClienteClubeRoute: ClienteClubeRoute,
   ClienteEntrarRoute: ClienteEntrarRoute,
   ClienteHistoricoRoute: ClienteHistoricoRoute,
+  ClientePagamentosRoute: ClientePagamentosRoute,
   ClientePerfilRoute: ClientePerfilRoute,
   ClienteIndexRoute: ClienteIndexRoute,
 }
