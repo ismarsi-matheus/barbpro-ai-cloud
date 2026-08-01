@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -31,7 +33,7 @@ import {
   useClientSession,
   useClubUsage,
 } from "@/hooks/use-client-account";
-import { createClubBillingPortal } from "@/lib/club/club-checkout.functions";
+import { createClubBillingPortal, createClubCheckoutSession } from "@/lib/club/club-checkout.functions";
 
 export const Route = createFileRoute("/cliente/clube")({
   ssr: false,
@@ -66,6 +68,67 @@ function ClubePage() {
   const favSlug = dash.data?.profile?.favorite_company_slug ?? null;
 
   const entries = useMemo(() => usage.data ?? [], [usage.data]);
+
+  const favCompanyId = dash.data?.profile?.favorite_company_id ?? null;
+  const plansQuery = useQuery({
+    queryKey: ["client-club-plans", favCompanyId],
+    enabled: !!favCompanyId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_public_club_plans", {
+        _company_id: favCompanyId!,
+      });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const plans = plansQuery.data ?? [];
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [buying, setBuying] = useState<string | null>(null);
+  const startCheckout = useServerFn(createClubCheckoutSession);
+
+  const buyPlan = async (planId: string) => {
+    if (!favCompanyId || !favSlug) return;
+    setBuying(planId);
+    try {
+      const { url } = await startCheckout({
+        data: {
+          companyId: favCompanyId,
+          clubPlanId: planId,
+          slug: favSlug,
+          origin: window.location.origin,
+          name: nome,
+          phone: dash.data?.profile?.phone || "00000000000",
+          returnPath: "/cliente/clube",
+        },
+      });
+      if (!url) throw new Error("Checkout indisponível.");
+      window.location.href = url;
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível iniciar o checkout.");
+      setBuying(null);
+    }
+  };
+
+  // Retorno do Stripe: reconcilia a assinatura e atualiza a tela.
+  useEffect(() => {
+    const sessionId = new URLSearchParams(window.location.search).get("club_session");
+    if (!sessionId) return;
+    let tries = 0;
+    const tick = async () => {
+      tries += 1;
+      const res = await dash.refetch();
+      const active = (res.data?.club_memberships ?? []).some((m) => m.status === "ativo");
+      if (active) {
+        toast.success("Assinatura do Clube ativa!");
+        window.history.replaceState({}, "", "/cliente/clube");
+        return;
+      }
+      if (tries < 6) setTimeout(tick, 2000);
+    };
+    void tick();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const [portalFor, setPortalFor] = useState<string | null>(null);
   const openBillingPortal = useServerFn(createClubBillingPortal);
