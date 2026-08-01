@@ -479,6 +479,8 @@ export type Database = {
       }
       club_member: {
         Row: {
+          beneficios_utilizados: number
+          cancel_at_period_end: boolean
           club_plan_id: string
           company_id: string
           created_at: string
@@ -487,6 +489,7 @@ export type Database = {
           current_period_start: string | null
           customer_id: string
           id: string
+          last_provisioned_period: string | null
           started_at: string
           status: string
           stripe_customer_id: string | null
@@ -494,6 +497,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          beneficios_utilizados?: number
+          cancel_at_period_end?: boolean
           club_plan_id: string
           company_id: string
           created_at?: string
@@ -502,6 +507,7 @@ export type Database = {
           current_period_start?: string | null
           customer_id: string
           id?: string
+          last_provisioned_period?: string | null
           started_at?: string
           status?: string
           stripe_customer_id?: string | null
@@ -509,6 +515,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          beneficios_utilizados?: number
+          cancel_at_period_end?: boolean
           club_plan_id?: string
           company_id?: string
           created_at?: string
@@ -517,6 +525,7 @@ export type Database = {
           current_period_start?: string | null
           customer_id?: string
           id?: string
+          last_provisioned_period?: string | null
           started_at?: string
           status?: string
           stripe_customer_id?: string | null
@@ -1834,6 +1843,8 @@ export type Database = {
       get_my_club_memberships: {
         Args: { _company_id: string }
         Returns: {
+          beneficios_utilizados: number
+          cancel_at_period_end: boolean
           club_plan_id: string
           company_id: string
           creditos_mensais: number
