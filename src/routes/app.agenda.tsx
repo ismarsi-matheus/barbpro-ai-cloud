@@ -212,7 +212,19 @@ function AgendaPage() {
               <p><b>Serviço:</b> {selected.service_name}</p>
               <p><b>Profissional:</b> {selected.professional_name}</p>
               <p><b>Status:</b> {selected.status}</p>
-              {selected.price && <p><b>Valor estimado:</b> R$ {Number(selected.price).toFixed(2)}</p>}
+              {selected.pagamento_tipo === "clube" ? (
+                <div className="rounded-md border border-amber-300 bg-amber-50 p-2 space-y-0.5">
+                  <p className="inline-flex items-center gap-1 font-semibold text-amber-800">
+                    <Crown className="w-3.5 h-3.5" /> CLUBE
+                  </p>
+                  <p className="text-amber-900">
+                    Plano utilizado: <b>{clubPlanById.get(selected.club_member_id) ?? "Clube"}</b>
+                  </p>
+                  <p className="text-xs text-amber-800">Benefício utilizado (sem cobrança).</p>
+                </div>
+              ) : (
+                selected.price && <p><b>Valor estimado:</b> R$ {Number(selected.price).toFixed(2)}</p>
+              )}
             </div>
           )}
           <DialogFooter className="gap-2 sm:gap-2 flex-col sm:flex-row">
