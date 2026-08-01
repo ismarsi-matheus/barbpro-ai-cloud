@@ -131,11 +131,23 @@ function AgendarPage() {
   // Identificação (etapa 5): "auth" = cliente logado, "guest" = visitante
   const [identMode, setIdentMode] = useState<"auth" | "guest" | null>(null);
   const [prefilled, setPrefilled] = useState(false);
+  // Clube / checkout
+  const [subscribingPlanId, setSubscribingPlanId] = useState<string | null>(null);
+  const [clubInitialView, setClubInitialView] = useState<"choice" | "club" | "plans">("choice");
+  const [draftRestored, setDraftRestored] = useState(false);
+  const [clubActivatedNotified, setClubActivatedNotified] = useState(false);
 
+  const DRAFT_KEY = `bp:booking-draft:${slug}`;
 
   // Cliente logado (ou recém-autenticado) em barbearia sem Clube: pula a etapa 5
   useEffect(() => {
-    if (step === 5 && (clientSession || identMode === "auth") && !companyHasClub) {
+    if (
+      step === 5 &&
+      (clientSession || identMode === "auth") &&
+      clubPlansQuery.isFetched &&
+      !companyHasClub &&
+      !search.club_session
+    ) {
       setStep(6);
     }
   });
