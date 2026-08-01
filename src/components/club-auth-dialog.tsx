@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -23,12 +23,18 @@ export function ClubAuthDialog({
   open,
   onOpenChange,
   onAuthenticated,
+  initialMode = "login",
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onAuthenticated?: () => void;
+  initialMode?: Mode;
 }) {
-  const [mode, setMode] = useState<Mode>("login");
+  const [mode, setMode] = useState<Mode>(initialMode);
+
+  useEffect(() => {
+    if (open) setMode(initialMode);
+  }, [open, initialMode]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
