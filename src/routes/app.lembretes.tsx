@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentCompany } from "@/hooks/use-current-company";
@@ -60,7 +60,7 @@ function LembretesPage() {
           <p className="font-semibold">Disponível no plano Pro ou superior</p>
           <p className="text-sm text-muted-foreground">Envie lembretes de confirmação em segundos pelo WhatsApp da barbearia.</p>
           <Button asChild className="bg-[var(--brand)] text-white hover:bg-[var(--brand)]/90">
-            <a href="/app/checkout">Fazer upgrade</a>
+            <Link to="/app/checkout">Fazer upgrade</Link>
           </Button>
         </CardContent></Card>
       </div>

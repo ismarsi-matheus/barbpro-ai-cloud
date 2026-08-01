@@ -24,13 +24,17 @@ export function useCurrentCompany() {
     queryFn: async () => {
       // Super admin com impersonação: carrega a empresa solicitada direto (RLS permite)
       if (impersonateId) {
-        const { data: company } = await supabase
-          .from("company")
-          .select("*")
-          .eq("id", impersonateId)
-          .maybeSingle();
+        const [{ data: company }, { data: currentPlan }] = await Promise.all([
+          supabase.from("company").select("*").eq("id", impersonateId).maybeSingle(),
+          supabase.rpc("get_current_plan_slug", { _company_id: impersonateId }),
+        ]);
         if (company) {
-          return { ...company, role: "owner" as any, __impersonated: true };
+          return {
+            ...company,
+            selected_plan_slug: currentPlan ?? company.selected_plan_slug,
+            role: "owner" as any,
+            __impersonated: true,
+          };
         }
       }
 
@@ -61,13 +65,15 @@ export function useCurrentCompany() {
 
       if (!companyId) return null;
 
-      const { data: company } = await supabase
-        .from("company")
-        .select("*")
-        .eq("id", companyId)
-        .maybeSingle();
+      const [{ data: company }, { data: currentPlan, error: planError }] = await Promise.all([
+        supabase.from("company").select("*").eq("id", companyId).maybeSingle(),
+        supabase.rpc("get_current_plan_slug", { _company_id: companyId }),
+      ]);
 
-      return company ? { ...company, role } : null;
+      if (planError) throw planError;
+      return company
+        ? { ...company, selected_plan_slug: currentPlan ?? company.selected_plan_slug, role }
+        : null;
     },
   });
 }

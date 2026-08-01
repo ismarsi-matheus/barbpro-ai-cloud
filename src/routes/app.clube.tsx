@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,10 +33,10 @@ function ClubePage() {
         <PageHeader title="Clube de Assinatura" description="Receita recorrente para a barbearia" />
         <Card><CardContent className="p-8 text-center space-y-3">
           <Lock className="w-10 h-10 text-muted-foreground mx-auto" />
-          <p className="font-semibold">Disponível no plano Business</p>
+          <p className="font-semibold">Disponível no plano Pro ou superior</p>
           <p className="text-sm text-muted-foreground">Crie planos mensais (ex.: 4 cortes/mês) e fidelize seu cliente com cobrança recorrente.</p>
           <Button asChild className="bg-[var(--brand)] text-white hover:bg-[var(--brand)]/90">
-            <a href="/app/checkout">Fazer upgrade</a>
+            <Link to="/app/checkout">Fazer upgrade</Link>
           </Button>
         </CardContent></Card>
       </div>
