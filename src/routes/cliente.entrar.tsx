@@ -10,8 +10,22 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Scissors } from "lucide-react";
+import { lovable } from "@/integrations/lovable";
 
-export const Route = createFileRoute("/cliente/entrar")({ component: ClienteEntrar });
+export const Route = createFileRoute("/cliente/entrar")({
+  ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Entrar na Área do Cliente — BarbeiroPro" },
+      { name: "description", content: "Acesse seus agendamentos, histórico e benefícios do Clube da sua barbearia." },
+      { property: "og:title", content: "Entrar na Área do Cliente — BarbeiroPro" },
+      { property: "og:description", content: "Acesse seus agendamentos, histórico e benefícios do Clube." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: ClienteEntrar,
+});
 
 function ClienteEntrar() {
   const navigate = useNavigate();
@@ -27,6 +41,19 @@ function ClienteEntrar() {
       if (data.session) navigate({ to: "/cliente" });
     });
   }, [navigate]);
+
+  const oauth = async (provider: "google" | "apple") => {
+    setLoading(true);
+    const result = await lovable.auth.signInWithOAuth(provider, {
+      redirect_uri: window.location.origin + "/cliente",
+    });
+    if (result.error) {
+      setLoading(false);
+      return toast.error(result.error.message ?? "Não foi possível entrar.");
+    }
+    if (result.redirected) return;
+    navigate({ to: "/cliente" });
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +123,20 @@ function ClienteEntrar() {
           <CardDescription>Acesse sua conta ou crie uma agora</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="space-y-2">
+            <Button type="button" variant="outline" className="w-full" disabled={loading} onClick={() => oauth("google")}>
+              Continuar com Google
+            </Button>
+            <Button type="button" variant="outline" className="w-full" disabled={loading} onClick={() => oauth("apple")}>
+              Continuar com Apple
+            </Button>
+          </div>
+          <div className="relative my-5">
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">ou com email</span>
+            </div>
+          </div>
           <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="signin">Entrar</TabsTrigger>
