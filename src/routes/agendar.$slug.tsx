@@ -16,7 +16,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
-import { Scissors, Clock, CheckCircle2 } from "lucide-react";
+import { Scissors, Clock, CheckCircle2, Crown } from "lucide-react";
+import {
+  ClubChoiceStep,
+  type ClubMembership,
+  type ClubPlan,
+} from "@/components/club-choice-step";
 import { format, addDays, startOfDay, addMinutes } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
