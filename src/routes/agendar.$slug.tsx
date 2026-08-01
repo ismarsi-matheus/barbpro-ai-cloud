@@ -99,6 +99,8 @@ function AgendarPage() {
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState<string | null>(null);
   const [clientSession, setClientSession] = useState<Session | null>(null);
+  const [pagamentoTipo, setPagamentoTipo] = useState<"normal" | "clube">("normal");
+
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setClientSession(data.session));
