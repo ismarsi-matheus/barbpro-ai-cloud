@@ -702,8 +702,34 @@ function AgendarPage() {
             <Button onClick={downloadICS} variant="outline" size="sm" className="mt-4">
               Adicionar ao calendário (.ics)
             </Button>
-          </CardContent>
-        </Card>
+
+            <div className="mt-6 grid gap-2">
+              <Button asChild className="w-full">
+                <Link to="/cliente/agendamentos">Ver meus agendamentos</Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/cliente">Minha Conta</Link>
+              </Button>
+              <Button asChild variant="ghost" className="w-full">
+                <Link to="/">Voltar para a página inicial</Link>
+              </Button>
+            </div>
+
+            {clientSession ? (
+              <p className="mt-3 text-xs text-muted-foreground">
+                Redirecionando para seus agendamentos...
+              </p>
+            ) : (
+              <div className="mt-4 rounded-lg border bg-muted/40 p-3 text-left">
+                <p className="text-sm font-medium">Crie sua conta gratuita</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Acompanhe seus horários, histórico, clube e comprovantes na Área do Cliente.
+                </p>
+                <Button asChild size="sm" variant="outline" className="mt-2">
+                  <Link to="/cliente/entrar">Criar minha conta</Link>
+                </Button>
+              </div>
+            )}
       </div>
     );
   }
