@@ -96,20 +96,87 @@ function ClubePage() {
         </div>
       ) : memberships.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-14 text-center">
-            <Gift className="h-10 w-10 text-[var(--brand)]" />
-            <div>
+          <CardContent className="space-y-5 py-10">
+            <div className="flex flex-col items-center gap-2 text-center">
+              <Gift className="h-10 w-10 text-[var(--brand)]" />
               <p className="font-medium">Você ainda não faz parte de um Clube</p>
               <p className="text-sm text-muted-foreground">
                 Assinantes têm créditos mensais, descontos e prioridade no atendimento.
               </p>
             </div>
+
+            {!favCompanyId ? (
+              <p className="text-center text-sm text-muted-foreground">
+                Faça seu primeiro agendamento para ver os planos da sua barbearia.
+              </p>
+            ) : plansQuery.isLoading ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Skeleton className="h-40 rounded-xl" />
+                <Skeleton className="h-40 rounded-xl" />
+              </div>
+            ) : plans.length === 0 ? (
+              <p className="text-center text-sm text-muted-foreground">
+                Sua barbearia ainda não publicou planos de assinatura.
+              </p>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {plans.map((p) => {
+                  const beneficios: string[] = Array.isArray(p.beneficios)
+                    ? (p.beneficios as string[])
+                    : [];
+                  return (
+                    <Card
+                      key={p.id}
+                      className={
+                        selectedPlan === p.id
+                          ? "border-2 border-[var(--brand)]"
+                          : "border transition hover:shadow-md"
+                      }
+                    >
+                      <CardHeader className="pb-2">
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Crown className="h-4 w-4 text-[var(--brand)]" /> {p.nome}
+                        </CardTitle>
+                        <CardDescription>
+                          {formatBRL(p.preco_cents)}/mês • {p.creditos_mensais} crédito(s) por mês
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {beneficios.length ? (
+                          <ul className="space-y-1 text-sm text-muted-foreground">
+                            {beneficios.map((b, i) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <Sparkles className="mt-0.5 h-3.5 w-3.5 text-[var(--brand)]" />
+                                <span>{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                        <Button
+                          className="w-full bg-[var(--brand)] text-white hover:bg-[var(--brand)]/90"
+                          disabled={!!buying}
+                          onClick={() => {
+                            setSelectedPlan(p.id);
+                            void buyPlan(p.id);
+                          }}
+                        >
+                          {buying === p.id ? "Abrindo checkout..." : "Comprar Clube"}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
             {favSlug ? (
-              <Button asChild className="bg-[var(--brand)] text-white hover:bg-[var(--brand)]/90">
-                <Link to="/agendar/$slug" params={{ slug: favSlug }} search={{}}>
-                  <Sparkles className="mr-1.5 h-4 w-4" /> Ver planos ao agendar
-                </Link>
-              </Button>
+              <div className="text-center">
+                <Button asChild variant="outline">
+                  <Link to="/agendar/$slug" params={{ slug: favSlug }} search={{}}>
+                    <Sparkles className="mr-1.5 h-4 w-4" /> Ver planos ao agendar
+                  </Link>
+                </Button>
+              </div>
             ) : null}
           </CardContent>
         </Card>
