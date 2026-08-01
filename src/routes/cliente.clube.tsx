@@ -24,11 +24,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ClientShell } from "@/components/client/client-shell";
+import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import {
   useClientDashboard,
   useClientSession,
   useClubUsage,
 } from "@/hooks/use-client-account";
+import { createClubBillingPortal } from "@/lib/club/club-checkout.functions";
 
 export const Route = createFileRoute("/cliente/clube")({
   ssr: false,
@@ -63,6 +66,22 @@ function ClubePage() {
   const favSlug = dash.data?.profile?.favorite_company_slug ?? null;
 
   const entries = useMemo(() => usage.data ?? [], [usage.data]);
+
+  const [portalFor, setPortalFor] = useState<string | null>(null);
+  const openBillingPortal = useServerFn(createClubBillingPortal);
+
+  const openPortal = async (clubMemberId: string) => {
+    setPortalFor(clubMemberId);
+    try {
+      const { url } = await openBillingPortal({
+        data: { clubMemberId, returnUrl: `${window.location.origin}/cliente/clube` },
+      });
+      window.location.href = url;
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível abrir o portal.");
+      setPortalFor(null);
+    }
+  };
 
   return (
     <ClientShell
@@ -165,11 +184,31 @@ function ClubePage() {
                       </div>
                     </div>
                     <Progress value={pct} />
-                    {favSlug || m.company_id ? (
-                      <p className="text-xs text-muted-foreground">
-                        Para alterar ou cancelar seu plano, fale com a barbearia {m.company_name}.
-                      </p>
-                    ) : null}
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <Button
+                        variant="outline"
+                        disabled={portalFor === m.id}
+                        onClick={() => openPortal(m.id)}
+                      >
+                        <ArrowUpCircle className="mr-1.5 h-4 w-4" />
+                        {portalFor === m.id ? "Abrindo..." : "Gerenciar assinatura"}
+                      </Button>
+                      <Button variant="outline" asChild>
+                        <Link
+                          to="/agendar/$slug"
+                          params={{ slug: favSlug ?? "" }}
+                          search={{}}
+                          disabled={!favSlug}
+                        >
+                          <ArrowDownCircle className="mr-1.5 h-4 w-4" /> Ver planos
+                        </Link>
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      No portal você faz upgrade, downgrade, troca o cartão ou cancela — os
+                      benefícios seguem válidos até o fim do período pago.
+                    </p>
+
                   </CardContent>
                 </Card>
               );

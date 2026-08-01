@@ -1822,6 +1822,9 @@ export type Database = {
           company_slug: string
           company_telefone: string
           company_whatsapp: string
+          completed_at: string
+          confirmed_at: string
+          created_at: string
           duration_minutes: number
           id: string
           notes: string
@@ -1829,11 +1832,13 @@ export type Database = {
           price: number
           professional_id: string
           professional_name: string
+          professional_photo: string
           rating: number
           review_comment: string
           scheduled_at: string
           service_id: string
           service_name: string
+          service_price: number
           status: Database["public"]["Enums"]["appointment_status"]
         }[]
       }

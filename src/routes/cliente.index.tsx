@@ -20,7 +20,13 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { ClientShell } from "@/components/client/client-shell";
-import { useClientDashboard, useClientSession } from "@/hooks/use-client-account";
+import {
+  clubSavings,
+  useClientAppointments,
+  useClientDashboard,
+  useClientSession,
+  useSplitAppointments,
+} from "@/hooks/use-client-account";
 import { googleCalendarUrl, mapsUrl } from "@/lib/client-area/client-links";
 
 export const Route = createFileRoute("/cliente/")({
@@ -57,6 +63,10 @@ function dayLabel(d: Date) {
 function ClienteDashboard() {
   const { session } = useClientSession();
   const dash = useClientDashboard(session?.user.id);
+  const appointmentsQ = useClientAppointments(session?.user.id);
+  const { past } = useSplitAppointments(appointmentsQ.data);
+  const economia = clubSavings(appointmentsQ.data);
+  const recentes = past.slice(0, 4);
 
   const data = dash.data;
   const nome =
@@ -199,7 +209,7 @@ function ClienteDashboard() {
           </Card>
 
           {/* Indicadores */}
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardContent className="pt-6">
                 <p className="text-xs text-muted-foreground">Visitas realizadas</p>
@@ -212,6 +222,12 @@ function ClienteDashboard() {
                 <p className="text-3xl font-bold">{formatBRL(Number(data?.stats?.total_gasto ?? 0))}</p>
               </CardContent>
             </Card>
+            <Card className="border-emerald-500/30">
+              <CardContent className="pt-6">
+                <p className="text-xs text-muted-foreground">Total economizado no Clube</p>
+                <p className="text-3xl font-bold text-emerald-600">{formatBRL(economia)}</p>
+              </CardContent>
+            </Card>
             <Card>
               <CardContent className="pt-6">
                 <p className="text-xs text-muted-foreground">Profissional favorito</p>
@@ -221,6 +237,60 @@ function ClienteDashboard() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Últimos serviços */}
+          <Card>
+            <CardHeader className="flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle className="text-base">Últimos serviços</CardTitle>
+                <CardDescription>Seus atendimentos mais recentes</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/cliente/historico">
+                  Ver tudo <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {recentes.length === 0 ? (
+                <p className="py-4 text-center text-sm text-muted-foreground">
+                  Você ainda não tem atendimentos concluídos.
+                </p>
+              ) : (
+                <ul className="divide-y">
+                  {recentes.map((a) => (
+                    <li key={a.id} className="flex items-center justify-between gap-3 py-3">
+                      <div className="min-w-0">
+                        <Link
+                          to="/cliente/agendamentos/$id"
+                          params={{ id: a.id }}
+                          className="truncate font-medium hover:underline"
+                        >
+                          {a.service_name}
+                        </Link>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {format(new Date(a.scheduled_at), "dd/MM/yyyy")} • {a.professional_name} •{" "}
+                          {a.company_name}
+                        </p>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        {a.pagamento_tipo === "clube" ? (
+                          <Badge className="gap-1 bg-[var(--brand)] text-white">
+                            <Crown className="h-3 w-3" /> Clube
+                          </Badge>
+                        ) : (
+                          <span className="text-sm font-semibold">
+                            {formatBRL(Number(a.price ?? 0))}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+
 
           {/* Clube */}
           <Card>
