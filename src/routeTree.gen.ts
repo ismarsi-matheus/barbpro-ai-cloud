@@ -40,6 +40,7 @@ import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
 import { Route as ClientePagamentosRouteImport } from './routes/cliente.pagamentos'
 import { Route as ClienteHistoricoRouteImport } from './routes/cliente.historico'
 import { Route as ClienteEntrarRouteImport } from './routes/cliente.entrar'
+import { Route as ClienteConfiguracoesRouteImport } from './routes/cliente.configuracoes'
 import { Route as ClienteClubeRouteImport } from './routes/cliente.clube'
 import { Route as ClienteAgendamentosRouteImport } from './routes/cliente.agendamentos'
 import { Route as AppServicosRouteImport } from './routes/app.servicos'
@@ -222,6 +223,11 @@ const ClienteEntrarRoute = ClienteEntrarRouteImport.update({
   path: '/entrar',
   getParentRoute: () => ClienteRoute,
 } as any)
+const ClienteConfiguracoesRoute = ClienteConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => ClienteRoute,
+} as any)
 const ClienteClubeRoute = ClienteClubeRouteImport.update({
   id: '/clube',
   path: '/clube',
@@ -386,6 +392,7 @@ export interface FileRoutesByFullPath {
   '/app/servicos': typeof AppServicosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/clube': typeof ClienteClubeRoute
+  '/cliente/configuracoes': typeof ClienteConfiguracoesRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/pagamentos': typeof ClientePagamentosRoute
@@ -444,6 +451,7 @@ export interface FileRoutesByTo {
   '/app/servicos': typeof AppServicosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/clube': typeof ClienteClubeRoute
+  '/cliente/configuracoes': typeof ClienteConfiguracoesRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/pagamentos': typeof ClientePagamentosRoute
@@ -504,6 +512,7 @@ export interface FileRoutesById {
   '/app/servicos': typeof AppServicosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/clube': typeof ClienteClubeRoute
+  '/cliente/configuracoes': typeof ClienteConfiguracoesRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/pagamentos': typeof ClientePagamentosRoute
@@ -565,6 +574,7 @@ export interface FileRouteTypes {
     | '/app/servicos'
     | '/cliente/agendamentos'
     | '/cliente/clube'
+    | '/cliente/configuracoes'
     | '/cliente/entrar'
     | '/cliente/historico'
     | '/cliente/pagamentos'
@@ -623,6 +633,7 @@ export interface FileRouteTypes {
     | '/app/servicos'
     | '/cliente/agendamentos'
     | '/cliente/clube'
+    | '/cliente/configuracoes'
     | '/cliente/entrar'
     | '/cliente/historico'
     | '/cliente/pagamentos'
@@ -682,6 +693,7 @@ export interface FileRouteTypes {
     | '/app/servicos'
     | '/cliente/agendamentos'
     | '/cliente/clube'
+    | '/cliente/configuracoes'
     | '/cliente/entrar'
     | '/cliente/historico'
     | '/cliente/pagamentos'
@@ -951,6 +963,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClienteEntrarRouteImport
       parentRoute: typeof ClienteRoute
     }
+    '/cliente/configuracoes': {
+      id: '/cliente/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/cliente/configuracoes'
+      preLoaderRoute: typeof ClienteConfiguracoesRouteImport
+      parentRoute: typeof ClienteRoute
+    }
     '/cliente/clube': {
       id: '/cliente/clube'
       path: '/clube'
@@ -1181,6 +1200,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 interface ClienteRouteChildren {
   ClienteAgendamentosRoute: typeof ClienteAgendamentosRoute
   ClienteClubeRoute: typeof ClienteClubeRoute
+  ClienteConfiguracoesRoute: typeof ClienteConfiguracoesRoute
   ClienteEntrarRoute: typeof ClienteEntrarRoute
   ClienteHistoricoRoute: typeof ClienteHistoricoRoute
   ClientePagamentosRoute: typeof ClientePagamentosRoute
@@ -1191,6 +1211,7 @@ interface ClienteRouteChildren {
 const ClienteRouteChildren: ClienteRouteChildren = {
   ClienteAgendamentosRoute: ClienteAgendamentosRoute,
   ClienteClubeRoute: ClienteClubeRoute,
+  ClienteConfiguracoesRoute: ClienteConfiguracoesRoute,
   ClienteEntrarRoute: ClienteEntrarRoute,
   ClienteHistoricoRoute: ClienteHistoricoRoute,
   ClientePagamentosRoute: ClientePagamentosRoute,
