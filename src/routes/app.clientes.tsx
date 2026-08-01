@@ -41,6 +41,16 @@ function ClientesPage() {
     queryFn: async () => (await supabase.from("customer").select("*").eq("company_id", cid!).order("name")).data ?? [],
   });
 
+  const { data: insights } = useQuery({
+    queryKey: ["customer-insights", viewing?.id],
+    enabled: !!viewing?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_customer_insights", { _customer_id: viewing.id });
+      if (error) throw error;
+      return data as any;
+    },
+  });
+
   const { data: timeline = [] } = useQuery({
     queryKey: ["customer-timeline", viewing?.id],
     enabled: !!viewing?.id,
@@ -228,6 +238,42 @@ function ClientesPage() {
                   <p className="font-semibold text-xs">{viewing.status ?? "—"}</p>
                 </div>
               </div>
+              {insights && (
+                <div className="rounded-lg border p-3 space-y-3">
+                  <h4 className="text-sm font-semibold">Insights</h4>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="p-2 rounded bg-muted/40">
+                      <p className="text-xs text-muted-foreground">Total gasto</p>
+                      <p className="font-semibold text-sm">
+                        {Number(insights.total_gasto ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                      </p>
+                    </div>
+                    <div className="p-2 rounded bg-muted/40">
+                      <p className="text-xs text-muted-foreground">Ticket médio</p>
+                      <p className="font-semibold text-sm">
+                        {Number(insights.ticket_medio ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                      </p>
+                    </div>
+                    <div className="p-2 rounded bg-muted/40">
+                      <p className="text-xs text-muted-foreground">Cancelamentos</p>
+                      <p className="font-semibold text-sm">{insights.cancelamentos ?? 0}</p>
+                    </div>
+                  </div>
+                  {insights.club && (
+                    <div className="flex items-center justify-between rounded-md border border-[var(--brand)]/30 bg-[var(--brand)]/5 p-2 text-sm">
+                      <span className="font-medium flex items-center gap-1">
+                        <Crown className="w-4 h-4 text-[var(--brand)]" /> Clube {insights.club.plano_nome}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {insights.club.status === "ativo" ? `${insights.club.creditos_restantes} crédito(s)` : insights.club.status}
+                      </span>
+                    </div>
+                  )}
+                  {viewing.user_id && (
+                    <p className="text-xs text-muted-foreground">Conta do cliente vinculada ao app.</p>
+                  )}
+                </div>
+              )}
               {(company as any)?.fidelidade_ativa && (() => {
                 const meta = Number((company as any).fidelidade_meta ?? 10);
                 const c = Number(viewing.fidelidade_contador ?? 0);
