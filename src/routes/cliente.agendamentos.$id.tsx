@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Check,
   Crown,
+  CalendarPlus,
   Download,
   MapPin,
   MessageCircle,
@@ -41,7 +42,13 @@ import {
   useClientSession,
   type ClientAppointment,
 } from "@/hooks/use-client-account";
-import { downloadReceipt, mapsUrl, whatsappUrl } from "@/lib/client-area/client-links";
+import {
+  downloadIcs,
+  downloadReceipt,
+  googleCalendarUrl,
+  mapsUrl,
+  whatsappUrl,
+} from "@/lib/client-area/client-links";
 
 export const Route = createFileRoute("/cliente/agendamentos/$id")({
   ssr: false,
@@ -323,10 +330,22 @@ function AppointmentDetailPage() {
                   </a>
                 </Button>
               ) : null}
+              <Button className="w-full" variant="outline" asChild>
+                <a href={googleCalendarUrl(appointment)} target="_blank" rel="noreferrer">
+                  <CalendarPlus className="mr-2 h-4 w-4" /> Adicionar ao Google Calendar
+                </a>
+              </Button>
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={() => downloadIcs(appointment)}
+              >
+                <CalendarPlus className="mr-2 h-4 w-4" /> Apple Calendar (.ics)
+              </Button>
               {whatsappUrl(appointment) ? (
                 <Button className="w-full" variant="outline" asChild>
                   <a href={whatsappUrl(appointment)!} target="_blank" rel="noreferrer">
-                    <MessageCircle className="mr-2 h-4 w-4" /> Falar com a barbearia
+                    <MessageCircle className="mr-2 h-4 w-4" /> Confirmar por WhatsApp
                   </a>
                 </Button>
               ) : null}

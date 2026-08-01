@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -71,6 +71,7 @@ const formatBRL = (n: number) =>
 function AgendarPage() {
   const { slug } = Route.useParams();
   const search = Route.useSearch();
+  const navigate = useNavigate();
 
   const companyQuery = useQuery({
     queryKey: ["public-company", slug],
@@ -175,6 +176,15 @@ function AgendarPage() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setClientSession(s));
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  // Após confirmar, clientes autenticados vão direto para a Área do Cliente.
+  useEffect(() => {
+    if (!confirmed || !clientSession) return;
+    const t = setTimeout(() => {
+      navigate({ to: "/cliente/agendamentos" });
+    }, 3500);
+    return () => clearTimeout(t);
+  }, [confirmed, clientSession, navigate]);
 
   useEffect(() => {
     if (!clientSession) return;
@@ -702,6 +712,34 @@ function AgendarPage() {
             <Button onClick={downloadICS} variant="outline" size="sm" className="mt-4">
               Adicionar ao calendário (.ics)
             </Button>
+
+            <div className="mt-6 grid gap-2">
+              <Button asChild className="w-full">
+                <Link to="/cliente/agendamentos">Ver meus agendamentos</Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/cliente">Minha Conta</Link>
+              </Button>
+              <Button asChild variant="ghost" className="w-full">
+                <Link to="/">Voltar para a página inicial</Link>
+              </Button>
+            </div>
+
+            {clientSession ? (
+              <p className="mt-3 text-xs text-muted-foreground">
+                Redirecionando para seus agendamentos...
+              </p>
+            ) : (
+              <div className="mt-4 rounded-lg border bg-muted/40 p-3 text-left">
+                <p className="text-sm font-medium">Crie sua conta gratuita</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Acompanhe seus horários, histórico, clube e comprovantes na Área do Cliente.
+                </p>
+                <Button asChild size="sm" variant="outline" className="mt-2">
+                  <Link to="/cliente/entrar">Criar minha conta</Link>
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -723,10 +761,18 @@ function AgendarPage() {
               <Scissors className="w-6 h-6" />
             </div>
           )}
-          <div>
+          <div className="min-w-0">
             <h1 className="text-xl font-bold">{company.nome_fantasia || company.name}</h1>
             <p className="text-sm opacity-80">Agendamento online</p>
           </div>
+          <Button
+            asChild
+            size="sm"
+            variant="outline"
+            className="ml-auto shrink-0 border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+          >
+            <Link to="/cliente">Minha Conta</Link>
+          </Button>
         </div>
       </header>
 

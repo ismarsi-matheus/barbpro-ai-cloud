@@ -39,8 +39,10 @@ import { Route as ConfirmarTokenRouteImport } from './routes/confirmar.$token'
 import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
 import { Route as ClientePagamentosRouteImport } from './routes/cliente.pagamentos'
 import { Route as ClienteNotificacoesRouteImport } from './routes/cliente.notificacoes'
+import { Route as ClienteLoginRouteImport } from './routes/cliente.login'
 import { Route as ClienteHistoricoRouteImport } from './routes/cliente.historico'
 import { Route as ClienteEntrarRouteImport } from './routes/cliente.entrar'
+import { Route as ClienteDashboardRouteImport } from './routes/cliente.dashboard'
 import { Route as ClienteConfiguracoesRouteImport } from './routes/cliente.configuracoes'
 import { Route as ClienteClubeRouteImport } from './routes/cliente.clube'
 import { Route as AppServicosRouteImport } from './routes/app.servicos'
@@ -220,6 +222,11 @@ const ClienteNotificacoesRoute = ClienteNotificacoesRouteImport.update({
   path: '/notificacoes',
   getParentRoute: () => ClienteRoute,
 } as any)
+const ClienteLoginRoute = ClienteLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => ClienteRoute,
+} as any)
 const ClienteHistoricoRoute = ClienteHistoricoRouteImport.update({
   id: '/historico',
   path: '/historico',
@@ -228,6 +235,11 @@ const ClienteHistoricoRoute = ClienteHistoricoRouteImport.update({
 const ClienteEntrarRoute = ClienteEntrarRouteImport.update({
   id: '/entrar',
   path: '/entrar',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteDashboardRoute = ClienteDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => ClienteRoute,
 } as any)
 const ClienteConfiguracoesRoute = ClienteConfiguracoesRouteImport.update({
@@ -405,8 +417,10 @@ export interface FileRoutesByFullPath {
   '/app/servicos': typeof AppServicosRoute
   '/cliente/clube': typeof ClienteClubeRoute
   '/cliente/configuracoes': typeof ClienteConfiguracoesRoute
+  '/cliente/dashboard': typeof ClienteDashboardRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
+  '/cliente/login': typeof ClienteLoginRoute
   '/cliente/notificacoes': typeof ClienteNotificacoesRoute
   '/cliente/pagamentos': typeof ClientePagamentosRoute
   '/cliente/perfil': typeof ClientePerfilRoute
@@ -466,8 +480,10 @@ export interface FileRoutesByTo {
   '/app/servicos': typeof AppServicosRoute
   '/cliente/clube': typeof ClienteClubeRoute
   '/cliente/configuracoes': typeof ClienteConfiguracoesRoute
+  '/cliente/dashboard': typeof ClienteDashboardRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
+  '/cliente/login': typeof ClienteLoginRoute
   '/cliente/notificacoes': typeof ClienteNotificacoesRoute
   '/cliente/pagamentos': typeof ClientePagamentosRoute
   '/cliente/perfil': typeof ClientePerfilRoute
@@ -529,8 +545,10 @@ export interface FileRoutesById {
   '/app/servicos': typeof AppServicosRoute
   '/cliente/clube': typeof ClienteClubeRoute
   '/cliente/configuracoes': typeof ClienteConfiguracoesRoute
+  '/cliente/dashboard': typeof ClienteDashboardRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
+  '/cliente/login': typeof ClienteLoginRoute
   '/cliente/notificacoes': typeof ClienteNotificacoesRoute
   '/cliente/pagamentos': typeof ClientePagamentosRoute
   '/cliente/perfil': typeof ClientePerfilRoute
@@ -593,8 +611,10 @@ export interface FileRouteTypes {
     | '/app/servicos'
     | '/cliente/clube'
     | '/cliente/configuracoes'
+    | '/cliente/dashboard'
     | '/cliente/entrar'
     | '/cliente/historico'
+    | '/cliente/login'
     | '/cliente/notificacoes'
     | '/cliente/pagamentos'
     | '/cliente/perfil'
@@ -654,8 +674,10 @@ export interface FileRouteTypes {
     | '/app/servicos'
     | '/cliente/clube'
     | '/cliente/configuracoes'
+    | '/cliente/dashboard'
     | '/cliente/entrar'
     | '/cliente/historico'
+    | '/cliente/login'
     | '/cliente/notificacoes'
     | '/cliente/pagamentos'
     | '/cliente/perfil'
@@ -716,8 +738,10 @@ export interface FileRouteTypes {
     | '/app/servicos'
     | '/cliente/clube'
     | '/cliente/configuracoes'
+    | '/cliente/dashboard'
     | '/cliente/entrar'
     | '/cliente/historico'
+    | '/cliente/login'
     | '/cliente/notificacoes'
     | '/cliente/pagamentos'
     | '/cliente/perfil'
@@ -981,6 +1005,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClienteNotificacoesRouteImport
       parentRoute: typeof ClienteRoute
     }
+    '/cliente/login': {
+      id: '/cliente/login'
+      path: '/login'
+      fullPath: '/cliente/login'
+      preLoaderRoute: typeof ClienteLoginRouteImport
+      parentRoute: typeof ClienteRoute
+    }
     '/cliente/historico': {
       id: '/cliente/historico'
       path: '/historico'
@@ -993,6 +1024,13 @@ declare module '@tanstack/react-router' {
       path: '/entrar'
       fullPath: '/cliente/entrar'
       preLoaderRoute: typeof ClienteEntrarRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/dashboard': {
+      id: '/cliente/dashboard'
+      path: '/dashboard'
+      fullPath: '/cliente/dashboard'
+      preLoaderRoute: typeof ClienteDashboardRouteImport
       parentRoute: typeof ClienteRoute
     }
     '/cliente/configuracoes': {
@@ -1239,8 +1277,10 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 interface ClienteRouteChildren {
   ClienteClubeRoute: typeof ClienteClubeRoute
   ClienteConfiguracoesRoute: typeof ClienteConfiguracoesRoute
+  ClienteDashboardRoute: typeof ClienteDashboardRoute
   ClienteEntrarRoute: typeof ClienteEntrarRoute
   ClienteHistoricoRoute: typeof ClienteHistoricoRoute
+  ClienteLoginRoute: typeof ClienteLoginRoute
   ClienteNotificacoesRoute: typeof ClienteNotificacoesRoute
   ClientePagamentosRoute: typeof ClientePagamentosRoute
   ClientePerfilRoute: typeof ClientePerfilRoute
@@ -1252,8 +1292,10 @@ interface ClienteRouteChildren {
 const ClienteRouteChildren: ClienteRouteChildren = {
   ClienteClubeRoute: ClienteClubeRoute,
   ClienteConfiguracoesRoute: ClienteConfiguracoesRoute,
+  ClienteDashboardRoute: ClienteDashboardRoute,
   ClienteEntrarRoute: ClienteEntrarRoute,
   ClienteHistoricoRoute: ClienteHistoricoRoute,
+  ClienteLoginRoute: ClienteLoginRoute,
   ClienteNotificacoesRoute: ClienteNotificacoesRoute,
   ClientePagamentosRoute: ClientePagamentosRoute,
   ClientePerfilRoute: ClientePerfilRoute,

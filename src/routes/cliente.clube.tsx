@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -31,7 +33,7 @@ import {
   useClientSession,
   useClubUsage,
 } from "@/hooks/use-client-account";
-import { createClubBillingPortal } from "@/lib/club/club-checkout.functions";
+import { createClubBillingPortal, createClubCheckoutSession } from "@/lib/club/club-checkout.functions";
 
 export const Route = createFileRoute("/cliente/clube")({
   ssr: false,
@@ -67,6 +69,67 @@ function ClubePage() {
 
   const entries = useMemo(() => usage.data ?? [], [usage.data]);
 
+  const favCompanyId = dash.data?.profile?.favorite_company_id ?? null;
+  const plansQuery = useQuery({
+    queryKey: ["client-club-plans", favCompanyId],
+    enabled: !!favCompanyId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_public_club_plans", {
+        _company_id: favCompanyId!,
+      });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const plans = plansQuery.data ?? [];
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [buying, setBuying] = useState<string | null>(null);
+  const startCheckout = useServerFn(createClubCheckoutSession);
+
+  const buyPlan = async (planId: string) => {
+    if (!favCompanyId || !favSlug) return;
+    setBuying(planId);
+    try {
+      const { url } = await startCheckout({
+        data: {
+          companyId: favCompanyId,
+          clubPlanId: planId,
+          slug: favSlug,
+          origin: window.location.origin,
+          name: nome,
+          phone: dash.data?.profile?.phone || "00000000000",
+          returnPath: "/cliente/clube",
+        },
+      });
+      if (!url) throw new Error("Checkout indisponível.");
+      window.location.href = url;
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível iniciar o checkout.");
+      setBuying(null);
+    }
+  };
+
+  // Retorno do Stripe: reconcilia a assinatura e atualiza a tela.
+  useEffect(() => {
+    const sessionId = new URLSearchParams(window.location.search).get("club_session");
+    if (!sessionId) return;
+    let tries = 0;
+    const tick = async () => {
+      tries += 1;
+      const res = await dash.refetch();
+      const active = (res.data?.club_memberships ?? []).some((m) => m.status === "ativo");
+      if (active) {
+        toast.success("Assinatura do Clube ativa!");
+        window.history.replaceState({}, "", "/cliente/clube");
+        return;
+      }
+      if (tries < 6) setTimeout(tick, 2000);
+    };
+    void tick();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
   const [portalFor, setPortalFor] = useState<string | null>(null);
   const openBillingPortal = useServerFn(createClubBillingPortal);
 
@@ -96,20 +159,87 @@ function ClubePage() {
         </div>
       ) : memberships.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-14 text-center">
-            <Gift className="h-10 w-10 text-[var(--brand)]" />
-            <div>
+          <CardContent className="space-y-5 py-10">
+            <div className="flex flex-col items-center gap-2 text-center">
+              <Gift className="h-10 w-10 text-[var(--brand)]" />
               <p className="font-medium">Você ainda não faz parte de um Clube</p>
               <p className="text-sm text-muted-foreground">
                 Assinantes têm créditos mensais, descontos e prioridade no atendimento.
               </p>
             </div>
+
+            {!favCompanyId ? (
+              <p className="text-center text-sm text-muted-foreground">
+                Faça seu primeiro agendamento para ver os planos da sua barbearia.
+              </p>
+            ) : plansQuery.isLoading ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Skeleton className="h-40 rounded-xl" />
+                <Skeleton className="h-40 rounded-xl" />
+              </div>
+            ) : plans.length === 0 ? (
+              <p className="text-center text-sm text-muted-foreground">
+                Sua barbearia ainda não publicou planos de assinatura.
+              </p>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {plans.map((p) => {
+                  const beneficios: string[] = Array.isArray(p.beneficios)
+                    ? (p.beneficios as string[])
+                    : [];
+                  return (
+                    <Card
+                      key={p.id}
+                      className={
+                        selectedPlan === p.id
+                          ? "border-2 border-[var(--brand)]"
+                          : "border transition hover:shadow-md"
+                      }
+                    >
+                      <CardHeader className="pb-2">
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Crown className="h-4 w-4 text-[var(--brand)]" /> {p.nome}
+                        </CardTitle>
+                        <CardDescription>
+                          {formatBRL(p.preco_cents)}/mês • {p.creditos_mensais} crédito(s) por mês
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {beneficios.length ? (
+                          <ul className="space-y-1 text-sm text-muted-foreground">
+                            {beneficios.map((b, i) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <Sparkles className="mt-0.5 h-3.5 w-3.5 text-[var(--brand)]" />
+                                <span>{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                        <Button
+                          className="w-full bg-[var(--brand)] text-white hover:bg-[var(--brand)]/90"
+                          disabled={!!buying}
+                          onClick={() => {
+                            setSelectedPlan(p.id);
+                            void buyPlan(p.id);
+                          }}
+                        >
+                          {buying === p.id ? "Abrindo checkout..." : "Comprar Clube"}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
             {favSlug ? (
-              <Button asChild className="bg-[var(--brand)] text-white hover:bg-[var(--brand)]/90">
-                <Link to="/agendar/$slug" params={{ slug: favSlug }} search={{}}>
-                  <Sparkles className="mr-1.5 h-4 w-4" /> Ver planos ao agendar
-                </Link>
-              </Button>
+              <div className="text-center">
+                <Button asChild variant="outline">
+                  <Link to="/agendar/$slug" params={{ slug: favSlug }} search={{}}>
+                    <Sparkles className="mr-1.5 h-4 w-4" /> Ver planos ao agendar
+                  </Link>
+                </Button>
+              </div>
             ) : null}
           </CardContent>
         </Card>

@@ -256,6 +256,9 @@ function LandingPage() {
           </div>
           <nav className="flex items-center gap-2 shrink-0" aria-label="Navegação principal">
             <Button asChild variant="ghost" size="sm">
+              <Link to="/cliente">Minha Conta</Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
               <Link to="/entrar">Entrar</Link>
             </Button>
             <Button size="sm" className="text-white" style={{ backgroundColor: BRAND }} onClick={() => scrollToPlans()}>
@@ -601,7 +604,14 @@ function LandingPage() {
               <div className="text-[11px] text-white/40">{TAGLINE}</div>
             </div>
           </div>
-          <div className="text-sm text-white/40 text-center md:text-right">© {new Date().getFullYear()} BarbeiroPro AI. Todos os direitos reservados.</div>
+          <div className="flex flex-col items-center gap-2 md:items-end">
+            <nav className="flex items-center gap-4 text-sm" aria-label="Links do rodapé">
+              <Link to="/cliente" className="text-white/70 hover:text-white">Minha Conta</Link>
+              <Link to="/cliente/entrar" className="text-white/70 hover:text-white">Entrar como cliente</Link>
+              <Link to="/entrar" className="text-white/70 hover:text-white">Sou barbearia</Link>
+            </nav>
+            <div className="text-sm text-white/40 text-center md:text-right">© {new Date().getFullYear()} BarbeiroPro AI. Todos os direitos reservados.</div>
+          </div>
         </div>
       </footer>
 

@@ -353,6 +353,27 @@ function ClienteDashboard() {
 
           {/* Atalhos */}
           <div className="grid gap-3 sm:grid-cols-3">
+            {favSlug ? (
+              <Link to="/agendar/$slug" params={{ slug: favSlug }} search={{}}>
+                <Card className="h-full border-[var(--brand)]/40 transition hover:shadow-md">
+                  <CardContent className="flex items-center gap-3 pt-6">
+                    <Plus className="h-5 w-5 text-[var(--brand)]" />
+                    <span className="font-medium">Novo agendamento</span>
+                  </CardContent>
+                </Card>
+              </Link>
+            ) : null}
+            <Link
+              to={next ? "/cliente/agendamentos/$id" : "/cliente/agendamentos"}
+              params={next ? { id: next.id } : undefined}
+            >
+              <Card className="h-full transition hover:shadow-md">
+                <CardContent className="flex items-center gap-3 pt-6">
+                  <CalendarPlus className="h-5 w-5 text-[var(--brand)]" />
+                  <span className="font-medium">Reagendar</span>
+                </CardContent>
+              </Card>
+            </Link>
             <Link to="/cliente/agendamentos">
               <Card className="h-full transition hover:shadow-md">
                 <CardContent className="flex items-center gap-3 pt-6">
@@ -365,7 +386,23 @@ function ClienteDashboard() {
               <Card className="h-full transition hover:shadow-md">
                 <CardContent className="flex items-center gap-3 pt-6">
                   <History className="h-5 w-5 text-[var(--brand)]" />
-                  <span className="font-medium">Histórico e avaliações</span>
+                  <span className="font-medium">Ver histórico</span>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to="/cliente/clube">
+              <Card className="h-full transition hover:shadow-md">
+                <CardContent className="flex items-center gap-3 pt-6">
+                  <Crown className="h-5 w-5 text-[var(--brand)]" />
+                  <span className="font-medium">Meu Clube</span>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to="/cliente/perfil">
+              <Card className="h-full transition hover:shadow-md">
+                <CardContent className="flex items-center gap-3 pt-6">
+                  <Sparkles className="h-5 w-5 text-[var(--brand)]" />
+                  <span className="font-medium">Editar perfil</span>
                 </CardContent>
               </Card>
             </Link>
