@@ -31,8 +31,9 @@ function buildMessage(tipo: "d1" | "d0", nome: string, hora: string, barbearia: 
 function LembretesPage() {
   const { data: company } = useCurrentCompany();
   const cid = company?.id;
-  const planSlug = normalizePlanSlug((company as any)?.selected_plan_slug ?? (company as any)?.plano);
-  const allowed = featureEnabled(planSlug, "lembretesWhatsapp");
+  const { can } = useSubscription();
+  const allowed = can("lembretesWhatsapp");
+
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const barbearia = (company as any)?.nome_fantasia ?? (company as any)?.name ?? "barbearia";
 
