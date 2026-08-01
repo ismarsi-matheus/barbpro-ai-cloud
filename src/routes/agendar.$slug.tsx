@@ -715,6 +715,23 @@ function AgendarPage() {
         )}
 
         {step === 5 && (
+          <ClubChoiceStep
+            session={clientSession}
+            memberships={memberships}
+            loadingMembership={!!clientSession && membershipQuery.isLoading}
+            plans={clubPlans}
+            loadingPlans={clubPlansQuery.isLoading}
+            servicePrice={Number(service?.price ?? 0)}
+            onBack={() => setStep(4)}
+            onContinue={({ useClub, membership: m }) => {
+              setChosenMembership(useClub ? m : null);
+              setPagamentoTipo(useClub ? "clube" : "normal");
+              setStep(6);
+            }}
+          />
+        )}
+
+        {step === 6 && (
           <Card>
             <CardHeader>
               <CardTitle>Seus dados</CardTitle>
@@ -724,7 +741,7 @@ function AgendarPage() {
               <div className="p-3 rounded-md bg-muted/50 text-sm space-y-1">
                 <div>
                   <Badge variant="secondary">Serviço</Badge> {service?.name} •{" "}
-                  {service ? formatBRL(Number(service.price)) : ""}
+                  {usandoClube ? "Benefício do Clube" : service ? formatBRL(Number(service.price)) : ""}
                 </div>
                 <div>
                   <Badge variant="secondary">Profissional</Badge> {pro?.name}
@@ -735,56 +752,23 @@ function AgendarPage() {
                 </div>
               </div>
 
-              {membership ? (
-                <div className="space-y-2">
-                  <Label>Como deseja agendar?</Label>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <button
-                      type="button"
-                      onClick={() => setPagamentoTipo("normal")}
-                      className={`text-left p-3 rounded-md border transition ${
-                        pagamentoTipo === "normal"
-                          ? "border-[var(--brand)] bg-[var(--brand)]/5"
-                          : "border-border hover:border-[var(--brand)]"
-                      }`}
-                    >
-                      <div className="font-medium text-sm">Agendamento normal</div>
-                      <div className="text-xs text-muted-foreground">
-                        {service ? formatBRL(Number(service.price)) : ""} no atendimento
-                      </div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPagamentoTipo("clube")}
-                      className={`text-left p-3 rounded-md border transition ${
-                        pagamentoTipo === "clube"
-                          ? "border-[var(--brand)] bg-[var(--brand)]/5"
-                          : "border-border hover:border-[var(--brand)]"
-                      }`}
-                    >
-                      <div className="font-medium text-sm">
-                        Utilizar benefício do Clube
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {(membership as any).plano_nome} • {(membership as any).creditos_restantes} crédito(s) restante(s)
-                      </div>
-                    </button>
-                  </div>
-                  {pagamentoTipo === "clube" && (
-                    <p className="text-xs text-muted-foreground">
-                      1 crédito será debitado ao confirmar. Se o agendamento for cancelado, o
-                      crédito volta automaticamente.
+              {usandoClube && membership && (
+                <div className="p-3 rounded-md border border-[var(--brand)]/30 bg-[var(--brand)]/5 text-sm flex items-start gap-2">
+                  <Crown className="w-4 h-4 text-[var(--brand)] mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-medium">
+                      Benefício do Clube • {membership.plano_nome}
                     </p>
-                  )}
+                    <p className="text-xs text-muted-foreground">
+                      1 crédito será debitado ao confirmar ({membership.creditos_restantes}{" "}
+                      disponível(is)). Se o agendamento for cancelado, o crédito volta
+                      automaticamente.
+                    </p>
+                  </div>
                 </div>
-              ) : (clubPlansQuery.data?.length ?? 0) > 0 ? (
-                <div className="p-3 rounded-md border border-dashed text-sm">
-                  <span className="font-medium">Esta barbearia tem Clube de Assinatura.</span>{" "}
-                  <span className="text-muted-foreground">
-                    Assine para agendar usando créditos mensais.
-                  </span>
-                </div>
-              ) : null}
+              )}
+
+
 
               <div>
                 <Label>Seu nome</Label>
