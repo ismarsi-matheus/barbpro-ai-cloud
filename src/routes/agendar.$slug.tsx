@@ -935,7 +935,14 @@ function AgendarPage() {
               setPagamentoTipo(useClub ? "clube" : "normal");
               setStep(6);
             }}
+            onSubscribe={startClubCheckout}
+            subscribingPlanId={subscribingPlanId}
+            defaultName={nome}
+            defaultPhone={phone}
+            initialView={clubInitialView}
+            processingPayment={clubProcessing}
           />
+
         )}
 
         {step === 6 && (
