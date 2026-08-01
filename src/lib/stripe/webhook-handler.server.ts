@@ -353,6 +353,20 @@ async function handleInvoicePaid(inv: Stripe.Invoice): Promise<void> {
       ? ((inv as any).subscription as string)
       : (inv as any).subscription?.id ?? null;
   if (!subId) return;
+
+  // Renovação do Clube: recarrega créditos do período.
+  const stripe = getStripe();
+  const sub = await stripe.subscriptions.retrieve(subId).catch(() => null);
+  if (sub) {
+    const { isClubMetadata, syncClubMembershipFromSubscription } = await import(
+      "@/lib/club/club.server"
+    );
+    if (isClubMetadata(sub.metadata)) {
+      await syncClubMembershipFromSubscription(sub as any);
+      return;
+    }
+  }
+
   await updateSubscriptionStatus(subId, "active");
 }
 
