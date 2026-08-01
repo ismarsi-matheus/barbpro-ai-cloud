@@ -99,6 +99,7 @@ function ClubePage() {
           <div className="grid gap-4 md:grid-cols-2">
             {memberships.map((m) => {
               const ativo = m.status === "ativo";
+              const utilizados = m.beneficios_utilizados ?? Math.max(0, m.creditos_mensais - m.creditos_restantes);
               const pct =
                 m.creditos_mensais > 0 ? (m.creditos_restantes / m.creditos_mensais) * 100 : 0;
               return (
@@ -118,7 +119,13 @@ function ClubePage() {
                             : "bg-muted text-muted-foreground"
                         }
                       >
-                        {ativo ? "Ativo" : "Inativo"}
+                        {ativo
+                          ? m.cancel_at_period_end
+                            ? "Ativo até o fim do período"
+                            : "Ativo"
+                          : m.status === "expirado"
+                            ? "Expirado"
+                            : "Inativo"}
                       </Badge>
                     </div>
                   </CardHeader>
@@ -126,7 +133,7 @@ function ClubePage() {
                     <div className="grid grid-cols-2 gap-3">
                       <div className="rounded-lg border p-3">
                         <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Wallet className="h-3.5 w-3.5" /> Saldo
+                          <Wallet className="h-3.5 w-3.5" /> Saldo disponível
                         </p>
                         <p className="text-2xl font-bold">{m.creditos_restantes}</p>
                         <p className="text-[11px] text-muted-foreground">
@@ -135,7 +142,7 @@ function ClubePage() {
                       </div>
                       <div className="rounded-lg border p-3">
                         <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <CalendarClock className="h-3.5 w-3.5" /> Renovação
+                          <CalendarClock className="h-3.5 w-3.5" /> Próxima renovação
                         </p>
                         <p className="mt-1 text-sm font-semibold">
                           {m.current_period_end
@@ -145,6 +152,16 @@ function ClubePage() {
                         <p className="text-[11px] text-muted-foreground">
                           {formatBRL(m.preco_cents)}/mês
                         </p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="rounded-lg border p-3">
+                        <p className="text-xs text-muted-foreground">Benefícios utilizados</p>
+                        <p className="text-lg font-semibold">{utilizados}</p>
+                      </div>
+                      <div className="rounded-lg border p-3">
+                        <p className="text-xs text-muted-foreground">Benefícios restantes</p>
+                        <p className="text-lg font-semibold">{m.creditos_restantes}</p>
                       </div>
                     </div>
                     <Progress value={pct} />
