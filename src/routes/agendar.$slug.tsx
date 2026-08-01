@@ -124,6 +124,35 @@ function AgendarPage() {
     });
   }, [clientSession]);
 
+  // Clube: planos públicos da barbearia + assinatura do cliente logado
+  const clubPlansQuery = useQuery({
+    queryKey: ["club-plans-public", company?.id],
+    enabled: !!company?.id,
+    queryFn: async () =>
+      (await supabase.rpc("get_public_club_plans", { _company_id: company!.id })).data ?? [],
+    retry: false,
+  });
+
+  const membershipQuery = useQuery({
+    queryKey: ["club-membership", company?.id, clientSession?.user.id],
+    enabled: !!company?.id && !!clientSession,
+    queryFn: async () =>
+      (await supabase.rpc("get_my_club_memberships", { _company_id: company!.id })).data ?? [],
+    retry: false,
+  });
+
+  const membership = useMemo(
+    () =>
+      (membershipQuery.data ?? []).find(
+        (m: any) => m.status === "ativo" && (m.creditos_restantes ?? 0) > 0,
+      ) ?? null,
+    [membershipQuery.data],
+  );
+
+  useEffect(() => {
+    if (!membership && pagamentoTipo === "clube") setPagamentoTipo("normal");
+  }, [membership, pagamentoTipo]);
+
 
 
   const service = useMemo(
