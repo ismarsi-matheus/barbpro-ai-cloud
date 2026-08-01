@@ -71,6 +71,7 @@ const formatBRL = (n: number) =>
 function AgendarPage() {
   const { slug } = Route.useParams();
   const search = Route.useSearch();
+  const navigate = useNavigate();
 
   const companyQuery = useQuery({
     queryKey: ["public-company", slug],
