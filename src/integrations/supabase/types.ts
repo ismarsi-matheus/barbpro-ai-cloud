@@ -43,6 +43,7 @@ export type Database = {
       }
       appointment: {
         Row: {
+          club_member_id: string | null
           company_id: string
           completed_at: string | null
           confirm_token: string
@@ -53,6 +54,7 @@ export type Database = {
           customer_phone: string | null
           id: string
           notes: string | null
+          pagamento_tipo: string
           price: number | null
           professional_id: string
           professional_name: string | null
@@ -64,6 +66,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          club_member_id?: string | null
           company_id: string
           completed_at?: string | null
           confirm_token?: string
@@ -74,6 +77,7 @@ export type Database = {
           customer_phone?: string | null
           id?: string
           notes?: string | null
+          pagamento_tipo?: string
           price?: number | null
           professional_id: string
           professional_name?: string | null
@@ -85,6 +89,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          club_member_id?: string | null
           company_id?: string
           completed_at?: string | null
           confirm_token?: string
@@ -95,6 +100,7 @@ export type Database = {
           customer_phone?: string | null
           id?: string
           notes?: string | null
+          pagamento_tipo?: string
           price?: number | null
           professional_id?: string
           professional_name?: string | null
@@ -106,6 +112,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "appointment_club_member_id_fkey"
+            columns: ["club_member_id"]
+            isOneToOne: false
+            referencedRelation: "club_member"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "appointment_company_id_fkey"
             columns: ["company_id"]
@@ -223,11 +236,67 @@ export type Database = {
         }
         Relationships: []
       }
+      club_benefit_usage: {
+        Row: {
+          appointment_id: string | null
+          club_member_id: string
+          company_id: string
+          created_at: string
+          id: string
+          movimento: string
+          quantidade: number
+          updated_at: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          club_member_id: string
+          company_id: string
+          created_at?: string
+          id?: string
+          movimento?: string
+          quantidade?: number
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          club_member_id?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          movimento?: string
+          quantidade?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_benefit_usage_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_benefit_usage_club_member_id_fkey"
+            columns: ["club_member_id"]
+            isOneToOne: false
+            referencedRelation: "club_member"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_benefit_usage_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       club_member: {
         Row: {
           club_plan_id: string
           company_id: string
           created_at: string
+          creditos_restantes: number
           current_period_end: string | null
           customer_id: string
           id: string
@@ -239,6 +308,7 @@ export type Database = {
           club_plan_id: string
           company_id: string
           created_at?: string
+          creditos_restantes?: number
           current_period_end?: string | null
           customer_id: string
           id?: string
@@ -250,6 +320,7 @@ export type Database = {
           club_plan_id?: string
           company_id?: string
           created_at?: string
+          creditos_restantes?: number
           current_period_end?: string | null
           customer_id?: string
           id?: string
@@ -288,6 +359,7 @@ export type Database = {
           checkout_url: string | null
           company_id: string
           created_at: string
+          creditos_mensais: number
           id: string
           nome: string
           preco_cents: number
@@ -299,6 +371,7 @@ export type Database = {
           checkout_url?: string | null
           company_id: string
           created_at?: string
+          creditos_mensais?: number
           id?: string
           nome: string
           preco_cents?: number
@@ -310,6 +383,7 @@ export type Database = {
           checkout_url?: string | null
           company_id?: string
           created_at?: string
+          creditos_mensais?: number
           id?: string
           nome?: string
           preco_cents?: number
@@ -1548,6 +1622,29 @@ export type Database = {
         }[]
       }
       get_current_plan_slug: { Args: { _company_id: string }; Returns: string }
+      get_my_club_memberships: {
+        Args: { _company_id: string }
+        Returns: {
+          club_plan_id: string
+          company_id: string
+          creditos_mensais: number
+          creditos_restantes: number
+          current_period_end: string
+          id: string
+          plano_nome: string
+          status: string
+        }[]
+      }
+      get_public_club_plans: {
+        Args: { _company_id: string }
+        Returns: {
+          beneficios: Json
+          creditos_mensais: number
+          id: string
+          nome: string
+          preco_cents: number
+        }[]
+      }
       get_stripe_customer: {
         Args: { _company_id: string }
         Returns: {
@@ -1575,6 +1672,10 @@ export type Database = {
       mark_webhook_processed: {
         Args: { _error?: string; _stripe_event_id: string }
         Returns: undefined
+      }
+      redeem_club_benefit: {
+        Args: { _appointment_id: string; _club_member_id: string }
+        Returns: boolean
       }
       sync_stripe_subscription: {
         Args: {
