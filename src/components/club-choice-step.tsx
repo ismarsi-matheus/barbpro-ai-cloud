@@ -193,8 +193,35 @@ export function ClubChoiceStep({
               </p>
             </div>
           )}
+
+          {plans.length > 0 && onSubscribe && (
+            <div className="grid gap-3 sm:grid-cols-2 rounded-xl bg-muted/40 p-3">
+              <div>
+                <Label htmlFor="club-sub-name">Seu nome</Label>
+                <Input
+                  id="club-sub-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Nome completo"
+                />
+              </div>
+              <div>
+                <Label htmlFor="club-sub-phone">Telefone (WhatsApp)</Label>
+                <Input
+                  id="club-sub-phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="(11) 99999-9999"
+                />
+              </div>
+            </div>
+          )}
+
           {plans.map((p) => {
             const beneficios: string[] = Array.isArray(p.beneficios) ? p.beneficios : [];
+            const loadingThis = subscribingPlanId === p.id;
+            const canSubscribe =
+              !!onSubscribe && name.trim().length > 1 && phone.trim().length >= 6;
             return (
               <div
                 key={p.id}
@@ -222,9 +249,33 @@ export function ClubChoiceStep({
                     ))}
                   </ul>
                 )}
-                <p className="text-xs text-muted-foreground mt-3">
-                  Fale com a barbearia para ativar este plano.
-                </p>
+                {onSubscribe ? (
+                  <>
+                    <Button
+                      className="mt-4 w-full bg-[var(--brand)] text-white hover:bg-[var(--brand)]/90"
+                      disabled={!canSubscribe || !!subscribingPlanId}
+                      onClick={() =>
+                        onSubscribe(p, { name: name.trim(), phone: phone.trim() })
+                      }
+                    >
+                      {loadingThis ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-4 h-4 mr-2" />
+                      )}
+                      {loadingThis ? "Abrindo pagamento…" : "ASSINAR AGORA"}
+                    </Button>
+                    {!canSubscribe && (
+                      <p className="text-[11px] text-muted-foreground mt-2 text-center">
+                        Informe nome e telefone acima para assinar.
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Fale com a barbearia para ativar este plano.
+                  </p>
+                )}
               </div>
             );
           })}
