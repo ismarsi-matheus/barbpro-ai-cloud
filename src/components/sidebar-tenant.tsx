@@ -34,8 +34,10 @@ const GROUPS = [
     label: "Gestão",
     items: [
       { to: "/app/equipe", label: "Equipe", icon: Briefcase },
+      { to: "/app/assinatura", label: "Minha Assinatura", icon: CreditCard },
       { to: "/app/configuracoes", label: "Configurações", icon: Settings },
     ],
+
   },
 ];
 
