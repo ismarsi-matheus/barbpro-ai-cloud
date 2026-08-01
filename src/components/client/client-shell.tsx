@@ -17,7 +17,14 @@ import { cn } from "@/lib/utils";
 import { signOutClient } from "@/hooks/use-client-account";
 import { toast } from "sonner";
 
-export const CLIENT_NAV = [
+type ClientNavItem = {
+  to: string;
+  label: string;
+  icon: typeof Home;
+  exact?: boolean;
+};
+
+export const CLIENT_NAV: ClientNavItem[] = [
   { to: "/cliente", label: "Início", icon: Home, exact: true },
   { to: "/cliente/agendamentos", label: "Agendamentos", icon: Calendar },
   { to: "/cliente/historico", label: "Histórico", icon: History },
@@ -25,7 +32,7 @@ export const CLIENT_NAV = [
   { to: "/cliente/pagamentos", label: "Pagamentos", icon: CreditCard },
   { to: "/cliente/perfil", label: "Perfil", icon: User },
   { to: "/cliente/configuracoes", label: "Configurações", icon: Settings },
-] as const;
+];
 
 const MOBILE_NAV = CLIENT_NAV.filter((i) =>
   ["/cliente", "/cliente/agendamentos", "/cliente/clube", "/cliente/perfil"].includes(i.to),
