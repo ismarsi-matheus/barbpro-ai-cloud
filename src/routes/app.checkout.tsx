@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Star, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { createCheckoutSession } from "@/lib/stripe/checkout.functions";
+import { SUBSCRIPTION_PLAN_CATALOG } from "@/lib/subscription-plan-catalog";
 
 export const Route = createFileRoute("/app/checkout")({ component: CheckoutPage });
 
@@ -48,7 +49,10 @@ function CheckoutPage() {
         .eq("ativo", true)
         .order("ordem", { ascending: true });
       if (error) throw error;
-      return (data ?? []) as unknown as Plan[];
+      const activePlans = (data ?? []) as unknown as Plan[];
+      return activePlans.length > 0
+        ? activePlans
+        : SUBSCRIPTION_PLAN_CATALOG;
     },
   });
 
