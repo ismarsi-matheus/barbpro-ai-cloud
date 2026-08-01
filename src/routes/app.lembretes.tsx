@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Lock, MessageCircle, Calendar, Sparkles } from "lucide-react";
 import { format, parseISO, startOfDay, endOfDay, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { featureEnabled, normalizePlanSlug } from "@/lib/plan-features";
+import { useSubscription } from "@/hooks/use-subscription";
 
 export const Route = createFileRoute("/app/lembretes")({ component: LembretesPage });
 
