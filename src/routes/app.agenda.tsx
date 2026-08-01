@@ -172,6 +172,11 @@ function AgendaPage() {
                       >
                         <div className="font-semibold truncate">{format(parseISO(a.scheduled_at), "HH:mm")} {a.customer_name}</div>
                         <div className="truncate opacity-80">{a.service_name}</div>
+                        {a.pagamento_tipo === "clube" && (
+                          <div className="mt-0.5 inline-flex items-center gap-0.5 rounded bg-amber-500 text-white px-1 py-px text-[8px] font-bold tracking-wide">
+                            <Crown className="w-2.5 h-2.5" /> CLUBE
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
