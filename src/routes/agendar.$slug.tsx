@@ -28,10 +28,24 @@ import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/agendar/$slug")({
   component: AgendarPage,
-  validateSearch: (search: Record<string, unknown>): { servico?: string; profissional?: string } => {
-    const out: { servico?: string; profissional?: string } = {};
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    servico?: string;
+    profissional?: string;
+    club_session?: string;
+    club_cancel?: string;
+  } => {
+    const out: {
+      servico?: string;
+      profissional?: string;
+      club_session?: string;
+      club_cancel?: string;
+    } = {};
     if (typeof search["servico"] === "string") out.servico = search["servico"];
     if (typeof search["profissional"] === "string") out.profissional = search["profissional"];
+    if (typeof search["club_session"] === "string") out.club_session = search["club_session"];
+    if (typeof search["club_cancel"] === "string") out.club_cancel = search["club_cancel"];
     return out;
   },
   notFoundComponent: () => (
