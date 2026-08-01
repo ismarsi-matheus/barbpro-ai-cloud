@@ -149,9 +149,12 @@ function AgendarPage() {
     [membershipQuery.data],
   );
 
+  const usandoClube = pagamentoTipo === "clube" && !!membership;
+
   useEffect(() => {
     if (!membership && pagamentoTipo === "clube") setPagamentoTipo("normal");
   }, [membership, pagamentoTipo]);
+
 
 
 
