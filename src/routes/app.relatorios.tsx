@@ -18,7 +18,7 @@ import { format, subDays, startOfMonth, eachMonthOfInterval, subMonths, parseISO
 import { ptBR } from "date-fns/locale";
 import { formatBRL } from "@/lib/format";
 import { TrendingUp, TrendingDown, Percent, Receipt, Download, Lock } from "lucide-react";
-import { featureEnabled, normalizePlanSlug } from "@/lib/plan-features";
+import { useSubscription } from "@/hooks/use-subscription";
 
 export const Route = createFileRoute("/app/relatorios")({ component: RelPage });
 
