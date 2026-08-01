@@ -16,7 +16,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
-import { Scissors, Clock, CheckCircle2 } from "lucide-react";
+import { Scissors, Clock, CheckCircle2, Crown } from "lucide-react";
+import {
+  ClubChoiceStep,
+  type ClubMembership,
+  type ClubPlan,
+} from "@/components/club-choice-step";
 import { format, addDays, startOfDay, addMinutes } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -88,7 +93,7 @@ function AgendarPage() {
     retry: false,
   });
 
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
   const [serviceId, setServiceId] = useState<string>("");
   const [proId, setProId] = useState<string>("");
   const [date, setDate] = useState<Date>(startOfDay(new Date()));
@@ -100,6 +105,7 @@ function AgendarPage() {
   const [confirmed, setConfirmed] = useState<string | null>(null);
   const [clientSession, setClientSession] = useState<Session | null>(null);
   const [pagamentoTipo, setPagamentoTipo] = useState<"normal" | "clube">("normal");
+  const [chosenMembership, setChosenMembership] = useState<ClubMembership | null>(null);
 
 
   useEffect(() => {
@@ -141,19 +147,14 @@ function AgendarPage() {
     retry: false,
   });
 
-  const membership = useMemo(
-    () =>
-      (membershipQuery.data ?? []).find(
-        (m: any) => m.status === "ativo" && (m.creditos_restantes ?? 0) > 0,
-      ) ?? null,
-    [membershipQuery.data],
-  );
+  const memberships = (membershipQuery.data ?? []) as unknown as ClubMembership[];
+  const clubPlans = (clubPlansQuery.data ?? []) as unknown as ClubPlan[];
+  const companyHasClub = clubPlans.length > 0 || memberships.length > 0;
 
+  const membership = chosenMembership;
   const usandoClube = pagamentoTipo === "clube" && !!membership;
 
-  useEffect(() => {
-    if (!membership && pagamentoTipo === "clube") setPagamentoTipo("normal");
-  }, [membership, pagamentoTipo]);
+
 
 
 
@@ -412,6 +413,7 @@ function AgendarPage() {
         return;
       }
 
+      let clubeAplicado = usandoClube;
       if (usandoClube) {
         const { data: ok, error: rErr } = await supabase.rpc("redeem_club_benefit", {
           _appointment_id: appointmentPayload.id,
@@ -419,16 +421,29 @@ function AgendarPage() {
         });
         if (rErr || !ok) {
           console.error("[agendar] redeem club benefit failed", rErr);
-          toast.warning("Agendamento criado, mas o crédito do clube não pôde ser debitado.");
+          clubeAplicado = false;
+          // Reverte para agendamento normal para não deixar o preço zerado sem benefício.
+          await supabase
+            .from("appointment")
+            .update({ pagamento_tipo: "normal", club_member_id: null, price: service.price })
+            .eq("id", appointmentPayload.id);
+          toast.warning(
+            rErr?.message ??
+              "Agendamento criado, mas o benefício do Clube não pôde ser aplicado. Ele seguirá como pagamento normal.",
+          );
         }
         membershipQuery.refetch();
       }
 
       setSubmitting(false);
       setConfirmed(appointmentPayload.id);
-      toast.success(
-        usandoClube ? "Agendamento confirmado com benefício do Clube!" : "Agendamento confirmado!",
-      );
+      setPagamentoTipo(clubeAplicado ? "clube" : "normal");
+      if (clubeAplicado) {
+        toast.success("Agendamento confirmado com benefício do Clube!");
+      } else if (!usandoClube) {
+        toast.success("Agendamento confirmado!");
+      }
+
 
 
       // Dispara e-mail de confirmação (fire-and-forget)
@@ -504,6 +519,13 @@ function AgendarPage() {
             <p className="font-medium mt-1">
               {format(date, "EEEE, dd 'de' MMMM", { locale: ptBR })} às {time}
             </p>
+            {pagamentoTipo === "clube" && membership && (
+              <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[var(--brand)]/10 text-[var(--brand)] px-3 py-1 text-xs font-medium">
+                <Crown className="w-3.5 h-3.5" /> Benefício do Clube • {membership.plano_nome} •
+                saldo restante: {Math.max(0, (membership.creditos_restantes ?? 1) - 1)}
+              </div>
+            )}
+
             <p className="text-xs text-muted-foreground mt-4">
               Código: {confirmed.slice(0, 8)}
             </p>
@@ -540,17 +562,18 @@ function AgendarPage() {
 
       <main className="max-w-2xl mx-auto px-4 py-6">
         <div className="flex items-center gap-2 mb-6 text-xs text-muted-foreground">
-          {[1, 2, 3, 4, 5].map((s) => (
+          {(companyHasClub ? [1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 6]).map((s, i, arr) => (
             <div key={s} className="flex items-center gap-2">
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center ${step >= s ? "bg-[var(--brand)] text-white" : "bg-muted"}`}
+                className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${step >= s ? "bg-[var(--brand)] text-white" : "bg-muted"}`}
               >
-                {s}
+                {s === 5 ? <Crown className="w-3 h-3" /> : i + 1}
               </div>
-              {s < 5 && <div className="w-4 h-px bg-muted" />}
+              {i < arr.length - 1 && <div className="w-4 h-px bg-muted" />}
             </div>
           ))}
         </div>
+
 
         {step === 1 && (
           <Card>
@@ -689,7 +712,7 @@ function AgendarPage() {
                       disabled={taken}
                       onClick={() => {
                         setTime(t);
-                        setStep(5);
+                        setStep(companyHasClub ? 5 : 6);
                       }}
                       className={`p-2 rounded-md border transition ${
                         taken
@@ -713,6 +736,23 @@ function AgendarPage() {
         )}
 
         {step === 5 && (
+          <ClubChoiceStep
+            session={clientSession}
+            memberships={memberships}
+            loadingMembership={!!clientSession && membershipQuery.isLoading}
+            plans={clubPlans}
+            loadingPlans={clubPlansQuery.isLoading}
+            servicePrice={Number(service?.price ?? 0)}
+            onBack={() => setStep(4)}
+            onContinue={({ useClub, membership: m }) => {
+              setChosenMembership(useClub ? m : null);
+              setPagamentoTipo(useClub ? "clube" : "normal");
+              setStep(6);
+            }}
+          />
+        )}
+
+        {step === 6 && (
           <Card>
             <CardHeader>
               <CardTitle>Seus dados</CardTitle>
@@ -722,7 +762,7 @@ function AgendarPage() {
               <div className="p-3 rounded-md bg-muted/50 text-sm space-y-1">
                 <div>
                   <Badge variant="secondary">Serviço</Badge> {service?.name} •{" "}
-                  {service ? formatBRL(Number(service.price)) : ""}
+                  {usandoClube ? "Benefício do Clube" : service ? formatBRL(Number(service.price)) : ""}
                 </div>
                 <div>
                   <Badge variant="secondary">Profissional</Badge> {pro?.name}
@@ -733,56 +773,23 @@ function AgendarPage() {
                 </div>
               </div>
 
-              {membership ? (
-                <div className="space-y-2">
-                  <Label>Como deseja agendar?</Label>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <button
-                      type="button"
-                      onClick={() => setPagamentoTipo("normal")}
-                      className={`text-left p-3 rounded-md border transition ${
-                        pagamentoTipo === "normal"
-                          ? "border-[var(--brand)] bg-[var(--brand)]/5"
-                          : "border-border hover:border-[var(--brand)]"
-                      }`}
-                    >
-                      <div className="font-medium text-sm">Agendamento normal</div>
-                      <div className="text-xs text-muted-foreground">
-                        {service ? formatBRL(Number(service.price)) : ""} no atendimento
-                      </div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPagamentoTipo("clube")}
-                      className={`text-left p-3 rounded-md border transition ${
-                        pagamentoTipo === "clube"
-                          ? "border-[var(--brand)] bg-[var(--brand)]/5"
-                          : "border-border hover:border-[var(--brand)]"
-                      }`}
-                    >
-                      <div className="font-medium text-sm">
-                        Utilizar benefício do Clube
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {(membership as any).plano_nome} • {(membership as any).creditos_restantes} crédito(s) restante(s)
-                      </div>
-                    </button>
-                  </div>
-                  {pagamentoTipo === "clube" && (
-                    <p className="text-xs text-muted-foreground">
-                      1 crédito será debitado ao confirmar. Se o agendamento for cancelado, o
-                      crédito volta automaticamente.
+              {usandoClube && membership && (
+                <div className="p-3 rounded-md border border-[var(--brand)]/30 bg-[var(--brand)]/5 text-sm flex items-start gap-2">
+                  <Crown className="w-4 h-4 text-[var(--brand)] mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-medium">
+                      Benefício do Clube • {membership.plano_nome}
                     </p>
-                  )}
+                    <p className="text-xs text-muted-foreground">
+                      1 crédito será debitado ao confirmar ({membership.creditos_restantes}{" "}
+                      disponível(is)). Se o agendamento for cancelado, o crédito volta
+                      automaticamente.
+                    </p>
+                  </div>
                 </div>
-              ) : (clubPlansQuery.data?.length ?? 0) > 0 ? (
-                <div className="p-3 rounded-md border border-dashed text-sm">
-                  <span className="font-medium">Esta barbearia tem Clube de Assinatura.</span>{" "}
-                  <span className="text-muted-foreground">
-                    Assine para agendar usando créditos mensais.
-                  </span>
-                </div>
-              ) : null}
+              )}
+
+
 
               <div>
                 <Label>Seu nome</Label>
@@ -807,7 +814,11 @@ function AgendarPage() {
                 />
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setStep(4)} disabled={submitting}>
+                <Button
+                  variant="outline"
+                  onClick={() => setStep(companyHasClub ? 5 : 4)}
+                  disabled={submitting}
+                >
                   ← Voltar
                 </Button>
                 <Button

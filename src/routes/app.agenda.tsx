@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, Plus, Filter, Receipt, Bell, UserX } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Filter, Receipt, Bell, UserX, Crown } from "lucide-react";
 import { format, startOfWeek, addDays, isSameDay, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -56,6 +56,26 @@ function AgendaPage() {
       return data ?? [];
     },
   });
+
+  // Mapa de assinaturas do Clube (para exibir o selo CLUBE + plano usado)
+  const { data: clubMembers = [] } = useQuery({
+    queryKey: ["club-members-map", cid],
+    enabled: !!cid,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("club_member")
+        .select("id, club_plan:club_plan_id(nome)")
+        .eq("company_id", cid!);
+      return data ?? [];
+    },
+  });
+
+  const clubPlanById = useMemo(() => {
+    const m = new Map<string, string>();
+    (clubMembers as any[]).forEach((c) => m.set(c.id, c.club_plan?.nome ?? "Clube"));
+    return m;
+  }, [clubMembers]);
+
 
   const profColor = useMemo(() => {
     const m = new Map<string, string>();
@@ -152,6 +172,11 @@ function AgendaPage() {
                       >
                         <div className="font-semibold truncate">{format(parseISO(a.scheduled_at), "HH:mm")} {a.customer_name}</div>
                         <div className="truncate opacity-80">{a.service_name}</div>
+                        {a.pagamento_tipo === "clube" && (
+                          <div className="mt-0.5 inline-flex items-center gap-0.5 rounded bg-amber-500 text-white px-1 py-px text-[8px] font-bold tracking-wide">
+                            <Crown className="w-2.5 h-2.5" /> CLUBE
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -187,7 +212,19 @@ function AgendaPage() {
               <p><b>Serviço:</b> {selected.service_name}</p>
               <p><b>Profissional:</b> {selected.professional_name}</p>
               <p><b>Status:</b> {selected.status}</p>
-              {selected.price && <p><b>Valor estimado:</b> R$ {Number(selected.price).toFixed(2)}</p>}
+              {selected.pagamento_tipo === "clube" ? (
+                <div className="rounded-md border border-amber-300 bg-amber-50 p-2 space-y-0.5">
+                  <p className="inline-flex items-center gap-1 font-semibold text-amber-800">
+                    <Crown className="w-3.5 h-3.5" /> CLUBE
+                  </p>
+                  <p className="text-amber-900">
+                    Plano utilizado: <b>{clubPlanById.get(selected.club_member_id) ?? "Clube"}</b>
+                  </p>
+                  <p className="text-xs text-amber-800">Benefício utilizado (sem cobrança).</p>
+                </div>
+              ) : (
+                selected.price && <p><b>Valor estimado:</b> R$ {Number(selected.price).toFixed(2)}</p>
+              )}
             </div>
           )}
           <DialogFooter className="gap-2 sm:gap-2 flex-col sm:flex-row">

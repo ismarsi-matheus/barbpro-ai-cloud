@@ -1609,11 +1609,14 @@ export type Database = {
       get_client_appointments: {
         Args: never
         Returns: {
+          club_creditos_restantes: number
+          club_plan_nome: string
           company_id: string
           company_name: string
           company_slug: string
           duration_minutes: number
           id: string
+          pagamento_tipo: string
           price: number
           professional_name: string
           scheduled_at: string

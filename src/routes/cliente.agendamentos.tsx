@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Crown } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -57,27 +57,44 @@ function AgendamentosPage() {
     }
   };
 
-  const renderCard = (a: any, allowCancel: boolean) => (
-    <Card key={a.id}>
-      <CardContent className="pt-5 space-y-2">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <div className="font-medium">{a.service_name}</div>
-            <div className="text-sm text-muted-foreground">com {a.professional_name}</div>
+  const renderCard = (a: any, allowCancel: boolean) => {
+    const clube = a.pagamento_tipo === "clube";
+    return (
+      <Card key={a.id}>
+        <CardContent className="pt-5 space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <div className="font-medium">{a.service_name}</div>
+              <div className="text-sm text-muted-foreground">com {a.professional_name}</div>
+            </div>
+            <Badge variant={a.status === "cancelado" ? "destructive" : "secondary"}>{a.status}</Badge>
           </div>
-          <Badge variant={a.status === "cancelado" ? "destructive" : "secondary"}>{a.status}</Badge>
-        </div>
-        <div className="text-sm">{format(new Date(a.scheduled_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</div>
-        <div className="text-sm text-muted-foreground">{a.company_name}</div>
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-sm font-semibold">{formatBRL(a.price)}</span>
-          {allowCancel && (
-            <Button size="sm" variant="outline" onClick={() => cancel(a.id)}>Cancelar</Button>
+          <div className="text-sm">{format(new Date(a.scheduled_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</div>
+          <div className="text-sm text-muted-foreground">{a.company_name}</div>
+          {clube && (
+            <div className="rounded-md border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900 space-y-0.5">
+              <p className="inline-flex items-center gap-1 font-semibold">
+                <Crown className="w-3.5 h-3.5" /> Benefício do Clube utilizado
+              </p>
+              {a.club_plan_nome && <p>Plano: {a.club_plan_nome}</p>}
+              {a.club_creditos_restantes != null && (
+                <p>Saldo restante: {a.club_creditos_restantes} benefício(s)</p>
+              )}
+            </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-sm font-semibold">
+              {clube ? "Sem cobrança (Clube)" : formatBRL(a.price)}
+            </span>
+            {allowCancel && (
+              <Button size="sm" variant="outline" onClick={() => cancel(a.id)}>Cancelar</Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
 
   return (
     <div className="min-h-screen bg-[var(--surface)]">
