@@ -413,6 +413,7 @@ function AgendarPage() {
         return;
       }
 
+      let clubeAplicado = usandoClube;
       if (usandoClube) {
         const { data: ok, error: rErr } = await supabase.rpc("redeem_club_benefit", {
           _appointment_id: appointmentPayload.id,
@@ -420,16 +421,29 @@ function AgendarPage() {
         });
         if (rErr || !ok) {
           console.error("[agendar] redeem club benefit failed", rErr);
-          toast.warning("Agendamento criado, mas o crédito do clube não pôde ser debitado.");
+          clubeAplicado = false;
+          // Reverte para agendamento normal para não deixar o preço zerado sem benefício.
+          await supabase
+            .from("appointment")
+            .update({ pagamento_tipo: "normal", club_member_id: null, price: service.price })
+            .eq("id", appointmentPayload.id);
+          toast.warning(
+            rErr?.message ??
+              "Agendamento criado, mas o benefício do Clube não pôde ser aplicado. Ele seguirá como pagamento normal.",
+          );
         }
         membershipQuery.refetch();
       }
 
       setSubmitting(false);
       setConfirmed(appointmentPayload.id);
-      toast.success(
-        usandoClube ? "Agendamento confirmado com benefício do Clube!" : "Agendamento confirmado!",
-      );
+      setPagamentoTipo(clubeAplicado ? "clube" : "normal");
+      if (clubeAplicado) {
+        toast.success("Agendamento confirmado com benefício do Clube!");
+      } else if (!usandoClube) {
+        toast.success("Agendamento confirmado!");
+      }
+
 
 
       // Dispara e-mail de confirmação (fire-and-forget)
