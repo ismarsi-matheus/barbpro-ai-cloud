@@ -10,7 +10,7 @@ const now = Math.floor(Date.now() / 1000);
 const DAY = 86400;
 
 const meta = { kind: "club_membership", company_id: COMPANY, club_plan_id: PLAN, customer_id: CUSTOMER, user_id: "", creditos_mensais: "4", slug: "x" };
-const sub = (o: any = {}) => ({ id: SUB, status: "active", customer: "cus_test", cancel_at_period_end: false, metadata: { ...meta, ...(o.metadata ?? {}) }, items: { data: [{ current_period_start: o.start ?? now, current_period_end: o.end ?? now + 30 * DAY }] }, ...o }) as any;
+const sub = (o: any = {}) => ({ id: SUB, status: "active", customer: "cus_test", cancel_at_period_end: false, metadata: { ...meta, ...(o.metadata ?? {}) }, items: { data: [{ current_period_start: o.start ?? now, current_period_end: o.end ?? now + 30 * DAY }] }, status: o.status ?? "active", cancel_at_period_end: o.cancel_at_period_end ?? false }) as any;
 
 const show = async (label: string) => {
   const { data } = await admin.from("club_member").select("status,creditos_restantes,beneficios_utilizados,current_period_end,cancel_at_period_end,club_plan_id").eq("stripe_subscription_id", SUB).maybeSingle();
