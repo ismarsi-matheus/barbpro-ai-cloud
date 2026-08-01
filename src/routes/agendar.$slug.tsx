@@ -176,6 +176,15 @@ function AgendarPage() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // Após confirmar, clientes autenticados vão direto para a Área do Cliente.
+  useEffect(() => {
+    if (!confirmed || !clientSession) return;
+    const t = setTimeout(() => {
+      navigate({ to: "/cliente/agendamentos" });
+    }, 3500);
+    return () => clearTimeout(t);
+  }, [confirmed, clientSession, navigate]);
+
   useEffect(() => {
     if (!clientSession) return;
     supabase.from("client_profile").select("full_name,phone,email").eq("user_id", clientSession.user.id).maybeSingle().then(({ data }) => {
@@ -751,10 +760,18 @@ function AgendarPage() {
               <Scissors className="w-6 h-6" />
             </div>
           )}
-          <div>
+          <div className="min-w-0">
             <h1 className="text-xl font-bold">{company.nome_fantasia || company.name}</h1>
             <p className="text-sm opacity-80">Agendamento online</p>
           </div>
+          <Button
+            asChild
+            size="sm"
+            variant="outline"
+            className="ml-auto shrink-0 border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+          >
+            <Link to="/cliente">Minha Conta</Link>
+          </Button>
         </div>
       </header>
 
