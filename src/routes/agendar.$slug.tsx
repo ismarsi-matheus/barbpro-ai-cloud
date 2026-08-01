@@ -118,6 +118,13 @@ function AgendarPage() {
   const [prefilled, setPrefilled] = useState(false);
 
 
+  // Cliente logado (ou recém-autenticado) em barbearia sem Clube: pula a etapa 5
+  useEffect(() => {
+    if (step === 5 && (clientSession || identMode === "auth") && !companyHasClub) {
+      setStep(6);
+    }
+  });
+
   // "Agendar novamente": pré-seleciona serviço/profissional vindos da Área do Cliente
   useEffect(() => {
     if (prefilled) return;
@@ -751,7 +758,7 @@ function AgendarPage() {
                 })}
               </div>
               {busyQuery.isLoading && <p className="text-xs text-muted-foreground mt-2">Verificando horários…</p>}
-              <Button variant="ghost" size="sm" className="mt-4" onClick={() => setStep(3)}>
+              <Button variant="ghost" size="sm" className="mt-4" onClick={() => { setIdentMode(null); setStep(3); }}>
                 ← Voltar
               </Button>
             </CardContent>
@@ -855,7 +862,10 @@ function AgendarPage() {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setStep(5)}
+                  onClick={() => {
+                    setIdentMode(null);
+                    setStep(companyHasClub || !clientSession ? 5 : 4);
+                  }}
                   disabled={submitting}
                 >
                   ← Voltar
