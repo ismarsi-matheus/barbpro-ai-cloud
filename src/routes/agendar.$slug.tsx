@@ -793,7 +793,11 @@ function AgendarPage() {
                 />
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setStep(4)} disabled={submitting}>
+                <Button
+                  variant="outline"
+                  onClick={() => setStep(companyHasClub ? 5 : 4)}
+                  disabled={submitting}
+                >
                   ← Voltar
                 </Button>
                 <Button
