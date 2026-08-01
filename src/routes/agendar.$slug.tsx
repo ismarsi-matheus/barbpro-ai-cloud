@@ -366,10 +366,13 @@ function AgendarPage() {
         customer_phone: customerPhone,
         professional_name: pro.name,
         service_name: service.name,
-        price: service.price,
+        price: usandoClube ? 0 : service.price,
         scheduled_at: scheduledAt.toISOString(),
         source: "online" as const,
         status: "agendado" as const,
+        pagamento_tipo: usandoClube ? "clube" : "normal",
+        club_member_id: usandoClube ? (membership as any).id : null,
+
       };
 
       const missingRequired = ([
