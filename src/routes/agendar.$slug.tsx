@@ -691,7 +691,7 @@ function AgendarPage() {
                       disabled={taken}
                       onClick={() => {
                         setTime(t);
-                        setStep(5);
+                        setStep(companyHasClub ? 5 : 6);
                       }}
                       className={`p-2 rounded-md border transition ${
                         taken
