@@ -57,6 +57,26 @@ function AgendaPage() {
     },
   });
 
+  // Mapa de assinaturas do Clube (para exibir o selo CLUBE + plano usado)
+  const { data: clubMembers = [] } = useQuery({
+    queryKey: ["club-members-map", cid],
+    enabled: !!cid,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("club_member")
+        .select("id, club_plan:club_plan_id(nome)")
+        .eq("company_id", cid!);
+      return data ?? [];
+    },
+  });
+
+  const clubPlanById = useMemo(() => {
+    const m = new Map<string, string>();
+    (clubMembers as any[]).forEach((c) => m.set(c.id, c.club_plan?.nome ?? "Clube"));
+    return m;
+  }, [clubMembers]);
+
+
   const profColor = useMemo(() => {
     const m = new Map<string, string>();
     pros.forEach((p: any, i: number) => m.set(p.id, COLORS[i % COLORS.length]));
