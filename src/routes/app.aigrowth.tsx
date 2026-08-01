@@ -24,8 +24,9 @@ const ICONS: Record<string, any> = {
 function AIPage() {
   const { data: company } = useCurrentCompany();
   const cid = company?.id;
-  const planSlug = normalizePlanSlug(company?.selected_plan_slug ?? company?.plano);
-  const unlocked = featureEnabled(planSlug, "aiGrowth");
+  const { can } = useSubscription();
+  const unlocked = can("aiGrowth");
+
 
   const { data: insights = [] } = useQuery({
     queryKey: ["ai-insights", cid],
