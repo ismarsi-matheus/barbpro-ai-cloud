@@ -17,22 +17,15 @@ import { cn } from "@/lib/utils";
 import { signOutClient } from "@/hooks/use-client-account";
 import { toast } from "sonner";
 
-type ClientNavItem = {
-  to: string;
-  label: string;
-  icon: typeof Home;
-  exact?: boolean;
-};
-
-export const CLIENT_NAV: ClientNavItem[] = [
+export const CLIENT_NAV = [
   { to: "/cliente", label: "Início", icon: Home, exact: true },
-  { to: "/cliente/agendamentos", label: "Agendamentos", icon: Calendar },
-  { to: "/cliente/historico", label: "Histórico", icon: History },
-  { to: "/cliente/clube", label: "Clube", icon: Crown },
-  { to: "/cliente/pagamentos", label: "Pagamentos", icon: CreditCard },
-  { to: "/cliente/perfil", label: "Perfil", icon: User },
-  { to: "/cliente/configuracoes", label: "Configurações", icon: Settings },
-];
+  { to: "/cliente/agendamentos", label: "Agendamentos", icon: Calendar, exact: false },
+  { to: "/cliente/historico", label: "Histórico", icon: History, exact: false },
+  { to: "/cliente/clube", label: "Clube", icon: Crown, exact: false },
+  { to: "/cliente/pagamentos", label: "Pagamentos", icon: CreditCard, exact: false },
+  { to: "/cliente/perfil", label: "Perfil", icon: User, exact: false },
+  { to: "/cliente/configuracoes", label: "Configurações", icon: Settings, exact: false },
+] as const;
 
 const MOBILE_NAV = CLIENT_NAV.filter((i) =>
   ["/cliente", "/cliente/agendamentos", "/cliente/clube", "/cliente/perfil"].includes(i.to),
