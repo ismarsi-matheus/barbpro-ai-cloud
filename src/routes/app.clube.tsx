@@ -17,14 +17,15 @@ import { FormDialog } from "@/components/form-dialog";
 import { Plus, Pencil, Trash2, Copy, Lock, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatBRL } from "@/lib/format";
-import { featureEnabled, normalizePlanSlug } from "@/lib/plan-features";
+import { useSubscription } from "@/hooks/use-subscription";
 
 export const Route = createFileRoute("/app/clube")({ component: ClubePage });
 
 function ClubePage() {
   const { data: company } = useCurrentCompany();
-  const planSlug = normalizePlanSlug((company as any)?.selected_plan_slug ?? (company as any)?.plano);
-  const allowed = featureEnabled(planSlug, "clubeAssinatura");
+  const { can } = useSubscription();
+  const allowed = can("clubeAssinatura");
+
   const cid = company?.id;
 
   if (!allowed) {
