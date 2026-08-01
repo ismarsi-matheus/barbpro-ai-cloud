@@ -10,7 +10,7 @@ import { Sparkles, AlertTriangle, TrendingUp, Calendar, Users, ArrowRight } from
 import { formatBRL } from "@/lib/format";
 import { toast } from "sonner";
 import { subDays, startOfMonth } from "date-fns";
-import { featureEnabled, normalizePlanSlug } from "@/lib/plan-features";
+import { useSubscription } from "@/hooks/use-subscription";
 
 export const Route = createFileRoute("/app/aigrowth")({ component: AIPage });
 
