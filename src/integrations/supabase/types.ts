@@ -1426,6 +1426,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_subscription_to_company: {
+        Args: {
+          _company_id: string
+          _period_end: string
+          _status: string
+          _trial_end: string
+        }
+        Returns: undefined
+      }
       cancel_appointment_by_token: {
         Args: { _token: string }
         Returns: boolean

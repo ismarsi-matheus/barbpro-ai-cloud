@@ -1,0 +1,2 @@
+REVOKE ALL ON FUNCTION public.apply_subscription_to_company(uuid, text, timestamptz, timestamptz) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.apply_subscription_to_company(uuid, text, timestamptz, timestamptz) TO service_role;
