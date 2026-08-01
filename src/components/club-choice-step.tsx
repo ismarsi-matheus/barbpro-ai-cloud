@@ -307,12 +307,27 @@ export function ClubChoiceStep({
         <CardDescription>Sua assinatura nesta barbearia</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {processingPayment && (
+          <div className="rounded-xl border border-[var(--brand)]/40 bg-[var(--brand)]/5 p-4 flex items-center gap-3">
+            <Loader2 className="w-5 h-5 animate-spin text-[var(--brand)]" />
+            <div>
+              <p className="font-medium text-sm">Confirmando seu pagamento…</p>
+              <p className="text-xs text-muted-foreground">
+                Assim que a assinatura for ativada, seu agendamento continua exatamente de onde
+                parou.
+              </p>
+            </div>
+          </div>
+        )}
+
         {loadingMembership && (
           <div className="space-y-3">
             <Skeleton className="h-20 w-full rounded-xl" />
             <Skeleton className="h-10 w-full rounded-md" />
           </div>
         )}
+
+
 
         {!loadingMembership && !active && (
           <div className="space-y-4">
