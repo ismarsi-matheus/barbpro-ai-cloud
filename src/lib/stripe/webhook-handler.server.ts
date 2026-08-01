@@ -228,6 +228,13 @@ async function dispatch(evt: NormalizedEvent, canonicalType: string): Promise<vo
       return handleSubscriptionUpsert(object as Stripe.Subscription);
     case "customer.subscription.deleted": {
       const sub = object as Stripe.Subscription;
+      const { isClubMetadata, cancelClubMembershipBySubscription } = await import(
+        "@/lib/club/club.server"
+      );
+      if (isClubMetadata(sub.metadata)) {
+        await cancelClubMembershipBySubscription(sub.id);
+        return;
+      }
       await updateSubscriptionStatus(sub.id, "canceled");
       return;
     }
