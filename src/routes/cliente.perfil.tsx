@@ -72,18 +72,27 @@ function PerfilPage() {
     const data = profileQ.data as Record<string, unknown> | null | undefined;
     if (!session) return;
     if (data) {
+      const notif = (data["notifications"] ?? {}) as Record<string, unknown>;
+      const str = (k: string) => (data[k] as string | null) ?? "";
+      const bool = (k: string) => notif[k] !== false;
       setForm({
-        ...EMPTY,
-        ...Object.fromEntries(
-          Object.keys(EMPTY).map((k) => [
-            k,
-            typeof EMPTY[k as keyof typeof EMPTY] === "boolean"
-              ? (data[k] ?? true)
-              : ((data[k] as string | null) ?? ""),
-          ]),
-        ),
-        email: (data["email"] as string) || session.user.email || "",
-      } as typeof EMPTY);
+        full_name: str("full_name"),
+        phone: str("phone"),
+        email: str("email") || session.user.email || "",
+        cpf: str("cpf"),
+        birthdate: str("birthdate"),
+        cep: str("cep"),
+        endereco: str("endereco"),
+        cidade: str("cidade"),
+        estado: str("estado"),
+        photo_url: str("photo_url"),
+        favorite_company_id: str("favorite_company_id"),
+        favorite_professional_id: str("favorite_professional_id"),
+        favorite_service_id: str("favorite_service_id"),
+        notify_email: bool("email"),
+        notify_whatsapp: bool("whatsapp"),
+        notify_reminders: bool("reminders"),
+      });
     } else {
       setForm((f) => ({ ...f, email: session.user.email ?? "" }));
     }
@@ -141,9 +150,11 @@ function PerfilPage() {
       favorite_company_id: form.favorite_company_id || null,
       favorite_professional_id: form.favorite_professional_id || null,
       favorite_service_id: form.favorite_service_id || null,
-      notify_email: form.notify_email,
-      notify_whatsapp: form.notify_whatsapp,
-      notify_reminders: form.notify_reminders,
+      notifications: {
+        email: form.notify_email,
+        whatsapp: form.notify_whatsapp,
+        reminders: form.notify_reminders,
+      },
     };
     const { error } = await supabase
       .from("client_profile")
