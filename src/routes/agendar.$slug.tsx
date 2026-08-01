@@ -22,11 +22,18 @@ import {
   type ClubMembership,
   type ClubPlan,
 } from "@/components/club-choice-step";
+import { IdentificationStep } from "@/components/client/identification-step";
 import { format, addDays, startOfDay, addMinutes } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/agendar/$slug")({
   component: AgendarPage,
+  validateSearch: (search: Record<string, unknown>): { servico?: string; profissional?: string } => {
+    const out: { servico?: string; profissional?: string } = {};
+    if (typeof search["servico"] === "string") out.servico = search["servico"];
+    if (typeof search["profissional"] === "string") out.profissional = search["profissional"];
+    return out;
+  },
   notFoundComponent: () => (
     <div className="min-h-screen flex items-center justify-center bg-[var(--surface)] text-center px-4">
       <div>
@@ -44,6 +51,7 @@ const formatBRL = (n: number) =>
 
 function AgendarPage() {
   const { slug } = Route.useParams();
+  const search = Route.useSearch();
 
   const companyQuery = useQuery({
     queryKey: ["public-company", slug],
@@ -106,7 +114,30 @@ function AgendarPage() {
   const [clientSession, setClientSession] = useState<Session | null>(null);
   const [pagamentoTipo, setPagamentoTipo] = useState<"normal" | "clube">("normal");
   const [chosenMembership, setChosenMembership] = useState<ClubMembership | null>(null);
+  // Identificação (etapa 5): "auth" = cliente logado, "guest" = visitante
+  const [identMode, setIdentMode] = useState<"auth" | "guest" | null>(null);
+  const [prefilled, setPrefilled] = useState(false);
 
+
+  // Cliente logado (ou recém-autenticado) em barbearia sem Clube: pula a etapa 5
+  useEffect(() => {
+    if (step === 5 && (clientSession || identMode === "auth") && !companyHasClub) {
+      setStep(6);
+    }
+  });
+
+  // "Agendar novamente": pré-seleciona serviço/profissional vindos da Área do Cliente
+  useEffect(() => {
+    if (prefilled) return;
+    if (!servicesQuery.data || !proQuery.data) return;
+    const svc = search.servico && servicesQuery.data.find((s) => s.id === search.servico);
+    const prof = search.profissional && proQuery.data.find((p) => p.id === search.profissional);
+    if (svc) setServiceId(svc.id);
+    if (prof) setProId(prof.id);
+    if (svc && prof) setStep(3);
+    else if (svc) setStep(2);
+    if (svc || prof) setPrefilled(true);
+  }, [servicesQuery.data, proQuery.data, search.servico, search.profissional, prefilled]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setClientSession(data.session));
@@ -562,7 +593,7 @@ function AgendarPage() {
 
       <main className="max-w-2xl mx-auto px-4 py-6">
         <div className="flex items-center gap-2 mb-6 text-xs text-muted-foreground">
-          {(companyHasClub ? [1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 6]).map((s, i, arr) => (
+          {[1, 2, 3, 4, 5, 6].map((s, i, arr) => (
             <div key={s} className="flex items-center gap-2">
               <div
                 className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${step >= s ? "bg-[var(--brand)] text-white" : "bg-muted"}`}
@@ -712,7 +743,7 @@ function AgendarPage() {
                       disabled={taken}
                       onClick={() => {
                         setTime(t);
-                        setStep(companyHasClub ? 5 : 6);
+                        setStep(5);
                       }}
                       className={`p-2 rounded-md border transition ${
                         taken
@@ -728,14 +759,27 @@ function AgendarPage() {
                 })}
               </div>
               {busyQuery.isLoading && <p className="text-xs text-muted-foreground mt-2">Verificando horários…</p>}
-              <Button variant="ghost" size="sm" className="mt-4" onClick={() => setStep(3)}>
+              <Button variant="ghost" size="sm" className="mt-4" onClick={() => { setIdentMode(null); setStep(3); }}>
                 ← Voltar
               </Button>
             </CardContent>
           </Card>
         )}
 
-        {step === 5 && (
+        {step === 5 && !clientSession && identMode === null && (
+          <IdentificationStep
+            onBack={() => setStep(4)}
+            onAuthenticated={() => setIdentMode("auth")}
+            onGuest={() => {
+              setIdentMode("guest");
+              setPagamentoTipo("normal");
+              setChosenMembership(null);
+              setStep(6);
+            }}
+          />
+        )}
+
+        {step === 5 && (clientSession || identMode === "auth") && companyHasClub && (
           <ClubChoiceStep
             session={clientSession}
             memberships={memberships}
@@ -743,7 +787,10 @@ function AgendarPage() {
             plans={clubPlans}
             loadingPlans={clubPlansQuery.isLoading}
             servicePrice={Number(service?.price ?? 0)}
-            onBack={() => setStep(4)}
+            onBack={() => {
+              setIdentMode(null);
+              setStep(4);
+            }}
             onContinue={({ useClub, membership: m }) => {
               setChosenMembership(useClub ? m : null);
               setPagamentoTipo(useClub ? "clube" : "normal");
@@ -816,7 +863,10 @@ function AgendarPage() {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setStep(companyHasClub ? 5 : 4)}
+                  onClick={() => {
+                    setIdentMode(null);
+                    setStep(companyHasClub || !clientSession ? 5 : 4);
+                  }}
                   disabled={submitting}
                 >
                   ← Voltar

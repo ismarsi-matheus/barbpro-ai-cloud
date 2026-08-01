@@ -149,6 +149,67 @@ export type Database = {
           },
         ]
       }
+      appointment_review: {
+        Row: {
+          appointment_id: string
+          comment: string | null
+          company_id: string
+          created_at: string
+          customer_id: string | null
+          id: string
+          photos: Json
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appointment_id: string
+          comment?: string | null
+          company_id: string
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          photos?: Json
+          rating: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appointment_id?: string
+          comment?: string | null
+          company_id?: string
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          photos?: Json
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_review_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: true
+            referencedRelation: "appointment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_review_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_review_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customer"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_event_log: {
         Row: {
           buyer_email: string | null
@@ -188,6 +249,91 @@ export type Database = {
         }
         Relationships: []
       }
+      client_payment: {
+        Row: {
+          amount_cents: number
+          card_brand: string | null
+          card_last4: string | null
+          club_member_id: string | null
+          company_id: string | null
+          created_at: string
+          currency: string
+          customer_id: string | null
+          descricao: string
+          external_id: string | null
+          id: string
+          metodo: string | null
+          paid_at: string | null
+          provider: string
+          receipt_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents?: number
+          card_brand?: string | null
+          card_last4?: string | null
+          club_member_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          descricao?: string
+          external_id?: string | null
+          id?: string
+          metodo?: string | null
+          paid_at?: string | null
+          provider?: string
+          receipt_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          card_brand?: string | null
+          card_last4?: string | null
+          club_member_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          descricao?: string
+          external_id?: string | null
+          id?: string
+          metodo?: string | null
+          paid_at?: string | null
+          provider?: string
+          receipt_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_payment_club_member_id_fkey"
+            columns: ["club_member_id"]
+            isOneToOne: false
+            referencedRelation: "club_member"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_payment_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_payment_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customer"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_profile: {
         Row: {
           birthdate: string | null
@@ -198,9 +344,15 @@ export type Database = {
           email: string | null
           endereco: string | null
           estado: string | null
+          favorite_company_id: string | null
+          favorite_professional_id: string | null
+          favorite_service_id: string | null
           full_name: string
+          locale: string
+          notifications: Json
           phone: string | null
           photo_url: string | null
+          theme: string
           updated_at: string
           user_id: string
         }
@@ -213,9 +365,15 @@ export type Database = {
           email?: string | null
           endereco?: string | null
           estado?: string | null
+          favorite_company_id?: string | null
+          favorite_professional_id?: string | null
+          favorite_service_id?: string | null
           full_name?: string
+          locale?: string
+          notifications?: Json
           phone?: string | null
           photo_url?: string | null
+          theme?: string
           updated_at?: string
           user_id: string
         }
@@ -228,13 +386,41 @@ export type Database = {
           email?: string | null
           endereco?: string | null
           estado?: string | null
+          favorite_company_id?: string | null
+          favorite_professional_id?: string | null
+          favorite_service_id?: string | null
           full_name?: string
+          locale?: string
+          notifications?: Json
           phone?: string | null
           photo_url?: string | null
+          theme?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "client_profile_favorite_company_id_fkey"
+            columns: ["favorite_company_id"]
+            isOneToOne: false
+            referencedRelation: "company"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_profile_favorite_professional_id_fkey"
+            columns: ["favorite_professional_id"]
+            isOneToOne: false
+            referencedRelation: "professional"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_profile_favorite_service_id_fkey"
+            columns: ["favorite_service_id"]
+            isOneToOne: false
+            referencedRelation: "service"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       club_benefit_usage: {
         Row: {
@@ -1610,21 +1796,32 @@ export type Database = {
         Args: never
         Returns: {
           club_creditos_restantes: number
-          club_plan_nome: string
+          club_member_id: string
+          club_plano_nome: string
+          company_endereco: Json
           company_id: string
           company_name: string
           company_slug: string
+          company_telefone: string
+          company_whatsapp: string
           duration_minutes: number
           id: string
+          notes: string
           pagamento_tipo: string
           price: number
+          professional_id: string
           professional_name: string
+          rating: number
+          review_comment: string
           scheduled_at: string
+          service_id: string
           service_name: string
           status: Database["public"]["Enums"]["appointment_status"]
         }[]
       }
+      get_client_dashboard: { Args: never; Returns: Json }
       get_current_plan_slug: { Args: { _company_id: string }; Returns: string }
+      get_customer_insights: { Args: { _customer_id: string }; Returns: Json }
       get_my_club_memberships: {
         Args: { _company_id: string }
         Returns: {
@@ -1635,6 +1832,37 @@ export type Database = {
           current_period_end: string
           id: string
           plano_nome: string
+          status: string
+        }[]
+      }
+      get_my_club_usage: {
+        Args: { _club_member_id?: string }
+        Returns: {
+          appointment_at: string
+          appointment_id: string
+          club_member_id: string
+          company_name: string
+          created_at: string
+          id: string
+          movimento: string
+          plano_nome: string
+          quantidade: number
+          service_name: string
+        }[]
+      }
+      get_my_payments: {
+        Args: never
+        Returns: {
+          amount_cents: number
+          card_brand: string
+          card_last4: string
+          company_name: string
+          created_at: string
+          descricao: string
+          id: string
+          metodo: string
+          paid_at: string
+          receipt_url: string
           status: string
         }[]
       }
@@ -1678,6 +1906,10 @@ export type Database = {
       }
       redeem_club_benefit: {
         Args: { _appointment_id: string; _club_member_id: string }
+        Returns: boolean
+      }
+      reschedule_client_appointment: {
+        Args: { _appointment_id: string; _new_at: string }
         Returns: boolean
       }
       sync_stripe_subscription: {
