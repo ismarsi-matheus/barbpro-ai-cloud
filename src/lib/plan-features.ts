@@ -7,6 +7,7 @@ export type PlanFeatureKey =
   | 'relatoriosAvancados'
   | 'fidelidade'
   | 'clubeAssinatura'
+  | 'aiGrowth'
   | 'lembretesWhatsapp'
   | 'apiWebhooks';
 
@@ -26,6 +27,7 @@ const MATRIX: Record<PlanSlug, PlanFeatures> = {
     relatoriosAvancados: false,
     fidelidade: false,
     clubeAssinatura: false,
+    aiGrowth: false,
     lembretesWhatsapp: false,
     apiWebhooks: false,
   },
@@ -36,6 +38,7 @@ const MATRIX: Record<PlanSlug, PlanFeatures> = {
     relatoriosAvancados: true,
     fidelidade: true,
     clubeAssinatura: true,
+    aiGrowth: true,
     lembretesWhatsapp: true,
     apiWebhooks: false,
   },
@@ -46,6 +49,7 @@ const MATRIX: Record<PlanSlug, PlanFeatures> = {
     relatoriosAvancados: true,
     fidelidade: true,
     clubeAssinatura: true,
+    aiGrowth: true,
     lembretesWhatsapp: true,
     apiWebhooks: true,
   },

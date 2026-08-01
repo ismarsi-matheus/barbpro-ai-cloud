@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentCompany } from "@/hooks/use-current-company";
@@ -10,6 +10,7 @@ import { Sparkles, AlertTriangle, TrendingUp, Calendar, Users, ArrowRight } from
 import { formatBRL } from "@/lib/format";
 import { toast } from "sonner";
 import { subDays, startOfMonth } from "date-fns";
+import { featureEnabled, normalizePlanSlug } from "@/lib/plan-features";
 
 export const Route = createFileRoute("/app/aigrowth")({ component: AIPage });
 
@@ -23,19 +24,22 @@ const ICONS: Record<string, any> = {
 function AIPage() {
   const { data: company } = useCurrentCompany();
   const cid = company?.id;
+  const planSlug = normalizePlanSlug(company?.selected_plan_slug ?? company?.plano);
+  const unlocked = featureEnabled(planSlug, "aiGrowth");
 
   const { data: insights = [] } = useQuery({
     queryKey: ["ai-insights", cid],
-    enabled: !!cid,
+    enabled: !!cid && unlocked,
     queryFn: async () => {
+      if (!cid) return [];
       const cutoff60 = subDays(new Date(), 60).toISOString();
       const monthStart = startOfMonth(new Date()).toISOString();
       const [{ count: inactives }, { data: monthApts }, { data: pros }] = await Promise.all([
         supabase.from("customer").select("id", { count: "exact", head: true })
-          .eq("company_id", cid!).lt("last_appointment_at", cutoff60),
+          .eq("company_id", cid).lt("last_appointment_at", cutoff60),
         supabase.from("appointment").select("status, professional_name, service_name, scheduled_at")
-          .eq("company_id", cid!).gte("scheduled_at", monthStart),
-        supabase.from("professional").select("id, name").eq("company_id", cid!).eq("active", true),
+          .eq("company_id", cid).gte("scheduled_at", monthStart),
+        supabase.from("professional").select("id, name").eq("company_id", cid).eq("active", true),
       ]);
 
       const apts = monthApts ?? [];
@@ -86,6 +90,26 @@ function AIPage() {
   });
 
   const totalImpact = insights.reduce((s, i) => s + i.impact_estimate, 0);
+
+  if (!unlocked) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="AI Growth" description="Sua IA olha os dados da barbearia e sugere ações pra crescer." />
+        <Card>
+          <CardContent className="py-12 text-center space-y-4">
+            <Sparkles className="w-10 h-10 mx-auto text-muted-foreground" />
+            <div>
+              <p className="font-semibold">Disponível no plano Pro ou superior</p>
+              <p className="text-sm text-muted-foreground">Faça upgrade para liberar os insights de crescimento.</p>
+            </div>
+            <Button asChild>
+              <Link to="/app/checkout">Fazer upgrade</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
