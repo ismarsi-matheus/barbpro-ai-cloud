@@ -735,8 +735,6 @@ function AgendarPage() {
       </div>
     );
   }
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[var(--surface)]">
