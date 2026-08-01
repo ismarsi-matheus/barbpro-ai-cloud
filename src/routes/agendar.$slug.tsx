@@ -28,11 +28,12 @@ import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/agendar/$slug")({
   component: AgendarPage,
-  validateSearch: (search: Record<string, unknown>) => ({
-    servico: typeof search["servico"] === "string" ? (search["servico"] as string) : undefined,
-    profissional:
-      typeof search["profissional"] === "string" ? (search["profissional"] as string) : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { servico?: string; profissional?: string } => {
+    const out: { servico?: string; profissional?: string } = {};
+    if (typeof search["servico"] === "string") out.servico = search["servico"];
+    if (typeof search["profissional"] === "string") out.profissional = search["profissional"];
+    return out;
+  },
   notFoundComponent: () => (
     <div className="min-h-screen flex items-center justify-center bg-[var(--surface)] text-center px-4">
       <div>
