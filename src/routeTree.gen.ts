@@ -37,6 +37,7 @@ import { Route as DemoAigrowthRouteImport } from './routes/demo.aigrowth'
 import { Route as DemoAgendaRouteImport } from './routes/demo.agenda'
 import { Route as ConfirmarTokenRouteImport } from './routes/confirmar.$token'
 import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
+import { Route as ClienteHistoricoRouteImport } from './routes/cliente.historico'
 import { Route as ClienteEntrarRouteImport } from './routes/cliente.entrar'
 import { Route as ClienteAgendamentosRouteImport } from './routes/cliente.agendamentos'
 import { Route as AppServicosRouteImport } from './routes/app.servicos'
@@ -204,6 +205,11 @@ const ClientePerfilRoute = ClientePerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => ClienteRoute,
 } as any)
+const ClienteHistoricoRoute = ClienteHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => ClienteRoute,
+} as any)
 const ClienteEntrarRoute = ClienteEntrarRouteImport.update({
   id: '/entrar',
   path: '/entrar',
@@ -368,6 +374,7 @@ export interface FileRoutesByFullPath {
   '/app/servicos': typeof AppServicosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
+  '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
   '/demo/agenda': typeof DemoAgendaRoute
@@ -423,6 +430,7 @@ export interface FileRoutesByTo {
   '/app/servicos': typeof AppServicosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
+  '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
   '/demo/agenda': typeof DemoAgendaRoute
@@ -480,6 +488,7 @@ export interface FileRoutesById {
   '/app/servicos': typeof AppServicosRoute
   '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
+  '/cliente/historico': typeof ClienteHistoricoRoute
   '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
   '/demo/agenda': typeof DemoAgendaRoute
@@ -538,6 +547,7 @@ export interface FileRouteTypes {
     | '/app/servicos'
     | '/cliente/agendamentos'
     | '/cliente/entrar'
+    | '/cliente/historico'
     | '/cliente/perfil'
     | '/confirmar/$token'
     | '/demo/agenda'
@@ -593,6 +603,7 @@ export interface FileRouteTypes {
     | '/app/servicos'
     | '/cliente/agendamentos'
     | '/cliente/entrar'
+    | '/cliente/historico'
     | '/cliente/perfil'
     | '/confirmar/$token'
     | '/demo/agenda'
@@ -649,6 +660,7 @@ export interface FileRouteTypes {
     | '/app/servicos'
     | '/cliente/agendamentos'
     | '/cliente/entrar'
+    | '/cliente/historico'
     | '/cliente/perfil'
     | '/confirmar/$token'
     | '/demo/agenda'
@@ -894,6 +906,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientePerfilRouteImport
       parentRoute: typeof ClienteRoute
     }
+    '/cliente/historico': {
+      id: '/cliente/historico'
+      path: '/historico'
+      fullPath: '/cliente/historico'
+      preLoaderRoute: typeof ClienteHistoricoRouteImport
+      parentRoute: typeof ClienteRoute
+    }
     '/cliente/entrar': {
       id: '/cliente/entrar'
       path: '/entrar'
@@ -1124,6 +1143,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 interface ClienteRouteChildren {
   ClienteAgendamentosRoute: typeof ClienteAgendamentosRoute
   ClienteEntrarRoute: typeof ClienteEntrarRoute
+  ClienteHistoricoRoute: typeof ClienteHistoricoRoute
   ClientePerfilRoute: typeof ClientePerfilRoute
   ClienteIndexRoute: typeof ClienteIndexRoute
 }
@@ -1131,6 +1151,7 @@ interface ClienteRouteChildren {
 const ClienteRouteChildren: ClienteRouteChildren = {
   ClienteAgendamentosRoute: ClienteAgendamentosRoute,
   ClienteEntrarRoute: ClienteEntrarRoute,
+  ClienteHistoricoRoute: ClienteHistoricoRoute,
   ClientePerfilRoute: ClientePerfilRoute,
   ClienteIndexRoute: ClienteIndexRoute,
 }
