@@ -2,7 +2,9 @@ import { Link, useLocation } from "@tanstack/react-router";
 import {
   LayoutDashboard, CalendarDays, Users, Scissors, UserCog, DollarSign,
   Briefcase, BarChart3, Sparkles, Settings, LogOut, Shield, Package, Receipt, Bell, Crown,
+  CreditCard,
 } from "lucide-react";
+
 import { useAuth } from "@/hooks/use-auth";
 
 const GROUPS = [
