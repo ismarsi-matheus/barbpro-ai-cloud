@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClubAuthDialog } from "@/components/club-auth-dialog";
 import {
@@ -15,6 +17,7 @@ import {
   ArrowRight,
   Gift,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -53,6 +56,12 @@ export function ClubChoiceStep({
   servicePrice,
   onBack,
   onContinue,
+  onSubscribe,
+  subscribingPlanId = null,
+  defaultName = "",
+  defaultPhone = "",
+  initialView = "choice",
+  processingPayment = false,
 }: {
   session: Session | null;
   memberships: ClubMembership[];
@@ -62,9 +71,25 @@ export function ClubChoiceStep({
   servicePrice: number;
   onBack: () => void;
   onContinue: (opts: { useClub: boolean; membership: ClubMembership | null }) => void;
+  onSubscribe?: (plan: ClubPlan, contact: { name: string; phone: string }) => void;
+  subscribingPlanId?: string | null;
+  defaultName?: string;
+  defaultPhone?: string;
+  initialView?: "choice" | "club" | "plans";
+  processingPayment?: boolean;
 }) {
-  const [view, setView] = useState<"choice" | "club" | "plans">("choice");
+  const [view, setView] = useState<"choice" | "club" | "plans">(initialView);
   const [authOpen, setAuthOpen] = useState(false);
+  const [name, setName] = useState(defaultName);
+  const [phone, setPhone] = useState(defaultPhone);
+
+  useEffect(() => {
+    setView(initialView);
+  }, [initialView]);
+  useEffect(() => {
+    if (defaultName) setName((v) => v || defaultName);
+    if (defaultPhone) setPhone((v) => v || defaultPhone);
+  }, [defaultName, defaultPhone]);
 
   const active = memberships.find(
     (m) =>
@@ -81,6 +106,7 @@ export function ClubChoiceStep({
     }
     setView("club");
   };
+
 
   if (view === "choice") {
     return (
