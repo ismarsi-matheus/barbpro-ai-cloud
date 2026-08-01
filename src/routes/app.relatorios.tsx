@@ -39,8 +39,9 @@ function downloadCsv(filename: string, rows: (string | number)[][]) {
 function RelPage() {
   const { data: company } = useCurrentCompany();
   const cid = company?.id;
-  const planSlug = normalizePlanSlug((company as any)?.selected_plan_slug ?? (company as any)?.plano);
-  const hasAdvanced = featureEnabled(planSlug, "relatoriosAvancados");
+  const { can } = useSubscription();
+  const hasAdvanced = can("relatoriosAvancados");
+
 
   // janela de comissões / ranking
   const [from, setFrom] = useState(format(subDays(new Date(), 30), "yyyy-MM-dd"));
