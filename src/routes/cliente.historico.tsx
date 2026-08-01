@@ -16,12 +16,14 @@ import { ClientShell } from "@/components/client/client-shell";
 import { AppointmentCard } from "@/components/client/appointment-card";
 import { ReviewDialog } from "@/components/client/review-dialog";
 import {
+  clubSavings,
   useClientAppointments,
   useClientDashboard,
   useClientSession,
   useSplitAppointments,
   type ClientAppointment,
 } from "@/hooks/use-client-account";
+import { formatBRL } from "@/lib/format";
 
 export const Route = createFileRoute("/cliente/historico")({
   ssr: false,
@@ -82,13 +84,58 @@ function HistoricoPage() {
     return [...groups.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
   }, [filtered]);
 
+  const stats = useMemo(() => {
+    const concluidos = past.filter((a) => a.status === "concluido");
+    const gasto = concluidos.reduce((s, a) => s + Number(a.price ?? 0), 0);
+    const freq = new Map<string, number>();
+    concluidos.forEach((a) => {
+      const key = a.professional_name ?? "—";
+      freq.set(key, (freq.get(key) ?? 0) + 1);
+    });
+    const favorito = [...freq.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
+    return {
+      visitas: concluidos.length,
+      gasto,
+      economia: clubSavings(past),
+      favorito,
+    };
+  }, [past]);
+
   return (
     <ClientShell
       title="Histórico"
       subtitle={`${past.length} atendimento(s) registrados`}
       user={{ name: nome, email: session?.user.email, photo: dash.data?.profile?.photo_url }}
     >
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardContent className="pt-5">
+            <p className="text-xs text-muted-foreground">Visitas</p>
+            <p className="text-2xl font-bold">{stats.visitas}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-5">
+            <p className="text-xs text-muted-foreground">Total gasto</p>
+            <p className="text-2xl font-bold">{formatBRL(stats.gasto)}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-emerald-500/30">
+          <CardContent className="pt-5">
+            <p className="text-xs text-muted-foreground">Economia no Clube</p>
+            <p className="text-2xl font-bold text-emerald-600">{formatBRL(stats.economia)}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-5">
+            <p className="text-xs text-muted-foreground">Profissional mais frequente</p>
+            <p className="truncate text-lg font-semibold">{stats.favorito}</p>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="mb-5 grid gap-3 sm:grid-cols-[1fr_180px_200px]">
+
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input

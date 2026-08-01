@@ -33,6 +33,11 @@ export type ClientAppointment = {
   company_telefone: string | null;
   rating: number | null;
   review_comment: string | null;
+  service_price: number | null;
+  professional_photo: string | null;
+  created_at: string | null;
+  confirmed_at: string | null;
+  completed_at: string | null;
 };
 
 export type ClubMembershipSummary = {
@@ -307,4 +312,122 @@ export function useSaveReview() {
 
 export async function signOutClient() {
   await supabase.auth.signOut();
+}
+
+/** Agrupa agendamentos nas abas da tela "Meus agendamentos". */
+export function useAppointmentBuckets(list: ClientAppointment[] | undefined) {
+  return useMemo(() => {
+    const all = list ?? [];
+    const now = Date.now();
+    const isSameDay = (iso: string) => {
+      const d = new Date(iso);
+      const t = new Date();
+      return (
+        d.getDate() === t.getDate() &&
+        d.getMonth() === t.getMonth() &&
+        d.getFullYear() === t.getFullYear()
+      );
+    };
+    const asc = (a: ClientAppointment, b: ClientAppointment) =>
+      new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime();
+    const desc = (a: ClientAppointment, b: ClientAppointment) => -asc(a, b);
+    const abertos = all.filter(
+      (a) => !["cancelado", "nao_compareceu", "concluido"].includes(a.status),
+    );
+    return {
+      proximos: abertos
+        .filter((a) => new Date(a.scheduled_at).getTime() >= now)
+        .sort(asc),
+      hoje: abertos.filter((a) => isSameDay(a.scheduled_at)).sort(asc),
+      concluidos: all.filter((a) => a.status === "concluido").sort(desc),
+      cancelados: all
+        .filter((a) => a.status === "cancelado" || a.status === "nao_compareceu")
+        .sort(desc),
+    };
+  }, [list]);
+}
+
+/** Quanto o cliente deixou de pagar usando créditos do Clube (preço de tabela). */
+export function clubSavings(list: ClientAppointment[] | undefined) {
+  return (list ?? [])
+    .filter((a) => a.pagamento_tipo === "clube" && a.status === "concluido")
+    .reduce((sum, a) => sum + Number(a.service_price ?? 0), 0);
+}
+
+export type ClientNotification = {
+  id: string;
+  kind: "agendamento" | "lembrete" | "pagamento" | "clube" | "avaliacao";
+  title: string;
+  description: string;
+  at: string;
+};
+
+/** Feed de notificações derivado dos dados reais da conta (sem tabela extra). */
+export function useClientNotifications(
+  appointments: ClientAppointment[] | undefined,
+  dashboard: ClientDashboard | undefined,
+  payments: ClientPayment[] | undefined,
+) {
+  return useMemo(() => {
+    const out: ClientNotification[] = [];
+    const now = Date.now();
+
+    (appointments ?? []).forEach((a) => {
+      const when = new Date(a.scheduled_at).getTime();
+      if (a.confirmed_at) {
+        out.push({
+          id: `conf-${a.id}`,
+          kind: "agendamento",
+          title: "Agendamento confirmado",
+          description: `${a.service_name} com ${a.professional_name} — ${a.company_name}`,
+          at: a.confirmed_at,
+        });
+      }
+      if (when > now && when - now < 48 * 3600 * 1000 && a.status !== "cancelado") {
+        out.push({
+          id: `rem-${a.id}`,
+          kind: "lembrete",
+          title: "Lembrete de horário",
+          description: `${a.service_name} em breve na ${a.company_name}`,
+          at: a.scheduled_at,
+        });
+      }
+      if (a.status === "concluido" && !a.rating) {
+        out.push({
+          id: `rev-${a.id}`,
+          kind: "avaliacao",
+          title: "Avalie seu atendimento",
+          description: `${a.service_name} com ${a.professional_name}`,
+          at: a.completed_at ?? a.scheduled_at,
+        });
+      }
+    });
+
+    (payments ?? []).forEach((p) => {
+      out.push({
+        id: `pay-${p.id}`,
+        kind: "pagamento",
+        title: p.status === "pago" || p.status === "paid" ? "Pagamento aprovado" : "Pagamento",
+        description: `${p.descricao} — ${(p.amount_cents / 100).toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        })}`,
+        at: p.paid_at ?? p.created_at,
+      });
+    });
+
+    (dashboard?.club_memberships ?? []).forEach((m) => {
+      if (m.status === "ativo" && m.creditos_restantes > 0) {
+        out.push({
+          id: `club-${m.id}`,
+          kind: "clube",
+          title: "Benefícios disponíveis",
+          description: `${m.creditos_restantes} crédito(s) no plano ${m.plano_nome} — ${m.company_name}`,
+          at: m.current_period_end ?? new Date().toISOString(),
+        });
+      }
+    });
+
+    return out.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+  }, [appointments, dashboard, payments]);
 }

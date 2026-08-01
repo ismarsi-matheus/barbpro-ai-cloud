@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
+  Bell,
   Calendar,
   CreditCard,
   Crown,
@@ -22,6 +23,7 @@ export const CLIENT_NAV = [
   { to: "/cliente/agendamentos", label: "Agendamentos", icon: Calendar, exact: false },
   { to: "/cliente/historico", label: "Histórico", icon: History, exact: false },
   { to: "/cliente/clube", label: "Clube", icon: Crown, exact: false },
+  { to: "/cliente/notificacoes", label: "Notificações", icon: Bell, exact: false },
   { to: "/cliente/pagamentos", label: "Pagamentos", icon: CreditCard, exact: false },
   { to: "/cliente/perfil", label: "Perfil", icon: User, exact: false },
   { to: "/cliente/configuracoes", label: "Configurações", icon: Settings, exact: false },

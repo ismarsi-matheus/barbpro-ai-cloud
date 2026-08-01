@@ -152,3 +152,43 @@ export const getClubCheckoutStatus = createServerFn({ method: "POST" })
       clubPlanId: meta["club_plan_id"] ?? null,
     };
   });
+
+/**
+ * Portal de cobrança do Clube (upgrade, downgrade, troca de cartão e cancelamento).
+ * Só devolve a URL se a assinatura pertencer ao cliente autenticado.
+ */
+export const createClubBillingPortal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({ clubMemberId: z.string().uuid(), returnUrl: z.string().url() })
+      .parse(input),
+  )
+  .handler(async ({ data, context }): Promise<{ url: string }> => {
+    // Ownership: a RPC só devolve as assinaturas do usuário autenticado.
+    const { data: mine, error } = await context.supabase.rpc("get_my_club_memberships", {
+      _company_id: null as unknown as string,
+    });
+    if (error) throw new Error(error.message);
+    if (!(mine ?? []).some((m: { id: string }) => m.id === data.clubMemberId)) {
+      throw new Error("Assinatura não encontrada.");
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: member } = await (supabaseAdmin as any)
+      .from("club_member")
+      .select("stripe_customer_id")
+      .eq("id", data.clubMemberId)
+      .maybeSingle();
+
+    if (!member?.stripe_customer_id) {
+      throw new Error("Esta assinatura não possui cobrança online. Fale com a barbearia.");
+    }
+
+    const { getStripe } = await import("@/lib/stripe/client.server");
+    const session = await getStripe().billingPortal.sessions.create({
+      customer: member.stripe_customer_id,
+      return_url: data.returnUrl,
+    });
+    return { url: session.url };
+  });

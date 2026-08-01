@@ -27,7 +27,7 @@ import {
   type ClientAppointment,
 } from "@/hooks/use-client-account";
 
-export const Route = createFileRoute("/cliente/agendamentos")({
+export const Route = createFileRoute("/cliente/agendamentos/")({
   ssr: false,
   head: () => ({
     meta: [

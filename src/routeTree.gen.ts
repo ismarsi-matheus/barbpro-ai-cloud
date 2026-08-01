@@ -38,11 +38,11 @@ import { Route as DemoAgendaRouteImport } from './routes/demo.agenda'
 import { Route as ConfirmarTokenRouteImport } from './routes/confirmar.$token'
 import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
 import { Route as ClientePagamentosRouteImport } from './routes/cliente.pagamentos'
+import { Route as ClienteNotificacoesRouteImport } from './routes/cliente.notificacoes'
 import { Route as ClienteHistoricoRouteImport } from './routes/cliente.historico'
 import { Route as ClienteEntrarRouteImport } from './routes/cliente.entrar'
 import { Route as ClienteConfiguracoesRouteImport } from './routes/cliente.configuracoes'
 import { Route as ClienteClubeRouteImport } from './routes/cliente.clube'
-import { Route as ClienteAgendamentosRouteImport } from './routes/cliente.agendamentos'
 import { Route as AppServicosRouteImport } from './routes/app.servicos'
 import { Route as AppRelatoriosRouteImport } from './routes/app.relatorios'
 import { Route as AppProfissionaisRouteImport } from './routes/app.profissionais'
@@ -62,7 +62,9 @@ import { Route as AppAigrowthRouteImport } from './routes/app.aigrowth'
 import { Route as AppAgendaRouteImport } from './routes/app.agenda'
 import { Route as AgendarSlugRouteImport } from './routes/agendar.$slug'
 import { Route as DashboardAssinaturaIndexRouteImport } from './routes/dashboard.assinatura.index'
+import { Route as ClienteAgendamentosIndexRouteImport } from './routes/cliente.agendamentos.index'
 import { Route as DashboardAssinaturaSucessoRouteImport } from './routes/dashboard.assinatura.sucesso'
+import { Route as ClienteAgendamentosIdRouteImport } from './routes/cliente.agendamentos.$id'
 import { Route as ApiPublicEmailTestRouteImport } from './routes/api/public/email-test'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe/webhook'
 import { Route as ApiPublicCronAppointmentRemindersRouteImport } from './routes/api/public/cron/appointment-reminders'
@@ -213,6 +215,11 @@ const ClientePagamentosRoute = ClientePagamentosRouteImport.update({
   path: '/pagamentos',
   getParentRoute: () => ClienteRoute,
 } as any)
+const ClienteNotificacoesRoute = ClienteNotificacoesRouteImport.update({
+  id: '/notificacoes',
+  path: '/notificacoes',
+  getParentRoute: () => ClienteRoute,
+} as any)
 const ClienteHistoricoRoute = ClienteHistoricoRouteImport.update({
   id: '/historico',
   path: '/historico',
@@ -231,11 +238,6 @@ const ClienteConfiguracoesRoute = ClienteConfiguracoesRouteImport.update({
 const ClienteClubeRoute = ClienteClubeRouteImport.update({
   id: '/clube',
   path: '/clube',
-  getParentRoute: () => ClienteRoute,
-} as any)
-const ClienteAgendamentosRoute = ClienteAgendamentosRouteImport.update({
-  id: '/agendamentos',
-  path: '/agendamentos',
   getParentRoute: () => ClienteRoute,
 } as any)
 const AppServicosRoute = AppServicosRouteImport.update({
@@ -334,12 +336,23 @@ const DashboardAssinaturaIndexRoute =
     path: '/dashboard/assinatura/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ClienteAgendamentosIndexRoute =
+  ClienteAgendamentosIndexRouteImport.update({
+    id: '/agendamentos/',
+    path: '/agendamentos/',
+    getParentRoute: () => ClienteRoute,
+  } as any)
 const DashboardAssinaturaSucessoRoute =
   DashboardAssinaturaSucessoRouteImport.update({
     id: '/dashboard/assinatura/sucesso',
     path: '/dashboard/assinatura/sucesso',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ClienteAgendamentosIdRoute = ClienteAgendamentosIdRouteImport.update({
+  id: '/agendamentos/$id',
+  path: '/agendamentos/$id',
+  getParentRoute: () => ClienteRoute,
+} as any)
 const ApiPublicEmailTestRoute = ApiPublicEmailTestRouteImport.update({
   id: '/api/public/email-test',
   path: '/api/public/email-test',
@@ -390,11 +403,11 @@ export interface FileRoutesByFullPath {
   '/app/profissionais': typeof AppProfissionaisRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/servicos': typeof AppServicosRoute
-  '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/clube': typeof ClienteClubeRoute
   '/cliente/configuracoes': typeof ClienteConfiguracoesRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
+  '/cliente/notificacoes': typeof ClienteNotificacoesRoute
   '/cliente/pagamentos': typeof ClientePagamentosRoute
   '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
@@ -416,7 +429,9 @@ export interface FileRoutesByFullPath {
   '/master/planos': typeof MasterPlanosRoute
   '/cliente/': typeof ClienteIndexRoute
   '/api/public/email-test': typeof ApiPublicEmailTestRoute
+  '/cliente/agendamentos/$id': typeof ClienteAgendamentosIdRoute
   '/dashboard/assinatura/sucesso': typeof DashboardAssinaturaSucessoRoute
+  '/cliente/agendamentos/': typeof ClienteAgendamentosIndexRoute
   '/dashboard/assinatura/': typeof DashboardAssinaturaIndexRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
   '/api/public/cron/appointment-reminders': typeof ApiPublicCronAppointmentRemindersRoute
@@ -449,11 +464,11 @@ export interface FileRoutesByTo {
   '/app/profissionais': typeof AppProfissionaisRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/servicos': typeof AppServicosRoute
-  '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/clube': typeof ClienteClubeRoute
   '/cliente/configuracoes': typeof ClienteConfiguracoesRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
+  '/cliente/notificacoes': typeof ClienteNotificacoesRoute
   '/cliente/pagamentos': typeof ClientePagamentosRoute
   '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
@@ -475,7 +490,9 @@ export interface FileRoutesByTo {
   '/master/planos': typeof MasterPlanosRoute
   '/cliente': typeof ClienteIndexRoute
   '/api/public/email-test': typeof ApiPublicEmailTestRoute
+  '/cliente/agendamentos/$id': typeof ClienteAgendamentosIdRoute
   '/dashboard/assinatura/sucesso': typeof DashboardAssinaturaSucessoRoute
+  '/cliente/agendamentos': typeof ClienteAgendamentosIndexRoute
   '/dashboard/assinatura': typeof DashboardAssinaturaIndexRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
   '/api/public/cron/appointment-reminders': typeof ApiPublicCronAppointmentRemindersRoute
@@ -510,11 +527,11 @@ export interface FileRoutesById {
   '/app/profissionais': typeof AppProfissionaisRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/servicos': typeof AppServicosRoute
-  '/cliente/agendamentos': typeof ClienteAgendamentosRoute
   '/cliente/clube': typeof ClienteClubeRoute
   '/cliente/configuracoes': typeof ClienteConfiguracoesRoute
   '/cliente/entrar': typeof ClienteEntrarRoute
   '/cliente/historico': typeof ClienteHistoricoRoute
+  '/cliente/notificacoes': typeof ClienteNotificacoesRoute
   '/cliente/pagamentos': typeof ClientePagamentosRoute
   '/cliente/perfil': typeof ClientePerfilRoute
   '/confirmar/$token': typeof ConfirmarTokenRoute
@@ -536,7 +553,9 @@ export interface FileRoutesById {
   '/master/planos': typeof MasterPlanosRoute
   '/cliente/': typeof ClienteIndexRoute
   '/api/public/email-test': typeof ApiPublicEmailTestRoute
+  '/cliente/agendamentos/$id': typeof ClienteAgendamentosIdRoute
   '/dashboard/assinatura/sucesso': typeof DashboardAssinaturaSucessoRoute
+  '/cliente/agendamentos/': typeof ClienteAgendamentosIndexRoute
   '/dashboard/assinatura/': typeof DashboardAssinaturaIndexRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
   '/api/public/cron/appointment-reminders': typeof ApiPublicCronAppointmentRemindersRoute
@@ -572,11 +591,11 @@ export interface FileRouteTypes {
     | '/app/profissionais'
     | '/app/relatorios'
     | '/app/servicos'
-    | '/cliente/agendamentos'
     | '/cliente/clube'
     | '/cliente/configuracoes'
     | '/cliente/entrar'
     | '/cliente/historico'
+    | '/cliente/notificacoes'
     | '/cliente/pagamentos'
     | '/cliente/perfil'
     | '/confirmar/$token'
@@ -598,7 +617,9 @@ export interface FileRouteTypes {
     | '/master/planos'
     | '/cliente/'
     | '/api/public/email-test'
+    | '/cliente/agendamentos/$id'
     | '/dashboard/assinatura/sucesso'
+    | '/cliente/agendamentos/'
     | '/dashboard/assinatura/'
     | '/api/public/billing/webhook'
     | '/api/public/cron/appointment-reminders'
@@ -631,11 +652,11 @@ export interface FileRouteTypes {
     | '/app/profissionais'
     | '/app/relatorios'
     | '/app/servicos'
-    | '/cliente/agendamentos'
     | '/cliente/clube'
     | '/cliente/configuracoes'
     | '/cliente/entrar'
     | '/cliente/historico'
+    | '/cliente/notificacoes'
     | '/cliente/pagamentos'
     | '/cliente/perfil'
     | '/confirmar/$token'
@@ -657,7 +678,9 @@ export interface FileRouteTypes {
     | '/master/planos'
     | '/cliente'
     | '/api/public/email-test'
+    | '/cliente/agendamentos/$id'
     | '/dashboard/assinatura/sucesso'
+    | '/cliente/agendamentos'
     | '/dashboard/assinatura'
     | '/api/public/billing/webhook'
     | '/api/public/cron/appointment-reminders'
@@ -691,11 +714,11 @@ export interface FileRouteTypes {
     | '/app/profissionais'
     | '/app/relatorios'
     | '/app/servicos'
-    | '/cliente/agendamentos'
     | '/cliente/clube'
     | '/cliente/configuracoes'
     | '/cliente/entrar'
     | '/cliente/historico'
+    | '/cliente/notificacoes'
     | '/cliente/pagamentos'
     | '/cliente/perfil'
     | '/confirmar/$token'
@@ -717,7 +740,9 @@ export interface FileRouteTypes {
     | '/master/planos'
     | '/cliente/'
     | '/api/public/email-test'
+    | '/cliente/agendamentos/$id'
     | '/dashboard/assinatura/sucesso'
+    | '/cliente/agendamentos/'
     | '/dashboard/assinatura/'
     | '/api/public/billing/webhook'
     | '/api/public/cron/appointment-reminders'
@@ -949,6 +974,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientePagamentosRouteImport
       parentRoute: typeof ClienteRoute
     }
+    '/cliente/notificacoes': {
+      id: '/cliente/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/cliente/notificacoes'
+      preLoaderRoute: typeof ClienteNotificacoesRouteImport
+      parentRoute: typeof ClienteRoute
+    }
     '/cliente/historico': {
       id: '/cliente/historico'
       path: '/historico'
@@ -975,13 +1007,6 @@ declare module '@tanstack/react-router' {
       path: '/clube'
       fullPath: '/cliente/clube'
       preLoaderRoute: typeof ClienteClubeRouteImport
-      parentRoute: typeof ClienteRoute
-    }
-    '/cliente/agendamentos': {
-      id: '/cliente/agendamentos'
-      path: '/agendamentos'
-      fullPath: '/cliente/agendamentos'
-      preLoaderRoute: typeof ClienteAgendamentosRouteImport
       parentRoute: typeof ClienteRoute
     }
     '/app/servicos': {
@@ -1117,12 +1142,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAssinaturaIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cliente/agendamentos/': {
+      id: '/cliente/agendamentos/'
+      path: '/agendamentos'
+      fullPath: '/cliente/agendamentos/'
+      preLoaderRoute: typeof ClienteAgendamentosIndexRouteImport
+      parentRoute: typeof ClienteRoute
+    }
     '/dashboard/assinatura/sucesso': {
       id: '/dashboard/assinatura/sucesso'
       path: '/dashboard/assinatura/sucesso'
       fullPath: '/dashboard/assinatura/sucesso'
       preLoaderRoute: typeof DashboardAssinaturaSucessoRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/cliente/agendamentos/$id': {
+      id: '/cliente/agendamentos/$id'
+      path: '/agendamentos/$id'
+      fullPath: '/cliente/agendamentos/$id'
+      preLoaderRoute: typeof ClienteAgendamentosIdRouteImport
+      parentRoute: typeof ClienteRoute
     }
     '/api/public/email-test': {
       id: '/api/public/email-test'
@@ -1198,25 +1237,29 @@ const AppRouteChildren: AppRouteChildren = {
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface ClienteRouteChildren {
-  ClienteAgendamentosRoute: typeof ClienteAgendamentosRoute
   ClienteClubeRoute: typeof ClienteClubeRoute
   ClienteConfiguracoesRoute: typeof ClienteConfiguracoesRoute
   ClienteEntrarRoute: typeof ClienteEntrarRoute
   ClienteHistoricoRoute: typeof ClienteHistoricoRoute
+  ClienteNotificacoesRoute: typeof ClienteNotificacoesRoute
   ClientePagamentosRoute: typeof ClientePagamentosRoute
   ClientePerfilRoute: typeof ClientePerfilRoute
   ClienteIndexRoute: typeof ClienteIndexRoute
+  ClienteAgendamentosIdRoute: typeof ClienteAgendamentosIdRoute
+  ClienteAgendamentosIndexRoute: typeof ClienteAgendamentosIndexRoute
 }
 
 const ClienteRouteChildren: ClienteRouteChildren = {
-  ClienteAgendamentosRoute: ClienteAgendamentosRoute,
   ClienteClubeRoute: ClienteClubeRoute,
   ClienteConfiguracoesRoute: ClienteConfiguracoesRoute,
   ClienteEntrarRoute: ClienteEntrarRoute,
   ClienteHistoricoRoute: ClienteHistoricoRoute,
+  ClienteNotificacoesRoute: ClienteNotificacoesRoute,
   ClientePagamentosRoute: ClientePagamentosRoute,
   ClientePerfilRoute: ClientePerfilRoute,
   ClienteIndexRoute: ClienteIndexRoute,
+  ClienteAgendamentosIdRoute: ClienteAgendamentosIdRoute,
+  ClienteAgendamentosIndexRoute: ClienteAgendamentosIndexRoute,
 }
 
 const ClienteRouteWithChildren =
