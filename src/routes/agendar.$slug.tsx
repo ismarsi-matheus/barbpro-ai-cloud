@@ -1,8 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  createClubCheckoutSession,
+  getClubCheckoutStatus,
+} from "@/lib/club/club-checkout.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,10 +33,24 @@ import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/agendar/$slug")({
   component: AgendarPage,
-  validateSearch: (search: Record<string, unknown>): { servico?: string; profissional?: string } => {
-    const out: { servico?: string; profissional?: string } = {};
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    servico?: string;
+    profissional?: string;
+    club_session?: string;
+    club_cancel?: string;
+  } => {
+    const out: {
+      servico?: string;
+      profissional?: string;
+      club_session?: string;
+      club_cancel?: string;
+    } = {};
     if (typeof search["servico"] === "string") out.servico = search["servico"];
     if (typeof search["profissional"] === "string") out.profissional = search["profissional"];
+    if (typeof search["club_session"] === "string") out.club_session = search["club_session"];
+    if (typeof search["club_cancel"] === "string") out.club_cancel = search["club_cancel"];
     return out;
   },
   notFoundComponent: () => (
@@ -117,11 +136,23 @@ function AgendarPage() {
   // Identificação (etapa 5): "auth" = cliente logado, "guest" = visitante
   const [identMode, setIdentMode] = useState<"auth" | "guest" | null>(null);
   const [prefilled, setPrefilled] = useState(false);
+  // Clube / checkout
+  const [subscribingPlanId, setSubscribingPlanId] = useState<string | null>(null);
+  const [clubInitialView, setClubInitialView] = useState<"choice" | "club" | "plans">("choice");
+  const [draftRestored, setDraftRestored] = useState(false);
+  const [clubActivatedNotified, setClubActivatedNotified] = useState(false);
 
+  const DRAFT_KEY = `bp:booking-draft:${slug}`;
 
   // Cliente logado (ou recém-autenticado) em barbearia sem Clube: pula a etapa 5
   useEffect(() => {
-    if (step === 5 && (clientSession || identMode === "auth") && !companyHasClub) {
+    if (
+      step === 5 &&
+      (clientSession || identMode === "auth") &&
+      clubPlansQuery.isFetched &&
+      !companyHasClub &&
+      !search.club_session
+    ) {
       setStep(6);
     }
   });
@@ -184,6 +215,114 @@ function AgendarPage() {
 
   const membership = chosenMembership;
   const usandoClube = pagamentoTipo === "clube" && !!membership;
+
+  // ---------------------------------------------------------------
+  // Clube: checkout Stripe + retomada do agendamento após o pagamento
+  // ---------------------------------------------------------------
+  const startClubCheckoutFn = useServerFn(createClubCheckoutSession);
+  const clubStatusFn = useServerFn(getClubCheckoutStatus);
+
+  // Restaura o rascunho do agendamento ao voltar do Stripe.
+  useEffect(() => {
+    if (draftRestored) return;
+    if (!search.club_session) {
+      setDraftRestored(true);
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d.serviceId) setServiceId(d.serviceId);
+        if (d.proId) setProId(d.proId);
+        if (d.date) setDate(new Date(d.date));
+        if (d.time) setTime(d.time);
+        if (d.nome) setNome((v) => v || d.nome);
+        if (d.phone) setPhone((v) => v || d.phone);
+        if (d.email) setEmail((v) => v || d.email);
+        setPrefilled(true);
+        setIdentMode("auth");
+        setClubInitialView("club");
+        setStep(5);
+      }
+    } catch (e) {
+      console.error("[agendar] falha ao restaurar rascunho", e);
+    }
+    setDraftRestored(true);
+  }, [search.club_session, draftRestored, DRAFT_KEY]);
+
+  useEffect(() => {
+    if (search.club_cancel) {
+      toast.info("Pagamento cancelado. Você pode continuar sem o Clube.");
+    }
+  }, [search.club_cancel]);
+
+  const clubStatusQuery = useQuery({
+    queryKey: ["club-checkout-status", search.club_session],
+    enabled: !!search.club_session && !!clientSession,
+    queryFn: () => clubStatusFn({ data: { sessionId: search.club_session! } }),
+    refetchInterval: (q) => (q.state.data?.membershipActive ? false : 3000),
+    retry: 2,
+  });
+
+  useEffect(() => {
+    if (!clubStatusQuery.data?.membershipActive || clubActivatedNotified) return;
+    setClubActivatedNotified(true);
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
+    membershipQuery.refetch();
+    setClubInitialView("club");
+    toast.success("Assinatura do Clube ativada! Continue seu agendamento.");
+  }, [clubStatusQuery.data?.membershipActive, clubActivatedNotified, DRAFT_KEY, membershipQuery]);
+
+  const clubProcessing =
+    !!search.club_session && clubStatusQuery.data?.membershipActive !== true;
+
+  const startClubCheckout = async (plan: ClubPlan, contact: { name: string; phone: string }) => {
+    if (!company?.id) return;
+    if (!clientSession) {
+      toast.error("Entre na sua conta para assinar o Clube.");
+      return;
+    }
+    setSubscribingPlanId(plan.id);
+    try {
+      // Preserva todo o contexto do agendamento para retomar após o pagamento.
+      localStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({
+          serviceId,
+          proId,
+          date: date.toISOString(),
+          time,
+          nome: contact.name || nome,
+          phone: contact.phone || phone,
+          email,
+        }),
+      );
+      const res = await startClubCheckoutFn({
+        data: {
+          companyId: company.id,
+          clubPlanId: plan.id,
+          slug,
+          origin: window.location.origin,
+          name: contact.name,
+          phone: contact.phone,
+          returnPath: `/agendar/${slug}`,
+        },
+      });
+      if (!res?.url) throw new Error("URL de pagamento não retornada.");
+      window.location.href = res.url;
+    } catch (err: any) {
+      console.error("[agendar] club checkout error", err);
+      toast.error(err?.message ?? "Não foi possível abrir o pagamento.");
+      setSubscribingPlanId(null);
+    }
+  };
+
+
 
 
 
@@ -796,7 +935,14 @@ function AgendarPage() {
               setPagamentoTipo(useClub ? "clube" : "normal");
               setStep(6);
             }}
+            onSubscribe={startClubCheckout}
+            subscribingPlanId={subscribingPlanId}
+            defaultName={nome}
+            defaultPhone={phone}
+            initialView={clubInitialView}
+            processingPayment={clubProcessing}
           />
+
         )}
 
         {step === 6 && (

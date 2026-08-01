@@ -228,6 +228,13 @@ async function dispatch(evt: NormalizedEvent, canonicalType: string): Promise<vo
       return handleSubscriptionUpsert(object as Stripe.Subscription);
     case "customer.subscription.deleted": {
       const sub = object as Stripe.Subscription;
+      const { isClubMetadata, cancelClubMembershipBySubscription } = await import(
+        "@/lib/club/club.server"
+      );
+      if (isClubMetadata(sub.metadata)) {
+        await cancelClubMembershipBySubscription(sub.id);
+        return;
+      }
       await updateSubscriptionStatus(sub.id, "canceled");
       return;
     }
@@ -275,6 +282,24 @@ async function handleCustomer(c: Stripe.Customer): Promise<void> {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
   if (session.mode !== "subscription") return;
+
+  const subIdEarly =
+    typeof session.subscription === "string"
+      ? session.subscription
+      : session.subscription?.id ?? null;
+
+  // Clube da barbearia (cliente final) — não toca na assinatura SaaS.
+  const { isClubMetadata, syncClubMembershipFromSubscription } = await import(
+    "@/lib/club/club.server"
+  );
+  if (isClubMetadata(session.metadata)) {
+    if (!subIdEarly) return;
+    const stripeClub = getStripe();
+    const clubSub = await stripeClub.subscriptions.retrieve(subIdEarly);
+    await syncClubMembershipFromSubscription(clubSub as any);
+    return;
+  }
+
   const stripeCustomerId =
     typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
   const companyId = await resolveCompanyId(session.metadata ?? null, stripeCustomerId);
@@ -287,10 +312,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     metadata: (session.metadata as Record<string, unknown>) ?? {},
   });
 
-  const subId =
-    typeof session.subscription === "string"
-      ? session.subscription
-      : session.subscription?.id ?? null;
+  const subId = subIdEarly;
   if (!subId) return;
 
   const stripe = getStripe();
@@ -301,6 +323,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
 }
 
 async function handleSubscriptionUpsert(sub: Stripe.Subscription): Promise<void> {
+  const { isClubMetadata, syncClubMembershipFromSubscription } = await import(
+    "@/lib/club/club.server"
+  );
+  if (isClubMetadata(sub.metadata)) {
+    await syncClubMembershipFromSubscription(sub);
+    return;
+  }
+
   const stripeCustomerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
   const companyId = await resolveCompanyId(sub.metadata ?? null, stripeCustomerId);
   if (!companyId) return;
@@ -323,6 +353,20 @@ async function handleInvoicePaid(inv: Stripe.Invoice): Promise<void> {
       ? ((inv as any).subscription as string)
       : (inv as any).subscription?.id ?? null;
   if (!subId) return;
+
+  // Renovação do Clube: recarrega créditos do período.
+  const stripe = getStripe();
+  const sub = await stripe.subscriptions.retrieve(subId).catch(() => null);
+  if (sub) {
+    const { isClubMetadata, syncClubMembershipFromSubscription } = await import(
+      "@/lib/club/club.server"
+    );
+    if (isClubMetadata(sub.metadata)) {
+      await syncClubMembershipFromSubscription(sub as any);
+      return;
+    }
+  }
+
   await updateSubscriptionStatus(subId, "active");
 }
 

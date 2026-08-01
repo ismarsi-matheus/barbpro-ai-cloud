@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClubAuthDialog } from "@/components/club-auth-dialog";
 import {
@@ -15,6 +17,7 @@ import {
   ArrowRight,
   Gift,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -53,6 +56,12 @@ export function ClubChoiceStep({
   servicePrice,
   onBack,
   onContinue,
+  onSubscribe,
+  subscribingPlanId = null,
+  defaultName = "",
+  defaultPhone = "",
+  initialView = "choice",
+  processingPayment = false,
 }: {
   session: Session | null;
   memberships: ClubMembership[];
@@ -62,9 +71,25 @@ export function ClubChoiceStep({
   servicePrice: number;
   onBack: () => void;
   onContinue: (opts: { useClub: boolean; membership: ClubMembership | null }) => void;
+  onSubscribe?: (plan: ClubPlan, contact: { name: string; phone: string }) => void;
+  subscribingPlanId?: string | null;
+  defaultName?: string;
+  defaultPhone?: string;
+  initialView?: "choice" | "club" | "plans";
+  processingPayment?: boolean;
 }) {
-  const [view, setView] = useState<"choice" | "club" | "plans">("choice");
+  const [view, setView] = useState<"choice" | "club" | "plans">(initialView);
   const [authOpen, setAuthOpen] = useState(false);
+  const [name, setName] = useState(defaultName);
+  const [phone, setPhone] = useState(defaultPhone);
+
+  useEffect(() => {
+    setView(initialView);
+  }, [initialView]);
+  useEffect(() => {
+    if (defaultName) setName((v) => v || defaultName);
+    if (defaultPhone) setPhone((v) => v || defaultPhone);
+  }, [defaultName, defaultPhone]);
 
   const active = memberships.find(
     (m) =>
@@ -81,6 +106,7 @@ export function ClubChoiceStep({
     }
     setView("club");
   };
+
 
   if (view === "choice") {
     return (
@@ -167,8 +193,35 @@ export function ClubChoiceStep({
               </p>
             </div>
           )}
+
+          {plans.length > 0 && onSubscribe && (
+            <div className="grid gap-3 sm:grid-cols-2 rounded-xl bg-muted/40 p-3">
+              <div>
+                <Label htmlFor="club-sub-name">Seu nome</Label>
+                <Input
+                  id="club-sub-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Nome completo"
+                />
+              </div>
+              <div>
+                <Label htmlFor="club-sub-phone">Telefone (WhatsApp)</Label>
+                <Input
+                  id="club-sub-phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="(11) 99999-9999"
+                />
+              </div>
+            </div>
+          )}
+
           {plans.map((p) => {
             const beneficios: string[] = Array.isArray(p.beneficios) ? p.beneficios : [];
+            const loadingThis = subscribingPlanId === p.id;
+            const canSubscribe =
+              !!onSubscribe && name.trim().length > 1 && phone.trim().length >= 6;
             return (
               <div
                 key={p.id}
@@ -196,9 +249,33 @@ export function ClubChoiceStep({
                     ))}
                   </ul>
                 )}
-                <p className="text-xs text-muted-foreground mt-3">
-                  Fale com a barbearia para ativar este plano.
-                </p>
+                {onSubscribe ? (
+                  <>
+                    <Button
+                      className="mt-4 w-full bg-[var(--brand)] text-white hover:bg-[var(--brand)]/90"
+                      disabled={!canSubscribe || !!subscribingPlanId}
+                      onClick={() =>
+                        onSubscribe(p, { name: name.trim(), phone: phone.trim() })
+                      }
+                    >
+                      {loadingThis ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-4 h-4 mr-2" />
+                      )}
+                      {loadingThis ? "Abrindo pagamento…" : "ASSINAR AGORA"}
+                    </Button>
+                    {!canSubscribe && (
+                      <p className="text-[11px] text-muted-foreground mt-2 text-center">
+                        Informe nome e telefone acima para assinar.
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Fale com a barbearia para ativar este plano.
+                  </p>
+                )}
               </div>
             );
           })}
@@ -230,12 +307,27 @@ export function ClubChoiceStep({
         <CardDescription>Sua assinatura nesta barbearia</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {processingPayment && (
+          <div className="rounded-xl border border-[var(--brand)]/40 bg-[var(--brand)]/5 p-4 flex items-center gap-3">
+            <Loader2 className="w-5 h-5 animate-spin text-[var(--brand)]" />
+            <div>
+              <p className="font-medium text-sm">Confirmando seu pagamento…</p>
+              <p className="text-xs text-muted-foreground">
+                Assim que a assinatura for ativada, seu agendamento continua exatamente de onde
+                parou.
+              </p>
+            </div>
+          </div>
+        )}
+
         {loadingMembership && (
           <div className="space-y-3">
             <Skeleton className="h-20 w-full rounded-xl" />
             <Skeleton className="h-10 w-full rounded-md" />
           </div>
         )}
+
+
 
         {!loadingMembership && !active && (
           <div className="space-y-4">

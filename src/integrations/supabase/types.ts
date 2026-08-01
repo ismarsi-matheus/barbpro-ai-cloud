@@ -484,10 +484,13 @@ export type Database = {
           created_at: string
           creditos_restantes: number
           current_period_end: string | null
+          current_period_start: string | null
           customer_id: string
           id: string
           started_at: string
           status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           updated_at: string
         }
         Insert: {
@@ -496,10 +499,13 @@ export type Database = {
           created_at?: string
           creditos_restantes?: number
           current_period_end?: string | null
+          current_period_start?: string | null
           customer_id: string
           id?: string
           started_at?: string
           status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -508,10 +514,13 @@ export type Database = {
           created_at?: string
           creditos_restantes?: number
           current_period_end?: string | null
+          current_period_start?: string | null
           customer_id?: string
           id?: string
           started_at?: string
           status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           updated_at?: string
         }
         Relationships: [
