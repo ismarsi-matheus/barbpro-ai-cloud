@@ -730,7 +730,11 @@ function AgendarPage() {
                 </Button>
               </div>
             )}
+          </CardContent>
+        </Card>
       </div>
+    );
+  }
     );
   }
 
