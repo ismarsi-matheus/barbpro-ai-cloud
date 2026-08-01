@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Check,
   Crown,
+  CalendarPlus,
   Download,
   MapPin,
   MessageCircle,
@@ -41,7 +42,13 @@ import {
   useClientSession,
   type ClientAppointment,
 } from "@/hooks/use-client-account";
-import { downloadReceipt, mapsUrl, whatsappUrl } from "@/lib/client-area/client-links";
+import {
+  downloadIcs,
+  downloadReceipt,
+  googleCalendarUrl,
+  mapsUrl,
+  whatsappUrl,
+} from "@/lib/client-area/client-links";
 
 export const Route = createFileRoute("/cliente/agendamentos/$id")({
   ssr: false,
