@@ -541,17 +541,18 @@ function AgendarPage() {
 
       <main className="max-w-2xl mx-auto px-4 py-6">
         <div className="flex items-center gap-2 mb-6 text-xs text-muted-foreground">
-          {[1, 2, 3, 4, 5].map((s) => (
+          {(companyHasClub ? [1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 6]).map((s, i, arr) => (
             <div key={s} className="flex items-center gap-2">
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center ${step >= s ? "bg-[var(--brand)] text-white" : "bg-muted"}`}
+                className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${step >= s ? "bg-[var(--brand)] text-white" : "bg-muted"}`}
               >
-                {s}
+                {s === 5 ? <Crown className="w-3 h-3" /> : i + 1}
               </div>
-              {s < 5 && <div className="w-4 h-px bg-muted" />}
+              {i < arr.length - 1 && <div className="w-4 h-px bg-muted" />}
             </div>
           ))}
         </div>
+
 
         {step === 1 && (
           <Card>
