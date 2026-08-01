@@ -39,6 +39,8 @@ export type ClubMembershipSummary = {
   id: string;
   status: string;
   creditos_restantes: number;
+  beneficios_utilizados?: number;
+  cancel_at_period_end?: boolean;
   current_period_end: string | null;
   plano_nome: string;
   creditos_mensais: number;
