@@ -147,19 +147,14 @@ function AgendarPage() {
     retry: false,
   });
 
-  const membership = useMemo(
-    () =>
-      (membershipQuery.data ?? []).find(
-        (m: any) => m.status === "ativo" && (m.creditos_restantes ?? 0) > 0,
-      ) ?? null,
-    [membershipQuery.data],
-  );
+  const memberships = (membershipQuery.data ?? []) as unknown as ClubMembership[];
+  const clubPlans = (clubPlansQuery.data ?? []) as unknown as ClubPlan[];
+  const companyHasClub = clubPlans.length > 0 || memberships.length > 0;
 
+  const membership = chosenMembership;
   const usandoClube = pagamentoTipo === "clube" && !!membership;
 
-  useEffect(() => {
-    if (!membership && pagamentoTipo === "clube") setPagamentoTipo("normal");
-  }, [membership, pagamentoTipo]);
+
 
 
 
