@@ -1,4 +1,4 @@
-export type PlanSlug = 'starter' | 'pro' | 'business';
+export type PlanSlug = 'starter' | 'pro' | 'elite';
 
 export type PlanFeatureKey =
   | 'multiprofissional'
@@ -7,6 +7,7 @@ export type PlanFeatureKey =
   | 'relatoriosAvancados'
   | 'fidelidade'
   | 'clubeAssinatura'
+  | 'aiGrowth'
   | 'lembretesWhatsapp'
   | 'apiWebhooks';
 
@@ -15,7 +16,7 @@ export type PlanFeatures = Record<PlanFeatureKey, boolean>;
 export const PLAN_LABEL: Record<PlanSlug, string> = {
   starter: 'Starter',
   pro: 'Pro',
-  business: 'Business',
+  elite: 'Elite',
 };
 
 const MATRIX: Record<PlanSlug, PlanFeatures> = {
@@ -26,6 +27,7 @@ const MATRIX: Record<PlanSlug, PlanFeatures> = {
     relatoriosAvancados: false,
     fidelidade: false,
     clubeAssinatura: false,
+    aiGrowth: false,
     lembretesWhatsapp: false,
     apiWebhooks: false,
   },
@@ -35,24 +37,27 @@ const MATRIX: Record<PlanSlug, PlanFeatures> = {
     financeiro: true,
     relatoriosAvancados: true,
     fidelidade: true,
-    clubeAssinatura: false,
+    clubeAssinatura: true,
+    aiGrowth: true,
     lembretesWhatsapp: true,
     apiWebhooks: false,
   },
-  business: {
+  elite: {
     multiprofissional: true,
     comissoes: true,
     financeiro: true,
     relatoriosAvancados: true,
     fidelidade: true,
     clubeAssinatura: true,
+    aiGrowth: true,
     lembretesWhatsapp: true,
     apiWebhooks: true,
   },
 };
 
 export function normalizePlanSlug(slug: string | null | undefined): PlanSlug {
-  if (slug === 'pro' || slug === 'business' || slug === 'starter') return slug;
+  if (slug === 'pro' || slug === 'elite' || slug === 'starter') return slug;
+  if (slug === 'business' || slug === 'premium') return 'elite';
   return 'starter';
 }
 

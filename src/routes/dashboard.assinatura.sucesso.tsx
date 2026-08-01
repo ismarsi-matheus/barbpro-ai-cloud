@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,6 +25,7 @@ export const Route = createFileRoute("/dashboard/assinatura/sucesso")({
 function SuccessPage() {
   const { session_id } = Route.useSearch();
   const navigate = useNavigate();
+  const router = useRouter();
   const qc = useQueryClient();
   const fetchStatus = useServerFn(getCheckoutSessionStatus);
   const [redirecting, setRedirecting] = useState(false);
@@ -50,13 +51,14 @@ function SuccessPage() {
     if (active && !redirecting) {
       setRedirecting(true);
       // Garante que o gate de paywall releia a empresa já com status atualizado.
-      qc.invalidateQueries({ queryKey: ["current-company"] });
-      const t = setTimeout(() => {
-        navigate({ to: "/app/dashboard" });
+      const t = setTimeout(async () => {
+        await qc.invalidateQueries({ queryKey: ["current-company"], refetchType: "all" });
+        await router.invalidate();
+        navigate({ to: "/app/dashboard", replace: true });
       }, 1800);
       return () => clearTimeout(t);
     }
-  }, [active, redirecting, navigate, qc]);
+  }, [active, redirecting, navigate, qc, router]);
 
   if (!enabled) {
     return (
