@@ -63,7 +63,7 @@ function PlanosTab({ cid }: { cid: string }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState({ nome: "", preco_reais: 0, beneficios: "", ativo: true, checkout_url: "" });
+  const [form, setForm] = useState({ nome: "", preco_reais: 0, creditos_mensais: 4, beneficios: "", ativo: true, checkout_url: "" });
 
   const { data = [] } = useQuery({
     queryKey: ["club-plans", cid],
@@ -76,6 +76,7 @@ function PlanosTab({ cid }: { cid: string }) {
       const payload = {
         nome: form.nome.trim(),
         preco_cents: Math.round((form.preco_reais || 0) * 100),
+        creditos_mensais: Math.max(0, Math.round(form.creditos_mensais || 0)),
         beneficios,
         ativo: form.ativo,
         checkout_url: form.checkout_url.trim() || null,
@@ -105,7 +106,7 @@ function PlanosTab({ cid }: { cid: string }) {
     <div className="space-y-3">
       <div className="flex justify-end">
         <Button
-          onClick={() => { setEditing(null); setForm({ nome: "", preco_reais: 0, beneficios: "", ativo: true, checkout_url: "" }); setOpen(true); }}
+          onClick={() => { setEditing(null); setForm({ nome: "", preco_reais: 0, creditos_mensais: 4, beneficios: "", ativo: true, checkout_url: "" }); setOpen(true); }}
           className="bg-[var(--brand)] text-white hover:bg-[var(--brand)]/90">
           <Plus className="w-4 h-4 mr-1" /> Novo plano
         </Button>
@@ -124,6 +125,7 @@ function PlanosTab({ cid }: { cid: string }) {
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-2xl font-bold">{formatBRL(p.preco_cents / 100)}<span className="text-xs text-muted-foreground"> /mês</span></p>
+              <p className="text-xs text-muted-foreground">{p.creditos_mensais ?? 0} crédito(s) por mês</p>
               {Array.isArray(p.beneficios) && p.beneficios.length > 0 && (
                 <ul className="text-sm space-y-1 text-muted-foreground">
                   {p.beneficios.map((b: string, i: number) => <li key={i}>• {b}</li>)}
@@ -140,6 +142,7 @@ function PlanosTab({ cid }: { cid: string }) {
                   setEditing(p);
                   setForm({
                     nome: p.nome, preco_reais: p.preco_cents / 100,
+                    creditos_mensais: p.creditos_mensais ?? 0,
                     beneficios: Array.isArray(p.beneficios) ? p.beneficios.join("\n") : "",
                     ativo: p.ativo, checkout_url: p.checkout_url ?? "",
                   });
@@ -162,6 +165,11 @@ function PlanosTab({ cid }: { cid: string }) {
         <div><Label>Preço (R$/mês)</Label>
           <Input type="number" step="0.01" min={0} value={form.preco_reais}
             onChange={(e) => setForm({ ...form, preco_reais: parseFloat(e.target.value) || 0 })} /></div>
+        <div><Label>Créditos mensais (benefícios inclusos) *</Label>
+          <Input type="number" min={0} step={1} required value={form.creditos_mensais}
+            onChange={(e) => setForm({ ...form, creditos_mensais: parseInt(e.target.value, 10) || 0 })} />
+          <p className="text-xs text-muted-foreground mt-1">Quantos atendimentos o assinante pode usar por mês (ex.: 4 cortes = 4).</p>
+        </div>
         <div><Label>Benefícios (1 por linha)</Label>
           <textarea className="w-full border rounded-md p-2 text-sm min-h-[100px]"
             value={form.beneficios} onChange={(e) => setForm({ ...form, beneficios: e.target.value })}
