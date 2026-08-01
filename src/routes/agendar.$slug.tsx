@@ -519,6 +519,13 @@ function AgendarPage() {
             <p className="font-medium mt-1">
               {format(date, "EEEE, dd 'de' MMMM", { locale: ptBR })} às {time}
             </p>
+            {pagamentoTipo === "clube" && membership && (
+              <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[var(--brand)]/10 text-[var(--brand)] px-3 py-1 text-xs font-medium">
+                <Crown className="w-3.5 h-3.5" /> Benefício do Clube • {membership.plano_nome} •
+                saldo restante: {Math.max(0, (membership.creditos_restantes ?? 1) - 1)}
+              </div>
+            )}
+
             <p className="text-xs text-muted-foreground mt-4">
               Código: {confirmed.slice(0, 8)}
             </p>
