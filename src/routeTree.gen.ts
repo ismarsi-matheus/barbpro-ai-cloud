@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrocarSenhaRouteImport } from './routes/trocar-senha'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as ResetSenhaRouteImport } from './routes/reset-senha'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as MasterRouteImport } from './routes/master'
@@ -76,6 +77,11 @@ import { Route as ApiPublicBillingWebhookRouteImport } from './routes/api/public
 const TrocarSenhaRoute = TrocarSenhaRouteImport.update({
   id: '/trocar-senha',
   path: '/trocar-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetSenhaRoute = ResetSenhaRouteImport.update({
@@ -403,6 +409,7 @@ export interface FileRoutesByFullPath {
   '/master': typeof MasterRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/reset-senha': typeof ResetSenhaRoute
+  '/termos': typeof TermosRoute
   '/trocar-senha': typeof TrocarSenhaRoute
   '/agendar/$slug': typeof AgendarSlugRoute
   '/app/agenda': typeof AppAgendaRoute
@@ -467,6 +474,7 @@ export interface FileRoutesByTo {
   '/master': typeof MasterRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/reset-senha': typeof ResetSenhaRoute
+  '/termos': typeof TermosRoute
   '/trocar-senha': typeof TrocarSenhaRoute
   '/agendar/$slug': typeof AgendarSlugRoute
   '/app/agenda': typeof AppAgendaRoute
@@ -533,6 +541,7 @@ export interface FileRoutesById {
   '/master': typeof MasterRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/reset-senha': typeof ResetSenhaRoute
+  '/termos': typeof TermosRoute
   '/trocar-senha': typeof TrocarSenhaRoute
   '/agendar/$slug': typeof AgendarSlugRoute
   '/app/agenda': typeof AppAgendaRoute
@@ -600,6 +609,7 @@ export interface FileRouteTypes {
     | '/master'
     | '/privacidade'
     | '/reset-senha'
+    | '/termos'
     | '/trocar-senha'
     | '/agendar/$slug'
     | '/app/agenda'
@@ -664,6 +674,7 @@ export interface FileRouteTypes {
     | '/master'
     | '/privacidade'
     | '/reset-senha'
+    | '/termos'
     | '/trocar-senha'
     | '/agendar/$slug'
     | '/app/agenda'
@@ -729,6 +740,7 @@ export interface FileRouteTypes {
     | '/master'
     | '/privacidade'
     | '/reset-senha'
+    | '/termos'
     | '/trocar-senha'
     | '/agendar/$slug'
     | '/app/agenda'
@@ -795,6 +807,7 @@ export interface RootRouteChildren {
   MasterRoute: typeof MasterRouteWithChildren
   PrivacidadeRoute: typeof PrivacidadeRoute
   ResetSenhaRoute: typeof ResetSenhaRoute
+  TermosRoute: typeof TermosRoute
   TrocarSenhaRoute: typeof TrocarSenhaRoute
   AgendarSlugRoute: typeof AgendarSlugRoute
   ConfirmarTokenRoute: typeof ConfirmarTokenRoute
@@ -813,6 +826,13 @@ declare module '@tanstack/react-router' {
       path: '/trocar-senha'
       fullPath: '/trocar-senha'
       preLoaderRoute: typeof TrocarSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-senha': {
@@ -1386,6 +1406,7 @@ const rootRouteChildren: RootRouteChildren = {
   MasterRoute: MasterRouteWithChildren,
   PrivacidadeRoute: PrivacidadeRoute,
   ResetSenhaRoute: ResetSenhaRoute,
+  TermosRoute: TermosRoute,
   TrocarSenhaRoute: TrocarSenhaRoute,
   AgendarSlugRoute: AgendarSlugRoute,
   ConfirmarTokenRoute: ConfirmarTokenRoute,
