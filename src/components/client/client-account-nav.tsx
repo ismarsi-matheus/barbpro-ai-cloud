@@ -113,8 +113,7 @@ export function ClientAccountNav({
         <Button asChild size="sm" variant="outline" className={outline}>
           <Link to="/cliente/entrar">
             <UserPlus className="mr-1.5 h-4 w-4" />
-            <span className="hidden xs:inline">Criar conta</span>
-            <span className="xs:hidden">Conta</span>
+            Criar conta
           </Link>
         </Button>
       </div>
