@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ClientAccountNav } from "@/components/client/client-account-nav";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -255,11 +256,10 @@ function LandingPage() {
             </div>
           </div>
           <nav className="flex items-center gap-2 shrink-0" aria-label="Navegação principal">
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/cliente">Minha Conta</Link>
-            </Button>
-            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-              <Link to="/entrar">Entrar</Link>
+            <ClientAccountNav />
+            <span className="hidden h-6 w-px bg-black/10 md:block" aria-hidden="true" />
+            <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
+              <Link to="/entrar">Sou barbearia</Link>
             </Button>
             <Button size="sm" className="text-white" style={{ backgroundColor: BRAND }} onClick={() => scrollToPlans()}>
               Ver planos
@@ -605,10 +605,12 @@ function LandingPage() {
             </div>
           </div>
           <div className="flex flex-col items-center gap-2 md:items-end">
-            <nav className="flex items-center gap-4 text-sm" aria-label="Links do rodapé">
-              <Link to="/cliente" className="text-white/70 hover:text-white">Minha Conta</Link>
-              <Link to="/cliente/entrar" className="text-white/70 hover:text-white">Entrar como cliente</Link>
-              <Link to="/entrar" className="text-white/70 hover:text-white">Sou barbearia</Link>
+            <nav className="flex flex-wrap items-center justify-center gap-4 text-sm md:justify-end" aria-label="Links do rodapé">
+              <Link to="/privacidade" className="text-white/70 hover:text-white">Política de Privacidade</Link>
+              <Link to="/termos" className="text-white/70 hover:text-white">Termos</Link>
+              <a href="mailto:contato@barbeiropro.app" className="text-white/70 hover:text-white">Contato</a>
+              <a href="https://instagram.com" target="_blank" rel="noreferrer" className="text-white/70 hover:text-white">Instagram</a>
+              <a href="https://wa.me/" target="_blank" rel="noreferrer" className="text-white/70 hover:text-white">WhatsApp</a>
             </nav>
             <div className="text-sm text-white/40 text-center md:text-right">© {new Date().getFullYear()} BarbeiroPro AI. Todos os direitos reservados.</div>
           </div>

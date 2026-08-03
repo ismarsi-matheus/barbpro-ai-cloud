@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ClientAccountNav } from "@/components/client/client-account-nav";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -713,12 +714,21 @@ function AgendarPage() {
               Adicionar ao calendário (.ics)
             </Button>
 
-            <div className="mt-6 grid gap-2">
-              <Button asChild className="w-full">
-                <Link to="/cliente/agendamentos">Ver meus agendamentos</Link>
+            <div className="mt-6 rounded-xl border border-[var(--brand)]/30 bg-[var(--brand)]/5 p-4 text-left">
+              <p className="flex items-center gap-2 text-sm font-semibold">
+                <CheckCircle2 className="h-4 w-4 text-green-600" /> Agendamento confirmado
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Agora você pode acompanhar seus agendamentos pela Área do Cliente.
+              </p>
+              <Button asChild className="mt-3 w-full">
+                <Link to="/cliente">Ir para Minha Conta</Link>
               </Button>
+            </div>
+
+            <div className="mt-3 grid gap-2">
               <Button asChild variant="outline" className="w-full">
-                <Link to="/cliente">Minha Conta</Link>
+                <Link to="/cliente/agendamentos">Ver meus agendamentos</Link>
               </Button>
               <Button asChild variant="ghost" className="w-full">
                 <Link to="/">Voltar para a página inicial</Link>
@@ -765,14 +775,7 @@ function AgendarPage() {
             <h1 className="text-xl font-bold">{company.nome_fantasia || company.name}</h1>
             <p className="text-sm opacity-80">Agendamento online</p>
           </div>
-          <Button
-            asChild
-            size="sm"
-            variant="outline"
-            className="ml-auto shrink-0 border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white"
-          >
-            <Link to="/cliente">Minha Conta</Link>
-          </Button>
+          <ClientAccountNav tone="onColor" className="ml-auto shrink-0" />
         </div>
       </header>
 
