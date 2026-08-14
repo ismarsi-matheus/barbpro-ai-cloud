@@ -79,14 +79,71 @@ function LandingPage() {
             <a href="#planos" className="hover:text-black transition-colors">Planos</a>
           </nav>
 
-          <div className="flex items-center gap-3">
-            <ClientAccountNav />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <ClientAccountNav className="hidden sm:flex" signedOutLabel="Área do cliente" />
+            <Button
+              asChild
+              size="sm"
+              variant="ghost"
+              className="hidden md:inline-flex rounded-full px-4 text-black/70 hover:text-black"
+            >
+              <Link to="/entrar">Sou barbearia</Link>
+            </Button>
             <Button size="sm" className="hidden sm:flex bg-[#1B3A4B] text-white hover:bg-[#1B3A4B]/90 rounded-full px-6" onClick={scrollToPlans}>
               Começar grátis
             </Button>
+
+            {/* Mobile */}
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="sm:hidden" aria-label="Abrir menu">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px]">
+                <SheetHeader className="text-left">
+                  <SheetTitle>BarbeiroPro AI</SheetTitle>
+                </SheetHeader>
+                <nav className="mt-6 flex flex-col gap-1 text-sm font-medium">
+                  {[
+                    ["#recursos", "Recursos"],
+                    ["#como-funciona", "Como funciona"],
+                    ["#clube", "Clube"],
+                    ["#planos", "Planos"],
+                  ].map(([href, label]) => (
+                    <a
+                      key={href}
+                      href={href}
+                      onClick={() => setMenuOpen(false)}
+                      className="rounded-lg px-3 py-2.5 hover:bg-muted"
+                    >
+                      {label}
+                    </a>
+                  ))}
+                </nav>
+                <div className="mt-6 flex flex-col gap-2">
+                  <Button asChild variant="outline" onClick={() => setMenuOpen(false)}>
+                    <Link to="/cliente/entrar">Área do cliente</Link>
+                  </Button>
+                  <Button asChild variant="outline" onClick={() => setMenuOpen(false)}>
+                    <Link to="/entrar">Sou barbearia</Link>
+                  </Button>
+                  <Button
+                    className="bg-[#1B3A4B] text-white hover:bg-[#1B3A4B]/90"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      scrollToPlans();
+                    }}
+                  >
+                    Começar grátis
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
+
 
       <main>
         {/* HERO */}
