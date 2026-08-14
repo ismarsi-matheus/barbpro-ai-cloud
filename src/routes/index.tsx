@@ -260,8 +260,11 @@ function LandingPage() {
           </div>
         </section>
 
-        {/* DEMONSTRAÇÃO VISUAL DO PRODUTO */}
-        <ProductShowcase onCtaClick={scrollToPlans} />
+        {/* DEMONSTRAÇÃO VISUAL DO PRODUTO / COMO FUNCIONA */}
+        <div id="como-funciona" className="scroll-mt-24">
+          <ProductShowcase onCtaClick={scrollToPlans} />
+        </div>
+
 
         {/* PROBLEMA / SOLUÇÃO */}
 
