@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { PlanCheckoutDialog } from "@/components/plan-checkout-dialog";
+import { SUBSCRIPTION_PLAN_CATALOG } from "@/lib/subscription-plan-catalog";
 import { 
   Calendar, Users, Percent, LineChart, Clock, MessageSquare, 
   ArrowRight, Zap, Star, ShieldCheck, TrendingUp, Scissors,
