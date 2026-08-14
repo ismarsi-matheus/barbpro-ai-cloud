@@ -226,7 +226,7 @@ function LandingPage() {
         </section>
 
         {/* RECURSOS */}
-        <section id="recursos" className="py-24 sm:py-32 bg-[#F8F7F3]">
+        <section id="recursos" className="scroll-mt-24 py-24 sm:py-32 bg-[#F8F7F3]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center max-w-3xl mx-auto mb-20">
               <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-6">Tudo o que sua barbearia precisa em um só lugar.</h2>
