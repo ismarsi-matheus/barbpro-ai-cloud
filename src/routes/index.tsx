@@ -124,12 +124,24 @@ function LandingPage() {
                     <a
                       key={href}
                       href={href}
-                      onClick={() => setMenuOpen(false)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setMenuOpen(false);
+                        // Aguarda a animação de fechamento do Sheet antes de rolar,
+                        // evitando que o scroll-lock do overlay cancele a rolagem.
+                        window.setTimeout(() => {
+                          document
+                            .querySelector(href)
+                            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                          window.history.replaceState(null, "", href);
+                        }, 260);
+                      }}
                       className="rounded-lg px-3 py-2.5 hover:bg-muted"
                     >
                       {label}
                     </a>
                   ))}
+
                 </nav>
                 <div className="mt-6 flex flex-col gap-2">
                   <Button asChild variant="outline" onClick={() => setMenuOpen(false)}>
