@@ -1,65 +1,61 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { z } from "zod";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { signUpInterno } from "@/lib/users.functions";
+import { checkEmailExists, signupTrial } from "@/lib/auth-signup.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { toast } from "sonner";
-import { Scissors } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Scissors, ArrowLeft, Loader2 } from "lucide-react";
 
-const searchSchema = z.object({
-  tab: z.enum(["signin", "signup"]).optional().default("signin"),
-});
+export const Route = createFileRoute("/entrar")({ component: EntrarPage });
 
-export const Route = createFileRoute("/entrar")({
-  validateSearch: searchSchema,
-  component: EntrarPage,
-});
+type Step = "email" | "login" | "signup";
 
 function EntrarPage() {
-  const { tab } = Route.useSearch();
   const navigate = useNavigate();
+  const checkFn = useServerFn(checkEmailExists);
+  const signupFn = useServerFn(signupTrial);
+
+  const [step, setStep] = useState<Step>("email");
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nome, setNome] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [cpf, setCpf] = useState("");
+  const [phone, setPhone] = useState("");
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/app/dashboard" });
-    });
-  }, [navigate]);
+  const handleEmailNext = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { exists } = await checkFn({ data: { email } });
+      setStep(exists ? "login" : "signup");
+    } catch (err: any) {
+      toast.error(err.message ?? "Erro ao verificar email");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success("Bem-vindo!");
+    if (error) return toast.error("Senha incorreta.");
+    toast.success("Bem-vindo de volta!");
     navigate({ to: "/app/dashboard" });
   };
 
-  const signUpFn = useServerFn(signUpInterno);
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await signUpFn({ data: { email, password, nome } });
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      toast.success("Conta criada!");
+      await signupFn({ data: { email, password, nome, cpf, phone } });
+      await supabase.auth.signInWithPassword({ email, password });
       navigate({ to: "/app/onboarding" });
     } catch (err: any) {
       toast.error(err.message ?? "Erro ao criar conta");
@@ -78,97 +74,56 @@ function EntrarPage() {
       </Link>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Acessar sua conta</CardTitle>
-          <CardDescription>Gerencie sua barbearia em um só lugar</CardDescription>
+          <CardTitle className="text-2xl">
+            {step === "email" ? "Acessar sua conta" : "Criar sua conta"}
+          </CardTitle>
+          <CardDescription>
+            {step === "email" && "Gestão profissional para barbearias"}
+            {step === "login" && "Já temos seu e-mail cadastrado."}
+            {step === "signup" && "Dados para o período de teste grátis"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue={tab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Entrar</TabsTrigger>
-              <TabsTrigger value="signup">Criar conta</TabsTrigger>
-            </TabsList>
-            <TabsContent value="signin">
-              <form onSubmit={handleLogin} className="space-y-4 mt-4">
-                <div>
-                  <Label htmlFor="email-in">Email</Label>
-                  <Input
-                    id="email-in"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="pwd-in">Senha</Label>
-                  <Input
-                    id="pwd-in"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <div className="text-right">
-                  <Link to="/esqueci-senha" className="text-xs text-muted-foreground hover:underline">
-                    Esqueci minha senha
-                  </Link>
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-[var(--brand)] hover:bg-[var(--brand)]/90 text-white"
-                  disabled={loading}
-                >
-                  {loading ? "Entrando..." : "Entrar"}
-                </Button>
-              </form>
-            </TabsContent>
-            <TabsContent value="signup">
-              <form onSubmit={handleSignup} className="space-y-4 mt-4">
-                <div>
-                  <Label htmlFor="nome-up">Seu nome</Label>
-                  <Input
-                    id="nome-up"
-                    required
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email-up">Email</Label>
-                  <Input
-                    id="email-up"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="pwd-up">Senha</Label>
-                  <Input
-                    id="pwd-up"
-                    type="password"
-                    required
-                    minLength={6}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Mínimo 6 caracteres</p>
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-[var(--brand)] hover:bg-[var(--brand)]/90 text-white"
-                  disabled={loading}
-                >
-                  {loading ? "Criando..." : "Criar conta e começar grátis"}
-                </Button>
-                <p className="text-xs text-center text-muted-foreground">
-                  14 dias de teste grátis. Sem cartão de crédito.
-                </p>
-              </form>
-            </TabsContent>
-          </Tabs>
+          {step === "email" && (
+            <form onSubmit={handleEmailNext} className="space-y-4">
+              <Label>E-mail</Label>
+              <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Button type="submit" className="w-full bg-[var(--brand)] text-white" disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Continuar
+              </Button>
+            </form>
+          )}
+          {step === "login" && (
+            <form onSubmit={handleLogin} className="space-y-4">
+              <button type="button" onClick={() => setStep("email")} className="text-xs text-muted-foreground flex items-center hover:underline"><ArrowLeft className="w-3 h-3 mr-1" /> Voltar</button>
+              <Label>E-mail</Label>
+              <Input value={email} disabled />
+              <Label>Senha</Label>
+              <Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+              <Button type="submit" className="w-full bg-[var(--brand)] text-white" disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Entrar
+              </Button>
+            </form>
+          )}
+          {step === "signup" && (
+            <form onSubmit={handleSignup} className="space-y-4">
+              <button type="button" onClick={() => setStep("email")} className="text-xs text-muted-foreground flex items-center hover:underline"><ArrowLeft className="w-3 h-3 mr-1" /> Voltar</button>
+              <Label>Seu Nome</Label>
+              <Input required value={nome} onChange={(e) => setNome(e.target.value)} />
+              <Label>CPF</Label>
+              <Input required value={cpf} placeholder="000.000.000-00" onChange={(e) => setCpf(e.target.value)} />
+              <Label>WhatsApp</Label>
+              <Input required value={phone} placeholder="(00) 00000-0000" onChange={(e) => setPhone(e.target.value)} />
+              <Label>Senha</Label>
+              <Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+              <Button type="submit" className="w-full bg-[var(--brand)] text-white" disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Criar conta
+              </Button>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>

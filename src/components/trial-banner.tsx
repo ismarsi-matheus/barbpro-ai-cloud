@@ -1,78 +1,44 @@
-import { differenceInCalendarDays, parseISO } from "date-fns";
-import { AlertCircle, Clock, AlertTriangle, Ban } from "lucide-react";
+import { Scissors, CheckCircle2, AlertCircle, Calendar, Clock, BarChart3, Users, Crown, Sparkles } from "lucide-react";
+import { format, differenceInDays, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
 import { Link } from "@tanstack/react-router";
 
 export function TrialBanner({ company }: { company: any }) {
-  if (!company) return null;
-  const status = company.status_cobranca;
+  if (!company || company.status_cobranca !== "trial") return null;
 
-  if (status === "suspenso") {
-    return (
-      <Banner color="red" icon={<Ban className="w-4 h-4" />}>
-        Conta suspensa por falta de pagamento. Acesso bloqueado.{" "}
-        <Link to="/app/configuracoes" className="underline font-semibold">Regularizar</Link>
-      </Banner>
-    );
-  }
-  if (status === "cancelado") {
-    return (
-      <Banner color="gray" icon={<Ban className="w-4 h-4" />}>
-        Conta cancelada. <Link to="/app/configuracoes" className="underline font-semibold">Reativar</Link>
-      </Banner>
-    );
-  }
-  if (status === "inadimplente") {
-    return (
-      <Banner color="orange" icon={<AlertCircle className="w-4 h-4" />}>
-        Pagamento em atraso. Sua conta será suspensa em breve.{" "}
-        <Link to="/app/configuracoes" className="underline font-semibold">Cobrança</Link>
-      </Banner>
-    );
-  }
-  if (status === "trial" && company.trial_ate) {
-    const days = differenceInCalendarDays(parseISO(company.trial_ate), new Date());
-    if (days < 0) {
-      return (
-        <Banner color="red" icon={<AlertCircle className="w-4 h-4" />}>
-          Seu período de teste expirou.{" "}
-          <Link to="/app/checkout" className="underline font-semibold">Escolher plano</Link>
-        </Banner>
-      );
-    }
-    if (days < 3) {
-      return (
-        <Banner color="amber" icon={<AlertTriangle className="w-4 h-4" />}>
-          Atenção: seu trial acaba em <strong>{days === 0 ? "menos de 1 dia" : `${days} dia${days !== 1 ? "s" : ""}`}</strong>.{" "}
-          <Link to="/app/checkout" className="underline font-semibold">Assinar agora</Link>
-        </Banner>
-      );
-    }
-    return (
-      <Banner color="brand" icon={<Clock className="w-4 h-4" />}>
-        🎁 Período de teste — restam <strong>{days} dia{days !== 1 ? "s" : ""}</strong>.
-      </Banner>
-    );
-  }
-  return null;
-}
+  const trialEnd = company.trial_ate ? parseISO(company.trial_ate) : null;
+  if (!trialEnd) return null;
 
-function Banner({
-  color, icon, children,
-}: {
-  color: "amber" | "orange" | "red" | "gray" | "brand";
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  const map: Record<string, string> = {
-    amber: "bg-amber-400 text-amber-950",
-    orange: "bg-orange-500 text-white",
-    red: "bg-red-600 text-white",
-    gray: "bg-gray-800 text-white",
-    brand: "bg-[var(--brand)] text-white",
-  };
+  const now = new Date();
+  const daysLeft = differenceInDays(trialEnd, now);
+  const expired = daysLeft < 0;
+
+  if (expired) {
+    return (
+      <div className="bg-destructive text-destructive-foreground px-4 py-2.5 flex items-center justify-center gap-3 text-sm font-medium animate-in fade-in slide-in-from-top-4 duration-500">
+        <AlertCircle className="w-4 h-4" />
+        <span>Seu período de teste expirou hoje. Escolha um plano para continuar usando o BarbeiroPro.</span>
+        <Button asChild size="sm" variant="secondary" className="h-7 text-xs font-bold px-3">
+          <Link to="/app/checkout">Ver Planos</Link>
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <div className={`${map[color]} text-sm px-4 py-2 text-center font-medium flex items-center justify-center gap-2`}>
-      {icon}<span>{children}</span>
+    <div className={cn(
+      "px-4 py-2 flex items-center justify-center gap-3 text-xs sm:text-sm font-medium transition-colors border-b border-white/10",
+      daysLeft <= 3 ? "bg-amber-500 text-white" : "bg-blue-600 text-white"
+    )}>
+      <Clock className="w-4 h-4 hidden sm:block" />
+      <span>
+        Você está no <b>Período de Teste</b>. Restam <b>{daysLeft === 0 ? "menos de 1 dia" : `${daysLeft} ${daysLeft === 1 ? 'dia' : 'dias'}`}</b>.
+      </span>
+      <Button asChild size="sm" variant="secondary" className="h-6 text-[10px] font-bold px-2 py-0 bg-white/20 hover:bg-white/30 text-white border-0">
+        <Link to="/app/checkout">Ativar Plano</Link>
+      </Button>
     </div>
   );
 }

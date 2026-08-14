@@ -54,13 +54,15 @@ function AppLayout() {
       const trialExpired =
         status === "trial" &&
         company.trial_ate &&
-        new Date(company.trial_ate as any).getTime() <= Date.now();
+        new Date(company.trial_ate as any).setHours(23, 59, 59, 999) < Date.now();
+      
       const needsPaywall =
         status === "suspenso" ||
         status === "cancelado" ||
         status === "inadimplente" ||
         trialExpired;
-      if (needsPaywall && !pathname.endsWith("/checkout")) {
+
+      if (needsPaywall && !pathname.endsWith("/checkout") && !pathname.endsWith("/configuracoes")) {
         navigate({ to: "/app/checkout" });
       }
     }
