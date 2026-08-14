@@ -105,8 +105,21 @@ function EntrarPage() {
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Entrar
               </Button>
+              <div className="flex items-center justify-between text-xs">
+                <Link to="/esqueci-senha" className="text-[var(--brand)] hover:underline">
+                  Esqueci minha senha
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setStep("signup")}
+                  className="text-muted-foreground hover:underline"
+                >
+                  Criar conta
+                </button>
+              </div>
             </form>
           )}
+
           {step === "signup" && (
             <form onSubmit={handleSignup} className="space-y-4">
               <button type="button" onClick={() => setStep("email")} className="text-xs text-muted-foreground flex items-center hover:underline"><ArrowLeft className="w-3 h-3 mr-1" /> Voltar</button>
