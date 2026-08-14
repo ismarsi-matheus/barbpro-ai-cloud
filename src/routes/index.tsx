@@ -8,8 +8,10 @@ import { PlanCheckoutDialog } from "@/components/plan-checkout-dialog";
 import { 
   Calendar, Users, Percent, LineChart, Clock, MessageSquare, 
   ArrowRight, Zap, Star, ShieldCheck, TrendingUp, Scissors,
-  Check, Play, ArrowUpRight
+  Check, Play, ArrowUpRight, Menu
 } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import dashboardPreview from "@/assets/dashboard-preview.png.asset.json";
