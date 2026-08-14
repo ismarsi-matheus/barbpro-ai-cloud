@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Scissors } from "lucide-react";
+import { Scissors, ArrowLeft } from "lucide-react";
 import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/cliente/entrar")({
