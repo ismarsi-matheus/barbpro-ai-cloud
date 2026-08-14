@@ -325,7 +325,7 @@ function LandingPage() {
         </section>
 
         {/* PLANOS */}
-        <section id="planos" className="py-24 sm:py-32 bg-[#F8F7F3]">
+        <section id="planos" className="scroll-mt-24 py-24 sm:py-32 bg-[#F8F7F3]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-20">
               <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-6">Escolha o plano ideal para crescer.</h2>
