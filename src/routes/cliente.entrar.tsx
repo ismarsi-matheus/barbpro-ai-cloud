@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Scissors } from "lucide-react";
+import { Scissors, ArrowLeft } from "lucide-react";
 import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/cliente/entrar")({
@@ -111,6 +111,12 @@ function ClienteEntrar() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--surface)] px-4 py-10">
+      <Link
+        to="/"
+        className="self-center mb-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <ArrowLeft className="w-4 h-4" /> Voltar para o início
+      </Link>
       <Link to="/" className="flex items-center gap-2 mb-6">
         <div className="w-8 h-8 rounded-md bg-[var(--brand)] flex items-center justify-center">
           <Scissors className="w-4 h-4 text-white" />

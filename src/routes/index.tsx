@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { PlanCheckoutDialog } from "@/components/plan-checkout-dialog";
+import { SUBSCRIPTION_PLAN_CATALOG } from "@/lib/subscription-plan-catalog";
 import { 
   Calendar, Users, Percent, LineChart, Clock, MessageSquare, 
   ArrowRight, Zap, Star, ShieldCheck, TrendingUp, Scissors,
@@ -40,7 +41,9 @@ function scrollToPlans() {
 }
 
 function LandingPage() {
-  const [plans, setPlans] = useState<any[]>([]);
+  // Fonte única dos planos públicos: catálogo em código (mesma fonte usada em
+  // /app/checkout). A tabela `plan` só sobrescreve quando estiver populada.
+  const [plans, setPlans] = useState<any[]>(SUBSCRIPTION_PLAN_CATALOG);
   const [selectedPlan, setSelectedPlan] = useState<any | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -52,7 +55,9 @@ function LandingPage() {
       .select("*")
       .eq("ativo", true)
       .order("ordem")
-      .then(({ data }) => setPlans(data ?? []));
+      .then(({ data }) => {
+        if (data && data.length > 0) setPlans(data);
+      });
   }, []);
 
   const handlePlanClick = (plan: any) => {
@@ -65,8 +70,9 @@ function LandingPage() {
     setDialogOpen(true);
   };
 
+
   return (
-    <div className="min-h-screen bg-white text-[#1B1C1E] selection:bg-[#1B3A4B] selection:text-white">
+    <div className="min-h-screen overflow-x-hidden bg-white text-[#1B1C1E] selection:bg-[#1B3A4B] selection:text-white">
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-black/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2">
