@@ -183,7 +183,11 @@ function LandingPage() {
           </div>
         </section>
 
+        {/* DEMONSTRAÇÃO VISUAL DO PRODUTO */}
+        <ProductShowcase onCtaClick={scrollToPlans} />
+
         {/* PROBLEMA / SOLUÇÃO */}
+
         <section className="py-24 sm:py-32 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-16">Sua barbearia ainda perde tempo com isso?</h2>
