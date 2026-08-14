@@ -1,4 +1,4 @@
-import { Scissors, Calendar, Percent, LineChart, Clock, MessageSquare, ArrowRight, Zap, Star, ShieldCheck, TrendingUp, Users } from "lucide-react";
+import { Scissors, Calendar, Percent, LineChart, Clock, MessageSquare, ArrowRight, Zap, Star, ShieldCheck, TrendingUp, Users, Bell } from "lucide-react";
 
 export const PAINS = [
   { 
