@@ -65,9 +65,12 @@ function firstName(name?: string | null) {
 export function ClientAccountNav({
   tone = "light",
   className,
+  signedOutLabel,
 }: {
   tone?: "light" | "onColor";
   className?: string;
+  /** Quando definido, exibe um único botão com esse texto no estado deslogado. */
+  signedOutLabel?: string;
 }) {
   const navigate = useNavigate();
   const { session, loading } = useClientSession(null);
@@ -105,6 +108,16 @@ export function ClientAccountNav({
   }
 
   if (!session) {
+    if (signedOutLabel) {
+      return (
+        <Button asChild size="sm" variant="outline" className={cn(outline, className)}>
+          <Link to="/cliente/entrar">
+            <User className="mr-1.5 h-4 w-4" />
+            {signedOutLabel}
+          </Link>
+        </Button>
+      );
+    }
     return (
       <div className={cn("flex items-center gap-2", className)}>
         <Button asChild variant="ghost" size="sm" className={cn("hidden sm:inline-flex", ghost)}>
@@ -119,6 +132,7 @@ export function ClientAccountNav({
       </div>
     );
   }
+
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
