@@ -13,6 +13,8 @@ import {
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import dashboardPreview from "@/assets/dashboard-preview.png.asset.json";
+import aiGrowthAsset from "@/assets/ai-growth-preview.png.asset.json";
+
 
 export const Route = createFileRoute("/")({
 
@@ -231,13 +233,20 @@ function LandingPage() {
                     Mudar agora
                   </Button>
                 </div>
-                <div className="hidden lg:block">
-                  <div className="aspect-video bg-white/10 rounded-2xl border border-white/20 backdrop-blur-sm p-4">
-                    <div className="w-full h-full bg-[#1B3A4B]/50 rounded-lg flex items-center justify-center">
-                      <Zap className="w-12 h-12 text-emerald-400 animate-pulse" />
+                <div className="min-w-0">
+                  <div className="relative rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm p-2 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.6)] transition-transform duration-500 hover:-translate-y-1">
+                    <div className="rounded-xl overflow-hidden bg-white">
+                      <img
+                        src={aiGrowthAsset.url}
+                        alt="AI Growth Engine do BarbeiroPro AI mostrando oportunidades de crescimento, clientes inativos, campanhas e impacto financeiro estimado."
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-auto block"
+                      />
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
