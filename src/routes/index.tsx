@@ -40,7 +40,9 @@ function scrollToPlans() {
 }
 
 function LandingPage() {
-  const [plans, setPlans] = useState<any[]>([]);
+  // Fonte única dos planos públicos: catálogo em código (mesma fonte usada em
+  // /app/checkout). A tabela `plan` só sobrescreve quando estiver populada.
+  const [plans, setPlans] = useState<any[]>(SUBSCRIPTION_PLAN_CATALOG);
   const [selectedPlan, setSelectedPlan] = useState<any | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -52,7 +54,9 @@ function LandingPage() {
       .select("*")
       .eq("ativo", true)
       .order("ordem")
-      .then(({ data }) => setPlans(data ?? []));
+      .then(({ data }) => {
+        if (data && data.length > 0) setPlans(data);
+      });
   }, []);
 
   const handlePlanClick = (plan: any) => {
@@ -64,6 +68,7 @@ function LandingPage() {
     });
     setDialogOpen(true);
   };
+
 
   return (
     <div className="min-h-screen bg-white text-[#1B1C1E] selection:bg-[#1B3A4B] selection:text-white">
