@@ -239,13 +239,14 @@ function LandingPage() {
                 { icon: Users, title: "CRM de Clientes", desc: "Histórico completo, preferências e alertas de clientes sumidos." },
                 { icon: TrendingUp, title: "Financeiro Real", desc: "Fluxo de caixa, entradas e saídas integradas aos atendimentos." },
                 { icon: Percent, title: "Comissões", desc: "Cálculo automático para seus profissionais sem erros manuais." },
-                { icon: ShieldCheck, title: "Clube de Assinaturas", desc: "Crie planos mensais e garanta receita recorrente todos os meses." },
+                { icon: ShieldCheck, title: "Clube de Assinaturas", desc: "Crie planos mensais e garanta receita recorrente todos os meses.", anchorId: "clube" },
                 { icon: Zap, title: "IA Growth", desc: "Inteligência artificial que detecta oportunidades de lucro para você." },
               ].map((item, i) => (
                 <motion.div 
                   key={i}
+                  id={(item as { anchorId?: string }).anchorId}
                   whileHover={{ y: -5 }}
-                  className="p-8 rounded-3xl bg-white border border-black/5 hover:shadow-xl hover:shadow-black/5 transition-all"
+                  className="scroll-mt-28 p-8 rounded-3xl bg-white border border-black/5 hover:shadow-xl hover:shadow-black/5 transition-all"
                 >
                   <div className="w-12 h-12 rounded-2xl bg-[#1B3A4B]/5 flex items-center justify-center mb-6">
                     <item.icon className="w-6 h-6 text-[#1B3A4B]" />
@@ -254,6 +255,7 @@ function LandingPage() {
                   <p className="text-black/50 leading-relaxed">{item.desc}</p>
                 </motion.div>
               ))}
+
             </div>
           </div>
         </section>
