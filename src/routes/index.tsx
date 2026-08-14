@@ -13,6 +13,8 @@ import {
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import dashboardPreview from "@/assets/dashboard-preview.png.asset.json";
+import aiGrowthAsset from "@/assets/ai-growth-preview.png.asset.json";
+
 
 export const Route = createFileRoute("/")({
 
