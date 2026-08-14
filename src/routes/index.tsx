@@ -124,12 +124,24 @@ function LandingPage() {
                     <a
                       key={href}
                       href={href}
-                      onClick={() => setMenuOpen(false)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setMenuOpen(false);
+                        // Aguarda a animação de fechamento do Sheet antes de rolar,
+                        // evitando que o scroll-lock do overlay cancele a rolagem.
+                        window.setTimeout(() => {
+                          document
+                            .querySelector(href)
+                            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                          window.history.replaceState(null, "", href);
+                        }, 260);
+                      }}
                       className="rounded-lg px-3 py-2.5 hover:bg-muted"
                     >
                       {label}
                     </a>
                   ))}
+
                 </nav>
                 <div className="mt-6 flex flex-col gap-2">
                   <Button asChild variant="outline" onClick={() => setMenuOpen(false)}>
@@ -226,7 +238,7 @@ function LandingPage() {
         </section>
 
         {/* RECURSOS */}
-        <section id="recursos" className="py-24 sm:py-32 bg-[#F8F7F3]">
+        <section id="recursos" className="scroll-mt-24 py-24 sm:py-32 bg-[#F8F7F3]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center max-w-3xl mx-auto mb-20">
               <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-6">Tudo o que sua barbearia precisa em um só lugar.</h2>
@@ -239,13 +251,14 @@ function LandingPage() {
                 { icon: Users, title: "CRM de Clientes", desc: "Histórico completo, preferências e alertas de clientes sumidos." },
                 { icon: TrendingUp, title: "Financeiro Real", desc: "Fluxo de caixa, entradas e saídas integradas aos atendimentos." },
                 { icon: Percent, title: "Comissões", desc: "Cálculo automático para seus profissionais sem erros manuais." },
-                { icon: ShieldCheck, title: "Clube de Assinaturas", desc: "Crie planos mensais e garanta receita recorrente todos os meses." },
+                { icon: ShieldCheck, title: "Clube de Assinaturas", desc: "Crie planos mensais e garanta receita recorrente todos os meses.", anchorId: "clube" },
                 { icon: Zap, title: "IA Growth", desc: "Inteligência artificial que detecta oportunidades de lucro para você." },
               ].map((item, i) => (
                 <motion.div 
                   key={i}
+                  id={(item as { anchorId?: string }).anchorId}
                   whileHover={{ y: -5 }}
-                  className="p-8 rounded-3xl bg-white border border-black/5 hover:shadow-xl hover:shadow-black/5 transition-all"
+                  className="scroll-mt-28 p-8 rounded-3xl bg-white border border-black/5 hover:shadow-xl hover:shadow-black/5 transition-all"
                 >
                   <div className="w-12 h-12 rounded-2xl bg-[#1B3A4B]/5 flex items-center justify-center mb-6">
                     <item.icon className="w-6 h-6 text-[#1B3A4B]" />
@@ -254,12 +267,16 @@ function LandingPage() {
                   <p className="text-black/50 leading-relaxed">{item.desc}</p>
                 </motion.div>
               ))}
+
             </div>
           </div>
         </section>
 
-        {/* DEMONSTRAÇÃO VISUAL DO PRODUTO */}
-        <ProductShowcase onCtaClick={scrollToPlans} />
+        {/* DEMONSTRAÇÃO VISUAL DO PRODUTO / COMO FUNCIONA */}
+        <div id="como-funciona" className="scroll-mt-24">
+          <ProductShowcase onCtaClick={scrollToPlans} />
+        </div>
+
 
         {/* PROBLEMA / SOLUÇÃO */}
 
@@ -320,7 +337,7 @@ function LandingPage() {
         </section>
 
         {/* PLANOS */}
-        <section id="planos" className="py-24 sm:py-32 bg-[#F8F7F3]">
+        <section id="planos" className="scroll-mt-24 py-24 sm:py-32 bg-[#F8F7F3]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-20">
               <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-6">Escolha o plano ideal para crescer.</h2>
