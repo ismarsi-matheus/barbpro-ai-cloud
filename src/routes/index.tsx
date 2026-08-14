@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ClientAccountNav } from "@/components/client/client-account-nav";
+import { ProductShowcase } from "@/components/landing/product-showcase";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
