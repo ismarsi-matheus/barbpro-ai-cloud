@@ -12,8 +12,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import dashboardPreview from "@/assets/dashboard-preview.png.asset.json";
 
 export const Route = createFileRoute("/")({
+
   head: () => ({
     meta: [
       { title: "BarbeiroPro AI — Sistema Inteligente para Barbearias" },
@@ -120,32 +122,35 @@ function LandingPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="relative"
+                className="relative lg:ml-auto w-full lg:max-w-[120%]"
               >
-                <div className="aspect-[4/3] rounded-3xl bg-[#1B3A4B]/5 border border-black/5 p-4 shadow-2xl relative z-10">
-                  <div className="w-full h-full rounded-2xl bg-white overflow-hidden shadow-inner border border-black/5 flex flex-col">
-                    <div className="h-10 bg-[#F8F7F3] border-b flex items-center px-4 gap-2">
-                      <div className="w-2 h-2 rounded-full bg-red-400" />
-                      <div className="w-2 h-2 rounded-full bg-amber-400" />
-                      <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                    </div>
-                    <div className="flex-1 p-6 space-y-4">
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="h-20 rounded-xl bg-[#F8F7F3] animate-pulse" />
-                        <div className="h-20 rounded-xl bg-[#F8F7F3] animate-pulse" />
-                        <div className="h-20 rounded-xl bg-[#F8F7F3] animate-pulse" />
-                      </div>
-                      <div className="h-40 rounded-xl bg-[#F8F7F3] animate-pulse" />
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="h-32 rounded-xl bg-[#F8F7F3] animate-pulse" />
-                        <div className="h-32 rounded-xl bg-[#F8F7F3] animate-pulse" />
-                      </div>
-                    </div>
+                <div className="relative z-10 rounded-2xl bg-white border border-black/10 shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden transition-transform duration-500 hover:scale-[1.02] group">
+                  {/* Browser Bar Mockup */}
+                  <div className="h-8 sm:h-10 bg-[#F8F7F3] border-b border-black/5 flex items-center px-4 gap-1.5 sm:gap-2 shrink-0">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
+                    <div className="ml-4 h-5 sm:h-6 flex-1 bg-black/5 rounded-md" />
+                  </div>
+                  
+                  {/* Actual Product Image */}
+                  <div className="relative overflow-hidden bg-[#F8F7F3] aspect-video sm:aspect-auto">
+                    <img 
+                      src={dashboardPreview.url} 
+                      alt="Dashboard do BarbeiroPro AI mostrando indicadores de agendamentos, faturamento, clientes e desempenho da barbearia"
+                      className="w-full h-auto object-top shadow-inner"
+                      loading="eager"
+                      fetchPriority="high"
+                    />
+                    
+                    {/* Subtle Overlay Glow */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-[#1B3A4B]/5 to-transparent pointer-events-none group-hover:opacity-0 transition-opacity" />
                   </div>
                 </div>
+
                 {/* Decorative elements */}
-                <div className="absolute -top-12 -right-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl" />
-                <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-[#1B3A4B]/10 rounded-full blur-3xl" />
+                <div className="absolute -top-12 -right-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -z-10" />
+                <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-[#1B3A4B]/10 rounded-full blur-3xl -z-10" />
               </motion.div>
             </div>
           </div>
