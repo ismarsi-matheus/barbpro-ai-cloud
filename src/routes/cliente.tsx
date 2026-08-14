@@ -12,8 +12,12 @@ export const Route = createFileRoute("/cliente")({
  * Faz o gate de sessão para todas as telas, exceto a de autenticação (/cliente/entrar).
  */
 function ClienteLayout() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isAuthRoute = pathname.startsWith("/cliente/entrar");
+  // Usa as matches confirmadas (e não o pathname "pendente") para decidir o gate.
+  // Com o pathname, ao navegar para fora de /cliente/entrar o hook passava a
+  // receber redirectTo e devolvia o usuário para /cliente/entrar (nav travada).
+  const isAuthRoute = useRouterState({
+    select: (s) => s.matches.some((m) => m.routeId === "/cliente/entrar"),
+  });
   const { session, loading } = useClientSession(isAuthRoute ? null : "/cliente/entrar");
 
   if (isAuthRoute) return <Outlet />;
