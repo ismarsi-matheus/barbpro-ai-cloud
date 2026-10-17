@@ -84,8 +84,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "BarbeiroPro AI — Sistema completo para barbearias" },
       { name: "twitter:description", content: "Agenda online, comissões automáticas, financeiro e IA pra recuperar clientes. 14 dias grátis." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b5dfb921-d026-4191-94d7-02eb37a9b15f/id-preview-15ae2c4f--d08cd3ae-67a9-476f-b954-795eb5bcb449.lovable.app-1779654774963.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b5dfb921-d026-4191-94d7-02eb37a9b15f/id-preview-15ae2c4f--d08cd3ae-67a9-476f-b954-795eb5bcb449.lovable.app-1779654774963.png" },
     ],
     links: [
       {

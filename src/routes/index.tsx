@@ -27,7 +27,7 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Transforme sua barbearia com agendamento online, gestão financeira e IA. Teste grátis por 14 dias." },
       { property: "og:title", content: "BarbeiroPro AI — Sistema Inteligente para Barbearias" },
       { property: "og:description", content: "Transforme sua barbearia com agendamento online, gestão financeira e IA. Teste grátis por 14 dias." },
-      { property: "og:image", content: "https://barbeiropro.app/og-image.png" },
+      { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
