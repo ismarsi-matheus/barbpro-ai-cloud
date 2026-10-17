@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "sdk_version": "3.1.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://ewdyunudbnukbwqsbeom.supabase.co/auth/v1",
+    "require_oauth_client_claim": true,
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "remix-of-barbeiropro-ai",
+      "version": "0.1.0",
+      "title": "Remix of BarbeiroPro AI"
+    },
+    "tools": [
+      {
+        "name": "list_my_appointments",
+        "title": "Meus agendamentos",
+        "description": "Consulta uma página dos agendamentos do cliente conectado, do mais recente ao mais antigo, sem alterar reservas.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "default": 20,
+              "description": "Quantidade de agendamentos, de 1 a 50.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            },
+            "offset": {
+              "default": 0,
+              "description": "Quantidade de registros a pular para consultar a próxima página.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            }
+          },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_club_usage",
+        "title": "Histórico de créditos do Clube",
+        "description": "Consulta os movimentos de créditos pertencentes ao cliente conectado, sem consumir créditos nem alterar assinaturas.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "membership_id": {
+              "description": "ID opcional de uma assinatura pertencente ao cliente conectado.",
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "limit": {
+              "default": 20,
+              "description": "Quantidade de movimentos, de 1 a 50.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            },
+            "offset": {
+              "default": 0,
+              "description": "Quantidade de movimentos a pular.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            }
+          },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_barbershops",
+        "title": "Minhas barbearias",
+        "description": "Lista as barbearias em que o usuário conectado possui vínculo ativo de equipe, respeitando suas permissões atuais.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "default": 20,
+              "description": "Quantidade máxima de vínculos, de 1 a 50.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
