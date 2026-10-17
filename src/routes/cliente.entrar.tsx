@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, type SearchSchemaInput } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { oauthReturnPath } from "@/lib/oauth-return-path";
 
 export const Route = createFileRoute("/cliente/entrar")({
   ssr: false,
-  validateSearch: (search: Record<string, unknown>) => ({ next: oauthReturnPath(search.next) }),
+  validateSearch: (search: Record<string, unknown> & SearchSchemaInput) => ({ next: oauthReturnPath(search.next) }),
   head: () => ({
     meta: [
       { title: "Entrar na Área do Cliente — BarbeiroPro" },

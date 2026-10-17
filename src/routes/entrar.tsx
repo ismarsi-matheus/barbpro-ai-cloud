@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, type SearchSchemaInput } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -12,7 +12,10 @@ import { Scissors, ArrowLeft, Loader2 } from "lucide-react";
 import { oauthReturnPath } from "@/lib/oauth-return-path";
 
 export const Route = createFileRoute("/entrar")({
-  validateSearch: (search: Record<string, unknown>) => ({ next: oauthReturnPath(search.next) }),
+  validateSearch: (search: Record<string, unknown> & SearchSchemaInput) => ({
+    next: oauthReturnPath(search.next),
+    tab: typeof search.tab === "string" ? search.tab : undefined,
+  }),
   head: () => ({ meta: [
     { title: "Acessar sua barbearia — BarbeiroPro AI" },
     { name: "description", content: "Entre na sua conta do BarbeiroPro AI para gerenciar sua barbearia." },
