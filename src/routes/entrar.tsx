@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, type SearchSchemaInput } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -9,13 +9,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Scissors, ArrowLeft, Loader2 } from "lucide-react";
+import { oauthReturnPath } from "@/lib/oauth-return-path";
 
-export const Route = createFileRoute("/entrar")({ component: EntrarPage });
+export const Route = createFileRoute("/entrar")({
+  validateSearch: (search: Record<string, unknown> & SearchSchemaInput) => ({
+    next: oauthReturnPath(search.next),
+    tab: typeof search.tab === "string" ? search.tab : undefined,
+  }),
+  head: () => ({ meta: [
+    { title: "Acessar sua barbearia — BarbeiroPro AI" },
+    { name: "description", content: "Entre na sua conta do BarbeiroPro AI para gerenciar sua barbearia." },
+    { property: "og:title", content: "Acessar sua barbearia — BarbeiroPro AI" },
+    { property: "og:description", content: "Acesse a gestão da sua barbearia no BarbeiroPro AI." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+  ] }),
+  component: EntrarPage,
+});
 
 type Step = "email" | "login" | "signup";
 
 function EntrarPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
   const checkFn = useServerFn(checkEmailExists);
   const signupFn = useServerFn(signupTrial);
 
@@ -47,7 +62,7 @@ function EntrarPage() {
     setLoading(false);
     if (error) return toast.error("Senha incorreta.");
     toast.success("Bem-vindo de volta!");
-    navigate({ to: "/app/dashboard" });
+    navigate({ href: next === "/" ? "/app/dashboard" : next });
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -55,8 +70,9 @@ function EntrarPage() {
     setLoading(true);
     try {
       await signupFn({ data: { email, password, nome, cpf, phone } });
-      await supabase.auth.signInWithPassword({ email, password });
-      navigate({ to: "/app/onboarding" });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      navigate({ href: next === "/" ? "/app/onboarding" : next });
     } catch (err: any) {
       toast.error(err.message ?? "Erro ao criar conta");
     } finally {

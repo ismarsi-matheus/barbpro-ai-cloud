@@ -28,6 +28,8 @@ import {
   useSplitAppointments,
 } from "@/hooks/use-client-account";
 import { googleCalendarUrl, mapsUrl } from "@/lib/client-area/client-links";
+import { useWebMCP } from "use-webmcp-tool";
+import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 
 export const Route = createFileRoute("/cliente/")({
   ssr: false,
@@ -79,6 +81,29 @@ function ClienteDashboard() {
   const clubs = data?.club_memberships ?? [];
   const activeClub = clubs.find((c) => c.status === "ativo") ?? clubs[0] ?? null;
   const favSlug = data?.profile?.favorite_company_slug ?? next?.company_slug ?? null;
+
+  useWebMCP({
+    name: "read_client_summary",
+    description: "Lê apenas o próximo agendamento e o saldo do Clube exibidos na página inicial do cliente.",
+    enabled: !!session && dash.isSuccess,
+    annotations: { readOnlyHint: true, untrustedContentHint: true },
+    execute: () => runWebMCPTool("read_client_summary", () => {
+      if (!session || !dash.isSuccess) throw new Error("O resumo ainda não está disponível.");
+      const appointment = next ? `${next.id}: ${next.service_name}, ${next.scheduled_at}, ${next.professional_name}, ${next.company_name}` : "Nenhum próximo agendamento.";
+      const club = activeClub ? `${activeClub.plano_nome}: ${activeClub.creditos_restantes} créditos, ${activeClub.status}, renovação ${activeClub.current_period_end ?? "não informada"}` : "Nenhuma assinatura do Clube.";
+      return `${appointment}\n${club}`;
+    }),
+  });
+  useWebMCP({
+    name: "read_recent_services",
+    description: "Lê os últimos serviços visíveis no resumo do cliente, no máximo quatro atendimentos.",
+    enabled: !!session && dash.isSuccess && appointmentsQ.isSuccess,
+    annotations: { readOnlyHint: true, untrustedContentHint: true },
+    execute: () => runWebMCPTool("read_recent_services", () => {
+      if (!session || !dash.isSuccess || !appointmentsQ.isSuccess) throw new Error("Os serviços ainda não estão disponíveis.");
+      return recentes.length ? recentes.map((item) => `${item.id}: ${item.service_name}, ${item.scheduled_at}, ${item.professional_name}, ${item.company_name}`).join("\n") : "Nenhum atendimento recente exibido.";
+    }),
+  });
 
   return (
     <ClientShell

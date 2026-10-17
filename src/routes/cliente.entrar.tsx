@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, type SearchSchemaInput } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Scissors, ArrowLeft } from "lucide-react";
 import { lovable } from "@/integrations/lovable";
+import { oauthReturnPath } from "@/lib/oauth-return-path";
 
 export const Route = createFileRoute("/cliente/entrar")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown> & SearchSchemaInput) => ({ next: oauthReturnPath(search.next) }),
   head: () => ({
     meta: [
       { title: "Entrar na Área do Cliente — BarbeiroPro" },
@@ -29,6 +31,8 @@ export const Route = createFileRoute("/cliente/entrar")({
 
 function ClienteEntrar() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
+  const destination = next === "/" ? "/cliente" : next;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nome, setNome] = useState("");
@@ -38,21 +42,21 @@ function ClienteEntrar() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/cliente" });
+      if (data.session) navigate({ href: destination });
     });
-  }, [navigate]);
+  }, [navigate, destination]);
 
   const oauth = async (provider: "google" | "apple") => {
     setLoading(true);
     const result = await lovable.auth.signInWithOAuth(provider, {
-      redirect_uri: window.location.origin + "/cliente",
+      redirect_uri: new URL(destination, window.location.origin).href,
     });
     if (result.error) {
       setLoading(false);
       return toast.error(result.error.message ?? "Não foi possível entrar.");
     }
     if (result.redirected) return;
-    navigate({ to: "/cliente" });
+    navigate({ href: destination });
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -62,7 +66,7 @@ function ClienteEntrar() {
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Bem-vindo!");
-    navigate({ to: "/cliente" });
+    navigate({ href: destination });
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -73,20 +77,20 @@ function ClienteEntrar() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/cliente`,
+          emailRedirectTo: new URL(destination, window.location.origin).href,
           data: { full_name: nome, phone },
         },
       });
       if (error) throw error;
-      if (data.session) {
+      if (data.session && data.user) {
         await supabase.from("client_profile").upsert({
-          user_id: data.user!.id,
+          user_id: data.user.id,
           full_name: nome,
           phone,
           email,
         });
         toast.success("Conta criada!");
-        navigate({ to: "/cliente" });
+        navigate({ href: destination });
       } else {
         toast.success("Confira seu email para confirmar a conta.");
       }

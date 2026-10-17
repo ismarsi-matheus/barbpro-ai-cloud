@@ -13,6 +13,7 @@ import { Route as TrocarSenhaRouteImport } from './routes/trocar-senha'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as ResetSenhaRouteImport } from './routes/reset-senha'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MasterRouteImport } from './routes/master'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as EntrarRouteImport } from './routes/entrar'
@@ -65,11 +66,13 @@ import { Route as AppAssinaturaRouteImport } from './routes/app.assinatura'
 import { Route as AppAigrowthRouteImport } from './routes/app.aigrowth'
 import { Route as AppAgendaRouteImport } from './routes/app.agenda'
 import { Route as AgendarSlugRouteImport } from './routes/agendar.$slug'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as DashboardAssinaturaIndexRouteImport } from './routes/dashboard.assinatura.index'
 import { Route as ClienteAgendamentosIndexRouteImport } from './routes/cliente.agendamentos.index'
 import { Route as DashboardAssinaturaSucessoRouteImport } from './routes/dashboard.assinatura.sucesso'
 import { Route as ClienteAgendamentosIdRouteImport } from './routes/cliente.agendamentos.$id'
 import { Route as ApiPublicEmailTestRouteImport } from './routes/api/public/email-test'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe/webhook'
 import { Route as ApiPublicCronAppointmentRemindersRouteImport } from './routes/api/public/cron/appointment-reminders'
 import { Route as ApiPublicBillingWebhookRouteImport } from './routes/api/public/billing/webhook'
@@ -92,6 +95,11 @@ const ResetSenhaRoute = ResetSenhaRouteImport.update({
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MasterRoute = MasterRouteImport.update({
@@ -354,6 +362,12 @@ const AgendarSlugRoute = AgendarSlugRouteImport.update({
   path: '/agendar/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const DashboardAssinaturaIndexRoute =
   DashboardAssinaturaIndexRouteImport.update({
     id: '/dashboard/assinatura/',
@@ -382,6 +396,11 @@ const ApiPublicEmailTestRoute = ApiPublicEmailTestRouteImport.update({
   path: '/api/public/email-test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe/webhook',
   path: '/api/public/stripe/webhook',
@@ -407,10 +426,12 @@ export interface FileRoutesByFullPath {
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/master': typeof MasterRouteWithChildren
+  '/mcp': typeof McpRoute
   '/privacidade': typeof PrivacidadeRoute
   '/reset-senha': typeof ResetSenhaRoute
   '/termos': typeof TermosRoute
   '/trocar-senha': typeof TrocarSenhaRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/agendar/$slug': typeof AgendarSlugRoute
   '/app/agenda': typeof AppAgendaRoute
   '/app/aigrowth': typeof AppAigrowthRoute
@@ -456,6 +477,7 @@ export interface FileRoutesByFullPath {
   '/master/painel': typeof MasterPainelRoute
   '/master/planos': typeof MasterPlanosRoute
   '/cliente/': typeof ClienteIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/email-test': typeof ApiPublicEmailTestRoute
   '/cliente/agendamentos/$id': typeof ClienteAgendamentosIdRoute
   '/dashboard/assinatura/sucesso': typeof DashboardAssinaturaSucessoRoute
@@ -472,10 +494,12 @@ export interface FileRoutesByTo {
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/master': typeof MasterRouteWithChildren
+  '/mcp': typeof McpRoute
   '/privacidade': typeof PrivacidadeRoute
   '/reset-senha': typeof ResetSenhaRoute
   '/termos': typeof TermosRoute
   '/trocar-senha': typeof TrocarSenhaRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/agendar/$slug': typeof AgendarSlugRoute
   '/app/agenda': typeof AppAgendaRoute
   '/app/aigrowth': typeof AppAigrowthRoute
@@ -521,6 +545,7 @@ export interface FileRoutesByTo {
   '/master/painel': typeof MasterPainelRoute
   '/master/planos': typeof MasterPlanosRoute
   '/cliente': typeof ClienteIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/email-test': typeof ApiPublicEmailTestRoute
   '/cliente/agendamentos/$id': typeof ClienteAgendamentosIdRoute
   '/dashboard/assinatura/sucesso': typeof DashboardAssinaturaSucessoRoute
@@ -539,10 +564,12 @@ export interface FileRoutesById {
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/master': typeof MasterRouteWithChildren
+  '/mcp': typeof McpRoute
   '/privacidade': typeof PrivacidadeRoute
   '/reset-senha': typeof ResetSenhaRoute
   '/termos': typeof TermosRoute
   '/trocar-senha': typeof TrocarSenhaRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/agendar/$slug': typeof AgendarSlugRoute
   '/app/agenda': typeof AppAgendaRoute
   '/app/aigrowth': typeof AppAigrowthRoute
@@ -588,6 +615,7 @@ export interface FileRoutesById {
   '/master/painel': typeof MasterPainelRoute
   '/master/planos': typeof MasterPlanosRoute
   '/cliente/': typeof ClienteIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/email-test': typeof ApiPublicEmailTestRoute
   '/cliente/agendamentos/$id': typeof ClienteAgendamentosIdRoute
   '/dashboard/assinatura/sucesso': typeof DashboardAssinaturaSucessoRoute
@@ -607,10 +635,12 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/esqueci-senha'
     | '/master'
+    | '/mcp'
     | '/privacidade'
     | '/reset-senha'
     | '/termos'
     | '/trocar-senha'
+    | '/.well-known/oauth-protected-resource'
     | '/agendar/$slug'
     | '/app/agenda'
     | '/app/aigrowth'
@@ -656,6 +686,7 @@ export interface FileRouteTypes {
     | '/master/painel'
     | '/master/planos'
     | '/cliente/'
+    | '/.lovable/oauth/consent'
     | '/api/public/email-test'
     | '/cliente/agendamentos/$id'
     | '/dashboard/assinatura/sucesso'
@@ -672,10 +703,12 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/esqueci-senha'
     | '/master'
+    | '/mcp'
     | '/privacidade'
     | '/reset-senha'
     | '/termos'
     | '/trocar-senha'
+    | '/.well-known/oauth-protected-resource'
     | '/agendar/$slug'
     | '/app/agenda'
     | '/app/aigrowth'
@@ -721,6 +754,7 @@ export interface FileRouteTypes {
     | '/master/painel'
     | '/master/planos'
     | '/cliente'
+    | '/.lovable/oauth/consent'
     | '/api/public/email-test'
     | '/cliente/agendamentos/$id'
     | '/dashboard/assinatura/sucesso'
@@ -738,10 +772,12 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/esqueci-senha'
     | '/master'
+    | '/mcp'
     | '/privacidade'
     | '/reset-senha'
     | '/termos'
     | '/trocar-senha'
+    | '/.well-known/oauth-protected-resource'
     | '/agendar/$slug'
     | '/app/agenda'
     | '/app/aigrowth'
@@ -787,6 +823,7 @@ export interface FileRouteTypes {
     | '/master/painel'
     | '/master/planos'
     | '/cliente/'
+    | '/.lovable/oauth/consent'
     | '/api/public/email-test'
     | '/cliente/agendamentos/$id'
     | '/dashboard/assinatura/sucesso'
@@ -805,12 +842,15 @@ export interface RootRouteChildren {
   EntrarRoute: typeof EntrarRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   MasterRoute: typeof MasterRouteWithChildren
+  McpRoute: typeof McpRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   ResetSenhaRoute: typeof ResetSenhaRoute
   TermosRoute: typeof TermosRoute
   TrocarSenhaRoute: typeof TrocarSenhaRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AgendarSlugRoute: typeof AgendarSlugRoute
   ConfirmarTokenRoute: typeof ConfirmarTokenRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicEmailTestRoute: typeof ApiPublicEmailTestRoute
   DashboardAssinaturaSucessoRoute: typeof DashboardAssinaturaSucessoRoute
   DashboardAssinaturaIndexRoute: typeof DashboardAssinaturaIndexRoute
@@ -847,6 +887,13 @@ declare module '@tanstack/react-router' {
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/master': {
@@ -1213,6 +1260,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgendarSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/assinatura/': {
       id: '/dashboard/assinatura/'
       path: '/dashboard/assinatura'
@@ -1246,6 +1300,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/email-test'
       fullPath: '/api/public/email-test'
       preLoaderRoute: typeof ApiPublicEmailTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/stripe/webhook': {
@@ -1404,12 +1465,16 @@ const rootRouteChildren: RootRouteChildren = {
   EntrarRoute: EntrarRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
   MasterRoute: MasterRouteWithChildren,
+  McpRoute: McpRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   ResetSenhaRoute: ResetSenhaRoute,
   TermosRoute: TermosRoute,
   TrocarSenhaRoute: TrocarSenhaRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AgendarSlugRoute: AgendarSlugRoute,
   ConfirmarTokenRoute: ConfirmarTokenRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicEmailTestRoute: ApiPublicEmailTestRoute,
   DashboardAssinaturaSucessoRoute: DashboardAssinaturaSucessoRoute,
   DashboardAssinaturaIndexRoute: DashboardAssinaturaIndexRoute,
