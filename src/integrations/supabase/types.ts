@@ -1962,6 +1962,29 @@ export type Database = {
           preco_cents: number
         }[]
       }
+      get_public_company: {
+        Args: { _slug: string }
+        Returns: {
+          business_hours: Json
+          endereco: Json
+          id: string
+          logo_url: string
+          name: string
+          nome_fantasia: string
+          primary_color: string
+          slug: string
+          whatsapp: string
+        }[]
+      }
+      get_public_professionals: {
+        Args: { _company_id: string }
+        Returns: {
+          id: string
+          name: string
+          photo_url: string
+          specialty: string
+        }[]
+      }
       get_stripe_customer: {
         Args: { _company_id: string }
         Returns: {
@@ -1985,6 +2008,7 @@ export type Database = {
         Args: { _company_id: string; _roles: string[] }
         Returns: boolean
       }
+      is_public_company: { Args: { _company_id: string }; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       mark_webhook_processed: {
         Args: { _error?: string; _stripe_event_id: string }
