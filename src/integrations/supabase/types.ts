@@ -58,6 +58,7 @@ export type Database = {
           price: number | null
           professional_id: string
           professional_name: string | null
+          reminder_sent_at: string | null
           scheduled_at: string
           service_id: string
           service_name: string | null
@@ -81,6 +82,7 @@ export type Database = {
           price?: number | null
           professional_id: string
           professional_name?: string | null
+          reminder_sent_at?: string | null
           scheduled_at: string
           service_id: string
           service_name?: string | null
@@ -104,6 +106,7 @@ export type Database = {
           price?: number | null
           professional_id?: string
           professional_name?: string | null
+          reminder_sent_at?: string | null
           scheduled_at?: string
           service_id?: string
           service_name?: string | null
@@ -813,6 +816,47 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "company"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_log: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          error: string | null
+          id: string
+          provider_id: string | null
+          recipient: string
+          status: string
+          template: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          provider_id?: string | null
+          recipient: string
+          status: string
+          template: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          provider_id?: string | null
+          recipient?: string
+          status?: string
+          template?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_log_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointment"
             referencedColumns: ["id"]
           },
         ]
@@ -1754,6 +1798,23 @@ export type Database = {
         Args: { _token: string }
         Returns: boolean
       }
+      create_public_booking: {
+        Args: {
+          _club_member_id?: string
+          _company_id: string
+          _email?: string
+          _name: string
+          _phone: string
+          _professional_id: string
+          _scheduled_at: string
+          _service_id: string
+        }
+        Returns: {
+          appointment_id: string
+          club_error: string
+          pagamento_tipo: string
+        }[]
+      }
       current_company_id: { Args: never; Returns: string }
       get_active_subscription: {
         Args: { _company_id: string }
@@ -1901,6 +1962,29 @@ export type Database = {
           preco_cents: number
         }[]
       }
+      get_public_company: {
+        Args: { _slug: string }
+        Returns: {
+          business_hours: Json
+          endereco: Json
+          id: string
+          logo_url: string
+          name: string
+          nome_fantasia: string
+          primary_color: string
+          slug: string
+          whatsapp: string
+        }[]
+      }
+      get_public_professionals: {
+        Args: { _company_id: string }
+        Returns: {
+          id: string
+          name: string
+          photo_url: string
+          specialty: string
+        }[]
+      }
       get_stripe_customer: {
         Args: { _company_id: string }
         Returns: {
@@ -1924,6 +2008,7 @@ export type Database = {
         Args: { _company_id: string; _roles: string[] }
         Returns: boolean
       }
+      is_public_company: { Args: { _company_id: string }; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       mark_webhook_processed: {
         Args: { _error?: string; _stripe_event_id: string }
