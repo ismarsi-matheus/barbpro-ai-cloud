@@ -152,7 +152,8 @@ function Onboarding() {
           role: i.role,
           generate_password: true,
         } });
-        generated.push({ email: res.email, password: res.password });
+        if (res.password) generated.push({ email: res.email, password: res.password });
+        else toast.info(`${res.email} já tinha conta e foi adicionado à equipe com a senha atual.`);
       }
       if (generated.length > 0) {
         setCreatedCreds(generated);

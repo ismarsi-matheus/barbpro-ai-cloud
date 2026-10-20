@@ -132,24 +132,25 @@ export const createTeamMember = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const email = data.email.toLowerCase();
 
-    const password = data.password && data.password.length >= 6
+    let password: string | null = data.password && data.password.length >= 6
       ? data.password
       : generateTempPassword();
-    const wasGenerated = !data.password || data.password.length < 6 || data.generate_password === true;
+    let wasGenerated = !data.password || data.password.length < 6 || data.generate_password === true;
 
+    // Conta já existente (dono de outra barbearia, cliente, etc.): apenas vincula
+    // à equipe. Nunca alterar a senha de uma conta que esta empresa não criou.
     let userId = await findUserByEmail(supabaseAdmin, email);
-    if (userId) {
-      const { error: upErr } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-        password,
-        email_confirm: true,
-      });
-      if (upErr) throw new Error(upErr.message);
+    const existingAccount = !!userId;
+    if (existingAccount) {
+      password = null;
+      wasGenerated = false;
     } else {
       const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
         email,
-        password,
+        password: password!,
         email_confirm: true,
         user_metadata: { nome: data.nome || "" },
+        app_metadata: { provisioned_by_company: data.company_id },
       });
       if (error) throw new Error(error.message);
       userId = created.user?.id ?? null;
@@ -173,7 +174,6 @@ export const createTeamMember = createServerFn({ method: "POST" })
           role: data.role as any,
           ativo: true,
           convite_aceito: true,
-          forcar_troca_senha: wasGenerated,
         })
         .eq("id", existing.id);
       if (error) throw new Error(error.message);
@@ -191,7 +191,7 @@ export const createTeamMember = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
     }
 
-    return { email, password, generated: wasGenerated };
+    return { email, password, generated: wasGenerated, existingAccount };
   });
 
 const UpdateRoleSchema = z.object({
@@ -257,6 +257,16 @@ export const resetTeamMemberPassword = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!member?.user_id) throw new Error("Membro sem conta vinculada.");
+
+    // Só redefine senha de contas criadas por esta empresa; contas próprias
+    // (que podem ser donas de outra barbearia ou clientes) usam "Esqueci minha senha".
+    const { data: authUser, error: userErr } = await supabaseAdmin.auth.admin.getUserById(member.user_id);
+    if (userErr) throw new Error(userErr.message);
+    if (authUser.user?.app_metadata?.provisioned_by_company !== data.company_id) {
+      throw new Error(
+        "Esta pessoa tem uma conta própria. Peça para ela usar \"Esqueci minha senha\" na tela de login.",
+      );
+    }
 
     const password = data.password && data.password.length >= 6 ? data.password : generateTempPassword();
     const wasGenerated = !data.password || data.password.length < 6;
