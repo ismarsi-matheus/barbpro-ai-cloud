@@ -78,13 +78,10 @@ function AgendarPage() {
   const companyQuery = useQuery({
     queryKey: ["public-company", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("company")
-        .select("id,name,nome_fantasia,logo_url,primary_color,whatsapp,endereco")
-        .eq("slug", slug)
-        .maybeSingle();
+      // RPC devolve só colunas públicas (sem CPF/CNPJ, e-mail ou cobrança).
+      const { data, error } = await (supabase as any).rpc("get_public_company", { _slug: slug });
       if (error) { console.error("[agendar] company error", error); throw error; }
-      return data;
+      return ((data as any[]) ?? [])[0] ?? null;
     },
     retry: false,
   });
@@ -111,14 +108,11 @@ function AgendarPage() {
     queryKey: ["public-pros", company?.id],
     enabled: !!company?.id,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("professional")
-        .select("id,name,specialty,photo_url")
-        .eq("company_id", company!.id)
-        .eq("active", true)
-        .order("name");
+      const { data, error } = await (supabase as any).rpc("get_public_professionals", {
+        _company_id: company!.id,
+      });
       if (error) { console.error("[agendar] pros error", error); return []; }
-      return data ?? [];
+      return (data ?? []) as Array<{ id: string; name: string; specialty: string | null; photo_url: string | null }>;
     },
     retry: false,
   });
