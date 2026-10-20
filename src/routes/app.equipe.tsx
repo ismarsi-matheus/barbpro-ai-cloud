@@ -66,7 +66,7 @@ function EquipePage() {
   const [form, setForm] = useState<{ email: string; nome: string; role: Role; password: string; generated: boolean }>({
     email: "", nome: "", role: "barbeiro", password: "", generated: false,
   });
-  const [creds, setCreds] = useState<{ email: string; password: string; generated: boolean } | null>(null);
+  const [creds, setCreds] = useState<{ email: string; password: string | null; generated: boolean } | null>(null);
   const [copied, setCopied] = useState<"email" | "pwd" | "both" | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
 
@@ -258,10 +258,12 @@ function EquipePage() {
           <DialogHeader>
             <DialogTitle>Acesso pronto</DialogTitle>
             <DialogDescription>
-              Envie estes dados para a pessoa. Ela entra em <b>/entrar</b>. A senha não será mostrada novamente.
+              {creds?.password
+                ? <>Envie estes dados para a pessoa. Ela entra em <b>/entrar</b>. A senha não será mostrada novamente.</>
+                : <>Esta pessoa já tinha conta e foi adicionada à equipe. Ela entra em <b>/entrar</b> com a senha atual dela (ou usa "Esqueci minha senha").</>}
             </DialogDescription>
           </DialogHeader>
-          {creds && (
+          {creds?.password && (
             <div className="space-y-3">
               <div>
                 <Label className="text-xs">Email</Label>
@@ -276,7 +278,7 @@ function EquipePage() {
                 <Label className="text-xs">Senha</Label>
                 <div className="flex gap-2">
                   <Input readOnly value={creds.password} className="font-mono" />
-                  <Button type="button" variant="outline" size="icon" onClick={() => copy(creds.password, "pwd")}>
+                  <Button type="button" variant="outline" size="icon" onClick={() => copy(creds.password!, "pwd")}>
                     {copied === "pwd" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </Button>
                 </div>

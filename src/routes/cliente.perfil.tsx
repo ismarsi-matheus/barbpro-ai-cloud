@@ -116,13 +116,10 @@ function PerfilPage() {
     queryKey: ["client-professionals", form.favorite_company_id],
     enabled: !!form.favorite_company_id,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("professional")
-        .select("id,name")
-        .eq("company_id", form.favorite_company_id)
-        .eq("active", true)
-        .order("name");
-      return data ?? [];
+      const { data } = await (supabase as any).rpc("get_public_professionals", {
+        _company_id: form.favorite_company_id,
+      });
+      return (data ?? []) as Array<{ id: string; name: string }>;
     },
   });
 

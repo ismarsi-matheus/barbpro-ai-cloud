@@ -2,22 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { isValidCPF, normalizePhone, onlyDigits } from "./auth-signup.server";
 
-const CheckEmailSchema = z.object({ email: z.string().trim().email().max(255) });
-
-export const checkEmailExists = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => CheckEmailSchema.parse(input))
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const email = data.email.toLowerCase();
-    
-    // Check if email exists in auth.users
-    const { data: list, error } = await supabaseAdmin.auth.admin.listUsers();
-    if (error) throw new Error(error.message);
-    
-    const found = list?.users.find((u: any) => (u.email ?? "").toLowerCase() === email);
-    return { exists: !!found };
-  });
-
 const SignupTrialSchema = z.object({
   email: z.string().trim().email().max(255),
   password: z.string().min(6).max(72),
@@ -58,7 +42,10 @@ export const signupTrial = createServerFn({ method: "POST" })
       email_confirm: true,
       user_metadata: { nome: data.nome, cpf, phone },
     });
-    if (createErr) throw new Error(createErr.message);
+    if (createErr) {
+      // Mensagem genérica: não confirmar se o e-mail já tem conta.
+      throw new Error("Não foi possível criar a conta com esses dados. Se você já tem conta, faça login.");
+    }
     const userId = created.user?.id;
     if (!userId) throw new Error("Falha ao criar usuário.");
 
@@ -112,6 +99,10 @@ export const signupTrial = createServerFn({ method: "POST" })
       cpf,
       phone,
     });
+
+    // Nunca lança: falha de e-mail não impede o cadastro.
+    const { notifyWelcome } = await import("@/lib/email/notify.server");
+    await notifyWelcome(email, data.nome);
 
     return { ok: true };
   });

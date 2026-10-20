@@ -9,6 +9,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { cancelMyAppointment, rescheduleMyAppointment } from "@/lib/client-area/client-account.functions";
 
 export type ClientAppointment = {
   id: string;
@@ -258,11 +259,7 @@ export function useCancelAppointment() {
   const invalidate = useInvalidateClientArea();
   return useMutation({
     mutationFn: async (appointmentId: string) => {
-      const { data, error } = await supabase.rpc("cancel_client_appointment", {
-        _appointment_id: appointmentId,
-      });
-      if (error) throw error;
-      if (!data) throw new Error("Este agendamento não pode mais ser cancelado.");
+      await cancelMyAppointment({ data: { appointmentId } });
       return true;
     },
     onSuccess: invalidate,
@@ -273,11 +270,7 @@ export function useRescheduleAppointment() {
   const invalidate = useInvalidateClientArea();
   return useMutation({
     mutationFn: async ({ appointmentId, newAt }: { appointmentId: string; newAt: Date }) => {
-      const { error } = await supabase.rpc("reschedule_client_appointment", {
-        _appointment_id: appointmentId,
-        _new_at: newAt.toISOString(),
-      });
-      if (error) throw error;
+      await rescheduleMyAppointment({ data: { appointmentId, newAt: newAt.toISOString() } });
       return true;
     },
     onSuccess: invalidate,

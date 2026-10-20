@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { checkEmailExists, signupTrial } from "@/lib/auth-signup.functions";
+import { signupTrial } from "@/lib/auth-signup.functions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 
 type Plan = { slug: string; name: string; price: number; trial_days?: number };
 
-type Step = "email" | "login" | "signup";
+type Step = "login" | "signup";
 
 export function PlanCheckoutDialog({
   open,
@@ -24,10 +24,9 @@ export function PlanCheckoutDialog({
   plan: Plan | null;
 }) {
   const navigate = useNavigate();
-  const checkFn = useServerFn(checkEmailExists);
   const signupFn = useServerFn(signupTrial);
 
-  const [step, setStep] = useState<Step>("email");
+  const [step, setStep] = useState<Step>("signup");
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,7 +35,7 @@ export function PlanCheckoutDialog({
   const [phone, setPhone] = useState("");
 
   const reset = () => {
-    setStep("email");
+    setStep("signup");
     setEmail("");
     setPassword("");
     setNome("");
@@ -49,25 +48,12 @@ export function PlanCheckoutDialog({
     onOpenChange(v);
   };
 
-  const handleEmailNext = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const { exists } = await checkFn({ data: { email } });
-      setStep(exists ? "login" : "signup");
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao verificar email");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) return toast.error("Senha incorreta. Tente novamente.");
+    if (error) return toast.error("E-mail ou senha incorretos.");
     toast.success("Bem-vindo de volta!");
     onOpenChange(false);
     navigate({ to: "/app/dashboard" });
@@ -100,37 +86,23 @@ export function PlanCheckoutDialog({
             {plan ? `Plano ${plan.name}` : "Escolha seu plano"}
           </DialogTitle>
           <DialogDescription>
-            {step === "email" && "Comece informando seu email."}
-            {step === "login" && "Já existe uma conta com este email. Faça login para continuar."}
+            {step === "login" && "Entre na sua conta para continuar."}
             {step === "signup" && `Crie sua conta. ${plan?.trial_days ?? 14} dias grátis pra testar.`}
           </DialogDescription>
         </DialogHeader>
 
-        {step === "email" && (
-          <form onSubmit={handleEmailNext} className="space-y-3">
-            <div>
-              <Label htmlFor="ck-email">Email</Label>
-              <Input id="ck-email" type="email" required value={email}
-                onChange={(e) => setEmail(e.target.value)} autoFocus />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Continuar
-            </Button>
-          </form>
-        )}
-
         {step === "login" && (
           <form onSubmit={handleLogin} className="space-y-3">
-            <BackButton onClick={() => setStep("email")} />
+            <BackButton onClick={() => setStep("signup")} label="criar conta" />
             <div>
-              <Label>Email</Label>
-              <Input value={email} disabled />
+              <Label htmlFor="ck-login-email">Email</Label>
+              <Input id="ck-login-email" type="email" required autoComplete="email" value={email}
+                onChange={(e) => setEmail(e.target.value)} />
             </div>
             <div>
               <Label htmlFor="ck-pwd">Senha</Label>
-              <Input id="ck-pwd" type="password" required value={password}
-                onChange={(e) => setPassword(e.target.value)} autoFocus />
+              <Input id="ck-pwd" type="password" required autoComplete="current-password" value={password}
+                onChange={(e) => setPassword(e.target.value)} />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
@@ -141,10 +113,11 @@ export function PlanCheckoutDialog({
 
         {step === "signup" && (
           <form onSubmit={handleSignup} className="space-y-3">
-            <BackButton onClick={() => setStep("email")} />
+            <BackButton onClick={() => setStep("login")} label="já tenho conta" />
             <div>
-              <Label>Email</Label>
-              <Input value={email} disabled />
+              <Label htmlFor="ck-email">Email</Label>
+              <Input id="ck-email" type="email" required autoComplete="email" value={email}
+                onChange={(e) => setEmail(e.target.value)} autoFocus />
             </div>
             <div>
               <Label htmlFor="ck-nome">Seu nome completo</Label>
@@ -164,7 +137,7 @@ export function PlanCheckoutDialog({
             </div>
             <div>
               <Label htmlFor="ck-newpwd">Crie uma senha</Label>
-              <Input id="ck-newpwd" type="password" required minLength={6}
+              <Input id="ck-newpwd" type="password" required minLength={6} autoComplete="new-password"
                 value={password} onChange={(e) => setPassword(e.target.value)} />
               <p className="text-xs text-muted-foreground mt-1">Mínimo 6 caracteres.</p>
             </div>
@@ -182,11 +155,11 @@ export function PlanCheckoutDialog({
   );
 }
 
-function BackButton({ onClick }: { onClick: () => void }) {
+function BackButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <button type="button" onClick={onClick}
       className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-      <ArrowLeft className="w-3 h-3" /> voltar
+      <ArrowLeft className="w-3 h-3" /> {label}
     </button>
   );
 }

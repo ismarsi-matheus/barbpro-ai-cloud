@@ -29,6 +29,7 @@ import {
   type ClubPlan,
 } from "@/components/club-choice-step";
 import { IdentificationStep } from "@/components/client/identification-step";
+import { createPublicBooking, type PublicBookingResult } from "@/lib/booking/booking.functions";
 import { format, addDays, startOfDay, addMinutes } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -77,13 +78,10 @@ function AgendarPage() {
   const companyQuery = useQuery({
     queryKey: ["public-company", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("company")
-        .select("id,name,nome_fantasia,logo_url,primary_color,whatsapp,endereco")
-        .eq("slug", slug)
-        .maybeSingle();
+      // RPC devolve só colunas públicas (sem CPF/CNPJ, e-mail ou cobrança).
+      const { data, error } = await (supabase as any).rpc("get_public_company", { _slug: slug });
       if (error) { console.error("[agendar] company error", error); throw error; }
-      return data;
+      return ((data as any[]) ?? [])[0] ?? null;
     },
     retry: false,
   });
@@ -110,14 +108,11 @@ function AgendarPage() {
     queryKey: ["public-pros", company?.id],
     enabled: !!company?.id,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("professional")
-        .select("id,name,specialty,photo_url")
-        .eq("company_id", company!.id)
-        .eq("active", true)
-        .order("name");
+      const { data, error } = await (supabase as any).rpc("get_public_professionals", {
+        _company_id: company!.id,
+      });
       if (error) { console.error("[agendar] pros error", error); return []; }
-      return data ?? [];
+      return (data ?? []) as Array<{ id: string; name: string; specialty: string | null; photo_url: string | null }>;
     },
     retry: false,
   });
@@ -527,89 +522,39 @@ function AgendarPage() {
         console.error("[agendar] conflict check exception", e);
       }
 
-      // Upsert de cliente: usa versão autenticada quando há sessão (vincula user_id)
-      const customerEmail = email.trim() || null;
-      const rpcName = clientSession ? "upsert_customer_for_user" : "upsert_customer_public";
-      const rpcArgs: any = clientSession
-        ? { _company_id: company.id, _name: customerName, _phone: customerPhone, _email: customerEmail }
-        : { _company_id: company.id, _name: customerName, _phone: customerPhone };
-      const { data: customerId, error: cErr } = await supabase.rpc(rpcName as any, rpcArgs);
-      console.log("[agendar] upsert result", { rpcName, customerId, error: cErr });
-      if (cErr || !customerId) {
+      // Cliente, preço, status e Clube são resolvidos no servidor (RPC transacional).
+      const customerEmail = email.trim();
+      let result: PublicBookingResult;
+      try {
+        result = await createPublicBooking({
+          data: {
+            companyId: company.id,
+            serviceId: service.id,
+            professionalId: pro.id,
+            scheduledAt: scheduledAt.toISOString(),
+            name: customerName,
+            phone: customerPhone,
+            email: customerEmail || undefined,
+            clubMemberId: usandoClube ? (membership as any).id : undefined,
+          },
+        });
+      } catch (err: any) {
         setSubmitting(false);
-        toast.error("Erro ao registrar cliente: " + (cErr?.message ?? "desconhecido"));
-        return;
-      }
-
-      const appointmentPayload = {
-        id: crypto.randomUUID(),
-        company_id: company.id,
-        customer_id: customerId,
-        professional_id: pro.id,
-        service_id: service.id,
-        customer_name: customerName,
-        customer_phone: customerPhone,
-        professional_name: pro.name,
-        service_name: service.name,
-        price: usandoClube ? 0 : service.price,
-        scheduled_at: scheduledAt.toISOString(),
-        source: "online" as const,
-        status: "agendado" as const,
-        pagamento_tipo: usandoClube ? "clube" : "normal",
-        club_member_id: usandoClube ? (membership as any).id : null,
-
-      };
-
-      const missingRequired = ([
-        "company_id",
-        "customer_id",
-        "professional_id",
-        "service_id",
-        "scheduled_at",
-        "source",
-        "status",
-      ] as const).filter((field) => !appointmentPayload[field]);
-
-      console.log("[agendar] appointment insert payload", appointmentPayload);
-
-      if (missingRequired.length) {
-        setSubmitting(false);
-        console.error("[agendar] missing required appointment fields", missingRequired, appointmentPayload);
-        toast.error("Dados do agendamento incompletos. Revise serviço, profissional, data e horário.");
-        return;
-      }
-
-      const { error: aErr } = await supabase
-        .from("appointment")
-        .insert(appointmentPayload);
-
-      if (aErr) {
-        setSubmitting(false);
-        if (aErr.message?.includes("reservado") || (aErr as any).code === "P0001") {
+        const msg: string = err?.message ?? "";
+        if (msg.includes("reservado")) {
           busyQuery.refetch();
           toast.error("Esse horário acabou de ser reservado, escolha outro");
           return;
         }
-        toast.error("Erro ao agendar: " + aErr.message);
+        toast.error("Erro ao agendar: " + (msg || "tente novamente."));
         return;
       }
 
-      let clubeAplicado = usandoClube;
+      const clubeAplicado = result.pagamentoTipo === "clube";
       if (usandoClube) {
-        const { data: ok, error: rErr } = await supabase.rpc("redeem_club_benefit", {
-          _appointment_id: appointmentPayload.id,
-          _club_member_id: (membership as any).id,
-        });
-        if (rErr || !ok) {
-          console.error("[agendar] redeem club benefit failed", rErr);
-          clubeAplicado = false;
-          // Reverte para agendamento normal para não deixar o preço zerado sem benefício.
-          await supabase
-            .from("appointment")
-            .update({ pagamento_tipo: "normal", club_member_id: null, price: service.price })
-            .eq("id", appointmentPayload.id);
+        if (!clubeAplicado) {
           toast.warning(
-            rErr?.message ??
+            result.clubError ??
               "Agendamento criado, mas o benefício do Clube não pôde ser aplicado. Ele seguirá como pagamento normal.",
           );
         }
@@ -617,24 +562,13 @@ function AgendarPage() {
       }
 
       setSubmitting(false);
-      setConfirmed(appointmentPayload.id);
+      setConfirmed(result.appointmentId);
       setPagamentoTipo(clubeAplicado ? "clube" : "normal");
       if (clubeAplicado) {
         toast.success("Agendamento confirmado com benefício do Clube!");
       } else if (!usandoClube) {
         toast.success("Agendamento confirmado!");
       }
-
-
-
-      // Dispara e-mail de confirmação (fire-and-forget)
-      try {
-        const { notifyAppointmentEvent } = await import("@/lib/email/notify.functions");
-        void notifyAppointmentEvent({ data: { appointmentId: appointmentPayload.id, kind: "created" } });
-      } catch (e) {
-        console.error("[agendar] notify failed", e);
-      }
-
     } catch (e: any) {
       console.error("[agendar] submit exception", e);
       setSubmitting(false);

@@ -152,7 +152,8 @@ function Onboarding() {
           role: i.role,
           generate_password: true,
         } });
-        generated.push({ email: res.email, password: res.password });
+        if (res.password) generated.push({ email: res.email, password: res.password });
+        else toast.info(`${res.email} já tinha conta e foi adicionado à equipe com a senha atual.`);
       }
       if (generated.length > 0) {
         setCreatedCreds(generated);
@@ -205,10 +206,9 @@ function Onboarding() {
     if (!companyId) return;
     setSaving(true);
     try {
-      const trialAte = format(addDays(new Date(), 14), "yyyy-MM-dd");
+      // Status e data do trial são definidos no cadastro (servidor), não aqui.
       await supabase.from("company").update({
         onboarding_concluido: true, onboarding_step: 5,
-        status_cobranca: "trial", trial_ate: trialAte,
       }).eq("id", companyId);
       await qc.invalidateQueries({ queryKey: ["current-company"] });
       toast.success("Bem-vindo! Seu trial de 14 dias começou.");

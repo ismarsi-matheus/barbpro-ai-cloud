@@ -8,7 +8,7 @@ export const templates = {
   "cadastro-confirmacao": (d: Base & { link?: string }) => ({
     subject: `Bem-vindo ao ${BRAND.name}`,
     react: (
-      <EmailLayout preview="Confirme seu cadastro">
+      <EmailLayout preview={d.link ? "Confirme seu cadastro" : "Sua conta foi criada"}>
         <Heading>Olá{d.nome ? `, ${d.nome}` : ""}!</Heading>
         <Text>Sua conta foi criada com sucesso.</Text>
         {d.link && (

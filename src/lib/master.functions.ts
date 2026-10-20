@@ -210,6 +210,7 @@ export const setSuperAdminEmails = createServerFn({ method: "POST" })
         if (page > 25) break;
       }
       const promoted: string[] = [];
+      const promotedIds: string[] = [];
       for (const email of normalized) {
         const user = allUsers.find((u) => (u.email ?? "").toLowerCase() === email);
         if (!user) continue;
@@ -217,7 +218,18 @@ export const setSuperAdminEmails = createServerFn({ method: "POST" })
           .from("user_roles")
           .upsert({ user_id: user.id, role: "super_admin" as any }, { onConflict: "user_id,role" });
         promoted.push(email);
+        promotedIds.push(user.id);
       }
+      // Remove o papel de quem saiu da lista.
+      if (promotedIds.length > 0) {
+        await supabaseAdmin
+          .from("user_roles")
+          .delete()
+          .eq("role", "super_admin" as any)
+          .not("user_id", "in", `(${promotedIds.join(",")})`);
+      }
+      // E-mails ainda sem conta só viram super admin quando a lista for salva
+      // novamente depois do cadastro (evita "reservar" um e-mail da lista).
       return { ok: true, total: normalized.length, promoted };
     }
 

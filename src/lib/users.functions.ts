@@ -26,45 +26,6 @@ async function findUserByEmail(admin: any, email: string): Promise<string | null
   }
 }
 
-// ===== Self-service signup (no email confirmation) =====
-const SignUpSchema = z.object({
-  email: z.string().trim().email().max(255),
-  password: z.string().min(6).max(72),
-  nome: z.string().trim().max(200).optional().default(""),
-});
-
-// Limite simples em memória: 5 tentativas / 10 min por email (anti-spam)
-const _signupAttempts = new Map<string, number[]>();
-function checkSignupRate(email: string) {
-  const now = Date.now();
-  const windowMs = 10 * 60 * 1000;
-  const list = (_signupAttempts.get(email) ?? []).filter((t) => now - t < windowMs);
-  if (list.length >= 5) throw new Error("Muitas tentativas. Aguarde alguns minutos e tente novamente.");
-  list.push(now);
-  _signupAttempts.set(email, list);
-}
-
-export const signUpInterno = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => SignUpSchema.parse(input))
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const email = data.email.toLowerCase();
-
-    checkSignupRate(email);
-
-    const existing = await findUserByEmail(supabaseAdmin, email);
-    if (existing) throw new Error("Já existe uma conta com este email. Entre com sua senha.");
-
-    const { error } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password: data.password,
-      email_confirm: true,
-      user_metadata: { nome: data.nome || "" },
-    });
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
-
 // ===== Master: reset admin (owner) password =====
 const ResetAdminSchema = z.object({ company_id: z.string().uuid() });
 
@@ -104,15 +65,51 @@ export const resetAdminPassword = createServerFn({ method: "POST" })
   });
 
 // ===== Team management (owner/admin of company OR super admin) =====
-async function assertCanManageTeam(context: any, companyId: string) {
+type CallerRole = "super" | "owner" | "admin";
+
+async function assertCanManageTeam(context: any, companyId: string): Promise<CallerRole> {
   const { data: isAdmin } = await context.supabase.rpc("is_super_admin");
-  if (isAdmin) return;
-  const { data: ok, error } = await context.supabase.rpc("has_company_role", {
-    _company_id: companyId,
-    _roles: ["owner", "admin"],
-  });
+  if (isAdmin) return "super";
+  const { data: me, error } = await context.supabase
+    .from("company_user")
+    .select("role")
+    .eq("company_id", companyId)
+    .eq("user_id", context.userId)
+    .eq("ativo", true)
+    .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!ok) throw new Error("Sem permissão para gerenciar a equipe.");
+  if (me?.role !== "owner" && me?.role !== "admin") {
+    throw new Error("Sem permissão para gerenciar a equipe.");
+  }
+  return me.role;
+}
+
+/**
+ * Regras sobre o membro alvo: ninguém altera/desativa/remove a si mesmo e
+ * só o dono (ou super admin) mexe em quem é dono.
+ */
+async function assertCanTouchMember(
+  context: any,
+  caller: CallerRole,
+  companyId: string,
+  memberId: string,
+): Promise<{ id: string; user_id: string | null; email: string | null; role: string }> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: member, error } = await supabaseAdmin
+    .from("company_user")
+    .select("id, user_id, email, role")
+    .eq("id", memberId)
+    .eq("company_id", companyId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!member) throw new Error("Membro não encontrado.");
+  if (caller !== "super" && member.user_id === context.userId) {
+    throw new Error("Você não pode alterar o seu próprio acesso.");
+  }
+  if (member.role === "owner" && caller === "admin") {
+    throw new Error("Apenas o dono pode alterar outro dono.");
+  }
+  return member as any;
 }
 
 const CreateMemberSchema = z.object({
@@ -128,28 +125,32 @@ export const createTeamMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => CreateMemberSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanManageTeam(context, data.company_id);
+    const caller = await assertCanManageTeam(context, data.company_id);
+    if (data.role === "owner" && caller === "admin") {
+      throw new Error("Apenas o dono pode adicionar outro dono.");
+    }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const email = data.email.toLowerCase();
 
-    const password = data.password && data.password.length >= 6
+    let password: string | null = data.password && data.password.length >= 6
       ? data.password
       : generateTempPassword();
-    const wasGenerated = !data.password || data.password.length < 6 || data.generate_password === true;
+    let wasGenerated = !data.password || data.password.length < 6 || data.generate_password === true;
 
+    // Conta já existente (dono de outra barbearia, cliente, etc.): apenas vincula
+    // à equipe. Nunca alterar a senha de uma conta que esta empresa não criou.
     let userId = await findUserByEmail(supabaseAdmin, email);
-    if (userId) {
-      const { error: upErr } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-        password,
-        email_confirm: true,
-      });
-      if (upErr) throw new Error(upErr.message);
+    const existingAccount = !!userId;
+    if (existingAccount) {
+      password = null;
+      wasGenerated = false;
     } else {
       const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
         email,
-        password,
+        password: password!,
         email_confirm: true,
         user_metadata: { nome: data.nome || "" },
+        app_metadata: { provisioned_by_company: data.company_id },
       });
       if (error) throw new Error(error.message);
       userId = created.user?.id ?? null;
@@ -173,7 +174,6 @@ export const createTeamMember = createServerFn({ method: "POST" })
           role: data.role as any,
           ativo: true,
           convite_aceito: true,
-          forcar_troca_senha: wasGenerated,
         })
         .eq("id", existing.id);
       if (error) throw new Error(error.message);
@@ -191,7 +191,7 @@ export const createTeamMember = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
     }
 
-    return { email, password, generated: wasGenerated };
+    return { email, password, generated: wasGenerated, existingAccount };
   });
 
 const UpdateRoleSchema = z.object({
@@ -204,7 +204,11 @@ export const updateTeamMemberRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => UpdateRoleSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanManageTeam(context, data.company_id);
+    const caller = await assertCanManageTeam(context, data.company_id);
+    await assertCanTouchMember(context, caller, data.company_id, data.member_id);
+    if (data.role === "owner" && caller === "admin") {
+      throw new Error("Apenas o dono pode promover alguém a dono.");
+    }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("company_user")
@@ -225,7 +229,8 @@ export const setTeamMemberActive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => SetActiveSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanManageTeam(context, data.company_id);
+    const caller = await assertCanManageTeam(context, data.company_id);
+    await assertCanTouchMember(context, caller, data.company_id, data.member_id);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("company_user")
@@ -246,17 +251,20 @@ export const resetTeamMemberPassword = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => ResetMemberSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanManageTeam(context, data.company_id);
+    const caller = await assertCanManageTeam(context, data.company_id);
+    const member = await assertCanTouchMember(context, caller, data.company_id, data.member_id);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (!member.user_id) throw new Error("Membro sem conta vinculada.");
 
-    const { data: member, error } = await supabaseAdmin
-      .from("company_user")
-      .select("id, user_id, email")
-      .eq("id", data.member_id)
-      .eq("company_id", data.company_id)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    if (!member?.user_id) throw new Error("Membro sem conta vinculada.");
+    // Só redefine senha de contas criadas por esta empresa; contas próprias
+    // (que podem ser donas de outra barbearia ou clientes) usam "Esqueci minha senha".
+    const { data: authUser, error: userErr } = await supabaseAdmin.auth.admin.getUserById(member.user_id);
+    if (userErr) throw new Error(userErr.message);
+    if (authUser.user?.app_metadata?.provisioned_by_company !== data.company_id) {
+      throw new Error(
+        "Esta pessoa tem uma conta própria. Peça para ela usar \"Esqueci minha senha\" na tela de login.",
+      );
+    }
 
     const password = data.password && data.password.length >= 6 ? data.password : generateTempPassword();
     const wasGenerated = !data.password || data.password.length < 6;
@@ -271,7 +279,7 @@ export const resetTeamMemberPassword = createServerFn({ method: "POST" })
       .update({ forcar_troca_senha: wasGenerated })
       .eq("id", member.id);
 
-    return { email: member.email, password, generated: wasGenerated };
+    return { email: member.email ?? "", password, generated: wasGenerated };
   });
 
 const RemoveMemberSchema = z.object({
@@ -283,7 +291,8 @@ export const removeTeamMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => RemoveMemberSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await assertCanManageTeam(context, data.company_id);
+    const caller = await assertCanManageTeam(context, data.company_id);
+    await assertCanTouchMember(context, caller, data.company_id, data.member_id);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("company_user")
