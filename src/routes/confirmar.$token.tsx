@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { cancelAppointmentByToken } from "@/lib/client-area/client-account.functions";
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -36,9 +37,7 @@ function ConfirmPage() {
 
   const cancelM = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.rpc("cancel_appointment_by_token", { _token: token });
-      if (error) throw error;
-      if (!data) throw new Error("Não foi possível cancelar.");
+      await cancelAppointmentByToken({ data: { token } });
     },
     onSuccess: () => { setActed("cancelled"); qc.invalidateQueries({ queryKey: ["confirm-token", token] }); },
   });

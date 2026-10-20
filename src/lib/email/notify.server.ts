@@ -4,15 +4,38 @@
 import { sendEmail } from "./email-service.server";
 import type { TemplateName } from "./templates";
 
-async function safeSend(to: string | null | undefined, template: TemplateName, data: Record<string, any>) {
+async function logEmail(row: {
+  template: TemplateName;
+  recipient: string;
+  status: "sent" | "failed";
+  provider_id?: string | null;
+  error?: string | null;
+  appointment_id?: string | null;
+}) {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await (supabaseAdmin as any).from("email_log").insert(row);
+  } catch (e) {
+    console.error("[notify] email_log insert failed", e);
+  }
+}
+
+async function safeSend(
+  to: string | null | undefined,
+  template: TemplateName,
+  data: Record<string, any>,
+  appointmentId?: string,
+) {
   if (!to) return { skipped: true, reason: "no-recipient" as const };
   try {
     const { id } = await sendEmail({ to, template, data });
-    console.log(`[notify] ${template} -> ${to} (${id})`);
+    await logEmail({ template, recipient: to, status: "sent", provider_id: id ?? null, appointment_id: appointmentId });
     return { ok: true, id };
   } catch (e: any) {
-    console.error(`[notify] ${template} failed for ${to}:`, e?.message ?? e);
-    return { ok: false, error: e?.message ?? String(e) };
+    const error = e?.message ?? String(e);
+    console.error(`[notify] ${template} failed:`, error);
+    await logEmail({ template, recipient: to, status: "failed", error, appointment_id: appointmentId });
+    return { ok: false, error };
   }
 }
 
@@ -55,7 +78,7 @@ export async function notifyAppointmentCreated(appointmentId: string) {
     data: fmtDateBR(ctx.a.scheduled_at),
     profissional: ctx.a.professional_name,
     servico: ctx.a.service_name,
-  });
+  }, ctx.a.id);
 }
 
 export async function notifyAppointmentCanceled(appointmentId: string) {
@@ -64,7 +87,7 @@ export async function notifyAppointmentCanceled(appointmentId: string) {
   return safeSend(ctx.email, "agendamento-cancelamento", {
     nome: ctx.a.customer_name,
     data: fmtDateBR(ctx.a.scheduled_at),
-  });
+  }, ctx.a.id);
 }
 
 export async function notifyAppointmentRescheduled(
@@ -77,7 +100,7 @@ export async function notifyAppointmentRescheduled(
     nome: ctx.a.customer_name,
     dataAntiga: fmtDateBR(oldScheduledAt),
     dataNova: fmtDateBR(ctx.a.scheduled_at),
-  });
+  }, ctx.a.id);
 }
 
 export async function notifyAppointmentReminder(appointmentId: string) {
@@ -86,7 +109,7 @@ export async function notifyAppointmentReminder(appointmentId: string) {
   return safeSend(ctx.email, "agendamento-lembrete", {
     nome: ctx.a.customer_name,
     data: fmtDateBR(ctx.a.scheduled_at),
-  });
+  }, ctx.a.id);
 }
 
 // --- Signup ---

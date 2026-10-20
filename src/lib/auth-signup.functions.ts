@@ -100,5 +100,9 @@ export const signupTrial = createServerFn({ method: "POST" })
       phone,
     });
 
+    // Nunca lança: falha de e-mail não impede o cadastro.
+    const { notifyWelcome } = await import("@/lib/email/notify.server");
+    await notifyWelcome(email, data.nome);
+
     return { ok: true };
   });
