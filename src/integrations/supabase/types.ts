@@ -58,6 +58,7 @@ export type Database = {
           price: number | null
           professional_id: string
           professional_name: string | null
+          reminder_sent_at: string | null
           scheduled_at: string
           service_id: string
           service_name: string | null
@@ -81,6 +82,7 @@ export type Database = {
           price?: number | null
           professional_id: string
           professional_name?: string | null
+          reminder_sent_at?: string | null
           scheduled_at: string
           service_id: string
           service_name?: string | null
@@ -104,6 +106,7 @@ export type Database = {
           price?: number | null
           professional_id?: string
           professional_name?: string | null
+          reminder_sent_at?: string | null
           scheduled_at?: string
           service_id?: string
           service_name?: string | null
@@ -813,6 +816,47 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "company"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_log: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          error: string | null
+          id: string
+          provider_id: string | null
+          recipient: string
+          status: string
+          template: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          provider_id?: string | null
+          recipient: string
+          status: string
+          template: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          provider_id?: string | null
+          recipient?: string
+          status?: string
+          template?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_log_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointment"
             referencedColumns: ["id"]
           },
         ]
