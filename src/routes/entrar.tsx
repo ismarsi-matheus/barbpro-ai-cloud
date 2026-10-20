@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { checkEmailExists, signupTrial } from "@/lib/auth-signup.functions";
+import { signupTrial } from "@/lib/auth-signup.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,15 +26,14 @@ export const Route = createFileRoute("/entrar")({
   component: EntrarPage,
 });
 
-type Step = "email" | "login" | "signup";
+type Step = "login" | "signup";
 
 function EntrarPage() {
   const navigate = useNavigate();
-  const { next } = Route.useSearch();
-  const checkFn = useServerFn(checkEmailExists);
+  const { next, tab } = Route.useSearch();
   const signupFn = useServerFn(signupTrial);
 
-  const [step, setStep] = useState<Step>("email");
+  const [step, setStep] = useState<Step>(tab === "signup" ? "signup" : "login");
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,25 +41,12 @@ function EntrarPage() {
   const [cpf, setCpf] = useState("");
   const [phone, setPhone] = useState("");
 
-  const handleEmailNext = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const { exists } = await checkFn({ data: { email } });
-      setStep(exists ? "login" : "signup");
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao verificar email");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) return toast.error("Senha incorreta.");
+    if (error) return toast.error("E-mail ou senha incorretos.");
     toast.success("Bem-vindo de volta!");
     navigate({ href: next === "/" ? "/app/dashboard" : next });
   };
@@ -97,32 +83,20 @@ function EntrarPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">
-            {step === "email" ? "Acessar sua conta" : "Criar sua conta"}
+            {step === "login" ? "Acessar sua conta" : "Criar sua conta"}
           </CardTitle>
           <CardDescription>
-            {step === "email" && "Gestão profissional para barbearias"}
-            {step === "login" && "Já temos seu e-mail cadastrado."}
+            {step === "login" && "Gestão profissional para barbearias"}
             {step === "signup" && "Dados para o período de teste grátis"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {step === "email" && (
-            <form onSubmit={handleEmailNext} className="space-y-4">
-              <Label>E-mail</Label>
-              <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-              <Button type="submit" className="w-full bg-[var(--brand)] text-white" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Continuar
-              </Button>
-            </form>
-          )}
           {step === "login" && (
             <form onSubmit={handleLogin} className="space-y-4">
-              <button type="button" onClick={() => setStep("email")} className="text-xs text-muted-foreground flex items-center hover:underline"><ArrowLeft className="w-3 h-3 mr-1" /> Voltar</button>
               <Label>E-mail</Label>
-              <Input value={email} disabled />
+              <Input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               <Label>Senha</Label>
-              <Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+              <Input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
               <Button type="submit" className="w-full bg-[var(--brand)] text-white" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Entrar
@@ -144,7 +118,9 @@ function EntrarPage() {
 
           {step === "signup" && (
             <form onSubmit={handleSignup} className="space-y-4">
-              <button type="button" onClick={() => setStep("email")} className="text-xs text-muted-foreground flex items-center hover:underline"><ArrowLeft className="w-3 h-3 mr-1" /> Voltar</button>
+              <button type="button" onClick={() => setStep("login")} className="text-xs text-muted-foreground flex items-center hover:underline"><ArrowLeft className="w-3 h-3 mr-1" /> Já tenho conta</button>
+              <Label>E-mail</Label>
+              <Input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               <Label>Seu Nome</Label>
               <Input required value={nome} onChange={(e) => setNome(e.target.value)} />
               <Label>CPF</Label>
@@ -152,7 +128,7 @@ function EntrarPage() {
               <Label>WhatsApp</Label>
               <Input required value={phone} placeholder="(00) 00000-0000" onChange={(e) => setPhone(e.target.value)} />
               <Label>Senha</Label>
-              <Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+              <Input type="password" required minLength={6} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
               <Button type="submit" className="w-full bg-[var(--brand)] text-white" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Criar conta

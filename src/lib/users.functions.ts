@@ -26,45 +26,6 @@ async function findUserByEmail(admin: any, email: string): Promise<string | null
   }
 }
 
-// ===== Self-service signup (no email confirmation) =====
-const SignUpSchema = z.object({
-  email: z.string().trim().email().max(255),
-  password: z.string().min(6).max(72),
-  nome: z.string().trim().max(200).optional().default(""),
-});
-
-// Limite simples em memória: 5 tentativas / 10 min por email (anti-spam)
-const _signupAttempts = new Map<string, number[]>();
-function checkSignupRate(email: string) {
-  const now = Date.now();
-  const windowMs = 10 * 60 * 1000;
-  const list = (_signupAttempts.get(email) ?? []).filter((t) => now - t < windowMs);
-  if (list.length >= 5) throw new Error("Muitas tentativas. Aguarde alguns minutos e tente novamente.");
-  list.push(now);
-  _signupAttempts.set(email, list);
-}
-
-export const signUpInterno = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => SignUpSchema.parse(input))
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const email = data.email.toLowerCase();
-
-    checkSignupRate(email);
-
-    const existing = await findUserByEmail(supabaseAdmin, email);
-    if (existing) throw new Error("Já existe uma conta com este email. Entre com sua senha.");
-
-    const { error } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password: data.password,
-      email_confirm: true,
-      user_metadata: { nome: data.nome || "" },
-    });
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
-
 // ===== Master: reset admin (owner) password =====
 const ResetAdminSchema = z.object({ company_id: z.string().uuid() });
 
