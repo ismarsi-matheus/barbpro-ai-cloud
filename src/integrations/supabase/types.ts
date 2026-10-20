@@ -1754,6 +1754,23 @@ export type Database = {
         Args: { _token: string }
         Returns: boolean
       }
+      create_public_booking: {
+        Args: {
+          _club_member_id?: string
+          _company_id: string
+          _email?: string
+          _name: string
+          _phone: string
+          _professional_id: string
+          _scheduled_at: string
+          _service_id: string
+        }
+        Returns: {
+          appointment_id: string
+          club_error: string
+          pagamento_tipo: string
+        }[]
+      }
       current_company_id: { Args: never; Returns: string }
       get_active_subscription: {
         Args: { _company_id: string }
